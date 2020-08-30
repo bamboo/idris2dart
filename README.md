@@ -8,7 +8,14 @@ To explore what cross-platform app development with Idris 2 powered by [Flutter]
 
 ### Status
 
-Basic primitives are working but the FFI is still missing.
+ - [x] data types, pattern matching, etc
+ - [x] basic Char, String and numeric primitives
+ - [x] [bidirectional FFI](./tests/dart/ffi001/Main.idr)
+ - [ ] delay/force
+ - [ ] remaining cast primitives
+ - [ ] remaining IO primitives
+ - [ ] `IOArray` primitives
+ - [ ] bounded int operations on `Bits*` values
 
 ### Building
 
