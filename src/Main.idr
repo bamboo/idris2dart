@@ -3,9 +3,8 @@ module Main
 import Compiler.Common
 import Compiler.ES.Imperative
 import Core.Context
-import Data.String.Extra
 import Data.StringMap
-import Data.Strings
+import FFI
 import Idris.Driver
 import Printer
 import System
@@ -16,7 +15,7 @@ data Dart : Type where
 
 record DartT where
   constructor MkDartT
-  imports : StringMap String
+  imports : StringMap Doc
 
 Statement : Type
 Statement = ImperativeStatement
@@ -32,6 +31,17 @@ dartIdent s = concatMap okChar (unpack s)
       if isAlphaNum c
         then cast c
         else "$" ++ asHex (cast c)
+
+addImport : {auto ctx : Ref Dart DartT} -> String -> Core Doc
+addImport lib = do
+  s <- get Dart
+  case lookup lib (imports s) of
+    Nothing => do
+      let alias = text (dartIdent lib)
+      put Dart (record { imports $= insert lib alias } s)
+      pure alias
+    Just alias =>
+      pure alias
 
 keywordSafe : String -> String
 keywordSafe s = case s of
@@ -124,12 +134,19 @@ runtimeTypeOf ty = case ty of
   DoubleType => "double"
   _ => "int"
 
+dartForeign : {auto ctx : Ref Dart DartT} -> Name -> ForeignDartSpec -> Core Doc
+dartForeign n (ForeignDartName lib f) = do
+  alias <- addImport lib
+  pure (final' <+> dartName n <+> " = " <+> alias <+> dot <+> text f <+> semi)
+
 foreignDecl : {auto ctx : Ref Dart DartT} -> Name -> List String -> Core Doc
 foreignDecl n ss = case n of
-  NS _ (UN "prim__putStr") =>
-    pure (dartName n <+> "(s, w)" <+> block ("stdout.write(s);" <+> line <+> "return w;"))
-  _ =>
-    pure (dartName n <+> "([a, b, c, d, e])" <+> block (unsupportedError ss))
+  NS _ (UN "prim__putStr") => do
+    alias <- addImport "dart:io"
+    pure (dartName n <+> "(s, w)" <+> block (alias <+> ".stdout.write(s);" <+> line <+> "return w;"))
+  _ => case mapMaybe foreignDartSpecFrom ss of
+    [s] => dartForeign n s
+    _ => pure (dartName n <+> "([a, b, c, d, e])" <+> block (unsupportedError ss))
 
 binOp : Doc -> Doc -> Doc -> Doc
 binOp o lhs rhs = paren (lhs <+> o <+> rhs)
@@ -286,16 +303,20 @@ mutual
     Just e => pure (kw <+> dartName n <+> " = " <+> !(dartExp e) <+> semi)
     Nothing => pure (kw <+> dartName n <+> semi)
 
+dartImport : (String, Doc) -> Doc
+dartImport (lib, alias) =
+  "import \"" <+> text lib <+> "\" as " <+> alias <+> semi
+
 compileToDart : Ref Ctxt Defs -> ClosedTerm -> Core Doc
 compileToDart defs term = do
   (impDefs, impMain) <- compileToImperative defs term
   ctx <- newRef Dart (MkDartT empty)
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
-  let header = "import \"dart:io\";\n"
+  let imports' = dartImport <$> toList !(imports <$> get Dart)
+  let header = vcat imports'
   let mainDecl = "void main() {" <+> indented dartMain <+> "}"
-  let doc = header <+> line <+> mainDecl <+> line <+> dartDefs <+> line
-  pure doc
+  pure (header <+> line <+> mainDecl <+> line <+> dartDefs <+> line)
 
 compileToDartFile : String -> Ref Ctxt Defs -> ClosedTerm -> Core ()
 compileToDartFile file defs term = do

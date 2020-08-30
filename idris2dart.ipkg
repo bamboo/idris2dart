@@ -3,6 +3,7 @@ package idris2dart
 main = Main
 
 modules = Main
+        , FFI
         , Printer
 
 depends = idris2, network, contrib
