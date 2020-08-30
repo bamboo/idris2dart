@@ -57,15 +57,16 @@ dartString : String -> String
 dartString s = "\"" ++ (concatMap okChar (unpack s)) ++ "\""
   where
     okChar : Char -> String
-    okChar c =
-      if (c >= ' ') && (c /= '\\') && (c /= '"') && (c <= '~')
+    okChar c = case c of
+      '\0' => "\\0"
+      '"' => "\\\""
+      '\r' => "\\r"
+      '\n' => "\\n"
+      '$' => "\\$"
+      '\\' => "\\\\"
+      c => if (c >= ' ') && (c <= '~')
         then cast c
-        else case c of
-          '\0' => "\\0"
-          '"' => "\\\""
-          '\r' => "\\r"
-          '\n' => "\\n"
-          other => "\\u{" ++ asHex (cast c) ++ "}"
+        else "\\u{" ++ asHex (cast c) ++ "}"
 
 dartStringDoc : String -> Doc
 dartStringDoc = text . dartString

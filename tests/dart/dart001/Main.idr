@@ -10,7 +10,9 @@ makePoint : Int -> Int -> Point
 makePoint = P
 
 main : IO ()
-main = printLn origin
+main = do
+  putStr "makePoint 0 $ 0 => "
+  printLn origin
   where 
    origin : Point
    origin = makePoint 0 $ 0
