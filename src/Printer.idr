@@ -57,7 +57,7 @@ export
 nest : Int -> Doc -> Doc
 nest = Nest
 
-export 
+export
 indented : Doc -> Doc
 indented d = nest 2 (line <+> d) <+> line
 
@@ -105,28 +105,28 @@ writeDocTo : HasIO io => File -> Doc -> (indent : String) -> io (Either FileErro
 writeDocTo f doc i = case doc of
   Text s => fPutStr f s
   LineBreak => do
-    Right () <- fPutStr f "\n" | e => pure e 
+    Right () <- fPutStr f "\n" | e => pure e
     if length i > 0
       then fPutStr f i
       else pure ok
   Seq x y => do
-    Right () <- writeDocTo f x i | e => pure e 
+    Right () <- writeDocTo f x i | e => pure e
     writeDocTo f y i
   Nest w d => writeDocTo f d (nSpaces (fromInteger (cast w) + length i))
-  Nil => pure ok 
+  Nil => pure ok
   where
     nSpaces : Nat -> String
     nSpaces i = replicate i ' '
 
 ||| Writes a [Doc] to a file
 export
-writeDocToFile : HasIO io => (filepath: String) -> (doc : Doc) -> io (Either FileError ()) 
+writeDocToFile : HasIO io => (filepath: String) -> (doc : Doc) -> io (Either FileError ())
 writeDocToFile fn doc = do
   Right h  <- openFile fn WriteTruncate
     | Left err => pure (Left err)
-  Right () <- writeDocTo h doc "" 
+  Right () <- writeDocTo h doc ""
     | Left err => do
       closeFile h
       pure (Left err)
   closeFile h
-  pure ok 
+  pure ok
