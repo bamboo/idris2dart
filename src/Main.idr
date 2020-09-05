@@ -2,8 +2,12 @@ module Main
 
 import Compiler.Common
 import Compiler.ES.Imperative
+import Core.CompileExpr
 import Core.Context
+import Data.List
+import Data.String.Extra
 import Data.StringMap
+import Data.Strings
 import FFI
 import Idris.Driver
 import Printer
@@ -50,7 +54,7 @@ keywordSafe s = case s of
 
 dartNameString : Name -> String
 dartNameString n = case n of
-  NS ns n => showSep "_" (reverse ns) ++ "_" ++ dartNameString n
+  NS ns n => showNSWithSep "_" ns ++ "_" ++ dartNameString n
   UN n => keywordSafe (dartIdent n)
   MN n i => dartIdent n ++ "_" ++ show i
   PV n d => "pat__" ++ dartNameString n
@@ -111,6 +115,9 @@ paramList ps = tupled ((dynamic' <+>) . dartName <$> ps)
 castTo : Doc -> Doc -> Doc
 castTo ty e = paren (e <+> " as " <+> ty)
 
+world' : Doc
+world' = text "#IdrisWorld"
+
 dartConstant : Constant -> Doc
 dartConstant c = case c of
   B8 i => shown i
@@ -124,7 +131,7 @@ dartConstant c = case c of
   Ch c => shown (cast {to=Int} c)
   Str s => dartStringDoc s
   Db d => shown d
-  WorldVal => text "#IdrisWorld"
+  WorldVal => world'
   _ => unsupported c
 
 runtimeTypeOf : Constant -> Doc
@@ -134,18 +141,94 @@ runtimeTypeOf ty = case ty of
   DoubleType => "double"
   _ => "int"
 
-dartForeign : {auto ctx : Ref Dart DartT} -> Name -> ForeignDartSpec -> Core Doc
-dartForeign n (ForeignDartName lib f) = do
-  alias <- addImport lib
-  pure (final' <+> dartName n <+> " = " <+> alias <+> dot <+> text f <+> semi)
+splitAtFirst : Char -> String -> (String, String)
+splitAtFirst ch s =
+  let (before, rest) = break (== ch) s
+  in (before, drop 1 rest)
 
-foreignDecl : {auto ctx : Ref Dart DartT} -> Name -> List String -> Core Doc
-foreignDecl n ss = case n of
+---- Dart FFI -------------------------------------
+Lib : Type
+Lib = String
+
+data ForeignDartSpec
+  = ForeignDartName Lib String
+
+foreignDartSpecFrom : String -> Maybe ForeignDartSpec
+foreignDartSpecFrom s =
+  if "Dart:" `isPrefixOf` s
+    then
+      let
+        (_, nameCommaLib) = splitAtFirst ':' s
+        (name, lib) = splitAtFirst ',' nameCommaLib
+      in
+        Just (ForeignDartName lib name)
+    else
+      Nothing
+
+uncurriedSignature : CFType -> CFType -> (List CFType, CFType)
+uncurriedSignature a b = go [a] b
+  where
+    go : List CFType -> CFType -> (List CFType, CFType)
+    go ps (CFFun a b) = go (a :: ps) b
+    go ps ret = (reverse ps, ret)
+
+argNamesFor : List a -> String -> List Doc
+argNamesFor args p = text . (p ++) . show <$> [1..length args]
+
+||| Adapts the foreign callback [c] so that it can be
+||| invoked from Dart with the expected signature.
+foreignCallback : (c : Doc) -> CFType -> CFType -> Doc
+foreignCallback c a b =
+  let
+    (args, ret) = uncurriedSignature a b
+    argNames = argNamesFor args "c$"
+    params = mapMaybe callbackParam (zip argNames args)
+    worldArg = case ret of
+      CFIORes _ => paren world'
+      _ => empty
+    callbackArgs = hcat (paren <$> params) <+> worldArg
+  in
+    tupled params <+> " => " <+> c <+> callbackArgs
+  where
+    callbackParam : (Doc, CFType) -> Maybe Doc
+    callbackParam (p, ty) = case ty of
+      CFWorld => Nothing
+      _ => Just p
+
+foreignArg : (Doc, CFType) -> Maybe Doc
+foreignArg (n, ty) = case ty of
+  CFWorld => Nothing
+  CFFun a b => Just (foreignCallback n a b)
+  _ => Just n
+
+foreignFunctionProxy : Doc -> Doc -> List CFType -> CFType -> Doc
+foreignFunctionProxy n ff args ret =
+  let
+    argNames = argNamesFor args "a$"
+    fArgs = mapMaybe foreignArg (zip argNames args)
+    fc = ff <+> tupled fArgs
+  in
+    n <+> tupled argNames <+> " => " <+> indented (fc <+> semi)
+
+dartForeign : {auto ctx : Ref Dart DartT}
+  -> Name -> ForeignDartSpec
+  -> List CFType -> CFType
+  -> Core Doc
+dartForeign n (ForeignDartName lib f) args ret = do
+  alias <- addImport lib
+  let ff = alias <+> dot <+> text f
+  pure (foreignFunctionProxy (dartName n) ff args ret)
+
+foreignDecl : {auto ctx : Ref Dart DartT}
+  -> Name -> List String
+  -> List CFType -> CFType
+  -> Core Doc
+foreignDecl n ss args ret = case n of
   NS _ (UN "prim__putStr") => do
     alias <- addImport "dart:io"
     pure (dartName n <+> "(s, w)" <+> block (alias <+> ".stdout.write(s);" <+> line <+> "return w;"))
   _ => case mapMaybe foreignDartSpecFrom ss of
-    [s] => dartForeign n s
+    [s] => dartForeign n s args ret
     _ => pure (dartName n <+> "([a, b, c, d, e])" <+> block (unsupportedError ss))
 
 binOp : Doc -> Doc -> Doc -> Doc
@@ -284,8 +367,8 @@ mutual
       dartVar var' n maybeE
     MutateStatement n e =>
       pure (dartName n <+> " = " <+> !(dartExp e) <+> semi)
-    ForeignDecl n ss =>
-      foreignDecl n ss
+    ForeignDecl fc n ss args ret =>
+      foreignDecl n ss args ret
     ErrorStatement s =>
       pure (assertionError (dartStringDoc s))
     ForEverLoop s =>

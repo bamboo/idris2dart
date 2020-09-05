@@ -23,7 +23,7 @@ applyFn : HasIO io => String -> Int -> (String -> Int -> String) -> io String
 applyFn c i f = primIO $ prim__applyFn c i f
 
 ||| An effectful foreign function that takes an effectful callback.
-%foreign (libsmall "applyFnIO")
+%foreign (libsmall "applyFn")
 prim__applyFnIO :
   String -> Int -> (String -> Int -> PrimIO String) -> PrimIO String
 

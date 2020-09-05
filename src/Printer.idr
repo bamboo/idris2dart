@@ -71,6 +71,10 @@ vcat : List Doc -> Doc
 vcat = sepBy line
 
 export
+hcat : List Doc -> Doc
+hcat = sepBy empty
+
+export
 commaSep : List Doc -> Doc
 commaSep = sepBy ", "
 

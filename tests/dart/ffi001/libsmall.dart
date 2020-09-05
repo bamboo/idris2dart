@@ -2,19 +2,14 @@ int add(int x, int y) {
   return x + y;
 }
 
-int addWithMessage(String msg, int x, int y, [Object idrisWorld]) {
+int addWithMessage(String msg, int x, int y) {
   print("$msg: $x + $y = ${x + y}");
   return x + y;
 }
 
-/* f : String -> Int -> String */
-String applyFn(String x, int y, dynamic f, [Object idrisWorld]) {
-  print("Applying callback to $x $y");
-  return f(x)(y);
-}
+typedef StringFn = String Function(String, int);
 
-/* f : String -> Int -> PrimIO String */
-String applyFnIO(String x, int y, dynamic f, [Object idrisWorld]) {
+String applyFn(String x, int y, StringFn f) {
   print("Applying callback to $x $y");
-  return f(x)(y)(idrisWorld);
+  return f(x, y);
 }
