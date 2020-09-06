@@ -390,6 +390,12 @@ dartImport : (String, Doc) -> Doc
 dartImport (lib, alias) =
   "import \"" <+> text lib <+> "\" as " <+> alias <+> semi
 
+header : List Doc
+header = [
+  text "// ignore_for_file: non_constant_identifier_names",
+  text "// ignore_for_file: unnecessary_cast"
+]
+
 compileToDart : Ref Ctxt Defs -> ClosedTerm -> Core Doc
 compileToDart defs term = do
   (impDefs, impMain) <- compileToImperative defs term
@@ -397,9 +403,9 @@ compileToDart defs term = do
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
   let imports' = dartImport <$> toList !(imports <$> get Dart)
-  let header = vcat imports'
+  let header' = vcat (header ++ imports')
   let mainDecl = "void main() {" <+> indented dartMain <+> "}"
-  pure (header <+> line <+> mainDecl <+> line <+> dartDefs <+> line)
+  pure (header' <+> line <+> mainDecl <+> line <+> dartDefs <+> line)
 
 compileToDartFile : String -> Ref Ctxt Defs -> ClosedTerm -> Core ()
 compileToDartFile file defs term = do
