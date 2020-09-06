@@ -1,6 +1,8 @@
 ||| https://idris2.readthedocs.io/en/latest/ffi/ffi.html
 module Main
 
+import System.FFI
+
 libsmall : String -> String
 libsmall fn = "Dart:" ++ fn ++ ",./libsmall.dart"
 
@@ -41,6 +43,22 @@ pluralise str x =
 pluraliseIO : String -> Int -> IO String
 pluraliseIO str x = pure (pluralise str x)
 
+||| A static member of the dart:core library.
+DateTime : Type
+DateTime = Struct "DateTime,dart:core" [("hour", Int)]
+
+%foreign "Dart:DateTime.parse,dart:core"
+prim__parseDateTime : String -> PrimIO DateTime
+
+namespace DateTime
+  export
+  parse : HasIO io => String -> io DateTime
+  parse s = primIO $ prim__parseDateTime s
+
+  export
+  hour : DateTime -> Int
+  hour dt = dt.getField "hour"
+
 main : IO ()
 main = do
   printLn (add 70 24)
@@ -49,4 +67,6 @@ main = do
   applyFn "Tree" 1 pluralise >>= putStrLn
   applyFnIO "Biscuit" 10 pluraliseIO >>= putStrLn
   applyFnIO "Tree" 1 pluraliseIO >>= putStrLn
+  moonLanding <- DateTime.parse "1969-07-20 20:18:04Z"
+  printLn moonLanding.hour
   pure ()

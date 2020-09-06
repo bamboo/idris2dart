@@ -231,6 +231,12 @@ foreignDecl n ss args ret = case n of
     [s] => dartForeign n s args ret
     _ => pure (dartName n <+> "([a, b, c, d, e])" <+> block (unsupportedError ss))
 
+foreignTypeName : {auto ctx : Ref Dart DartT} -> String -> Core Doc
+foreignTypeName ty = do
+  let (tyN, lib) = splitAtFirst ',' ty
+  alias <- addImport lib
+  pure (alias <+> dot <+> text tyN)
+
 binOp : Doc -> Doc -> Doc -> Doc
 binOp o lhs rhs = paren (lhs <+> o <+> rhs)
 
@@ -301,6 +307,8 @@ mutual
       pure (f' <+> tupled args')
     IEPrimFn f args =>
       pure (dartOp f !(traverseVect dartExp args))
+    IEPrimFnExt n args =>
+      dartPrimFnExt n args
     IEConstructor (Left tag) [] =>
       pure (text ("const [" ++ show tag ++ "]"))
     IEConstructor (Left tag) args => do
@@ -315,6 +323,12 @@ mutual
       e' <- dartExp e
       pure (castTo "$.List" e' <+> "[" <+> shown i <+> "]")
     _ => pure (debug e)
+
+  dartPrimFnExt : {auto ctx : Ref Dart DartT} -> Name -> List Expression -> Core Doc
+  dartPrimFnExt (NS _ (UN "prim__getField")) (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _) = do
+    fTy <- foreignTypeName ty
+    pure (castTo fTy !(dartExp e) <+> dot <+> text f)
+  dartPrimFnExt n args = pure (debug (n, args))
 
   dartCase : {auto ctx : Ref Dart DartT}
     -> (Expression, Statement)
