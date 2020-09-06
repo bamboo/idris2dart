@@ -89,10 +89,10 @@ debug : Show e => e -> Doc
 debug = dartStringDoc . show
 
 assertionError : Doc -> Doc
-assertionError e = "throw AssertionError" <+> paren e <+> semi
+assertionError e = "throw $.AssertionError" <+> paren e <+> semi
 
 unsupportedError : Show a => a -> Doc
-unsupportedError e = "throw UnsupportedError" <+> paren (debug e) <+> semi
+unsupportedError e = "throw $.UnsupportedError" <+> paren (debug e) <+> semi
 
 unsupported : Show a => a -> Doc
 unsupported e = "(() {" <+> unsupportedError e <+> "})()"
@@ -101,7 +101,7 @@ null' : Doc
 null' = text "null"
 
 dynamic' : Doc
-dynamic' = text "dynamic "
+dynamic' = text "$.dynamic "
 
 final' : Doc
 final' = text "final "
@@ -125,9 +125,9 @@ dartConstant c = case c of
   B32 i => shown i
   B64 i => shown i
   I i => shown i
-  BI 0 => text "BigInt.zero"
-  BI 1 => text "BigInt.one"
-  BI i => "BigInt.from(" <+> shown i <+> ")"
+  BI 0 => text "$.BigInt.zero"
+  BI 1 => text "$.BigInt.one"
+  BI i => "$.BigInt.from(" <+> shown i <+> ")"
   Ch c => shown (cast {to=Int} c)
   Str s => dartStringDoc s
   Db d => shown d
@@ -136,10 +136,10 @@ dartConstant c = case c of
 
 runtimeTypeOf : Constant -> Doc
 runtimeTypeOf ty = case ty of
-  StringType => "String"
-  IntegerType => "BigInt"
-  DoubleType => "double"
-  _ => "int"
+  StringType => "$.String"
+  IntegerType => "$.BigInt"
+  DoubleType => "$.double"
+  _ => "$.int"
 
 splitAtFirst : Char -> String -> (String, String)
 splitAtFirst ch s =
@@ -244,10 +244,10 @@ boolOpOf : Constant -> Doc -> Doc -> Doc -> Doc
 boolOpOf ty o lhs rhs = paren (binOpOf ty o lhs rhs <+> " ? 1 : 0")
 
 stringOp : Doc -> Doc -> Doc
-stringOp s m = (castTo "String" s) <+> dot <+> m
+stringOp s m = (castTo "$.String" s) <+> dot <+> m
 
 bigIntToInt : Doc -> Doc
-bigIntToInt i = castTo "BigInt" i <+> ".toInt()"
+bigIntToInt i = castTo "$.BigInt" i <+> ".toInt()"
 
 dartOp : {auto ctx : Ref Dart DartT}
   -> PrimFn arity
@@ -268,10 +268,10 @@ dartOp StrLength [x] = stringOp x "length"
 dartOp StrHead [x] = stringOp x "codeUnitAt(0)"
 dartOp StrIndex [x, y] = stringOp x "codeUnitAt" <+> paren y
 dartOp StrTail [x] = stringOp x "substring(1)"
-dartOp StrCons [x, y] = binOp "+" ("String.fromCharCode" <+> paren x) (castTo "String" y)
-dartOp StrAppend [x, y] = binOpOf' "String" "+" x y
+dartOp StrCons [x, y] = binOp "+" ("$.String.fromCharCode" <+> paren x) (castTo "$.String" y)
+dartOp StrAppend [x, y] = binOpOf' "$.String" "+" x y
 dartOp (Cast ty StringType) [x] = x <+> ".toString()"
-dartOp (Cast ty IntegerType) [x] = "BigInt.from" <+> paren x
+dartOp (Cast ty IntegerType) [x] = "$.BigInt.from" <+> paren x
 dartOp (Cast IntegerType IntType) [x] = bigIntToInt x
 dartOp (Cast CharType IntType) [x] = x
 dartOp e args = unsupported (e, args)
@@ -308,12 +308,12 @@ mutual
       pure (text ("[" ++ show tag ++ ", ") <+> commaSep args' <+> "]")
     IEConstructorHead e => do
       e' <- dartExp e
-      pure (castTo "int" (castTo "List" e' <+> "[0]"))
+      pure (castTo "$.int" (castTo "$.List" e' <+> "[0]"))
     IEConstructorTag (Left tag) =>
       pure (shown tag)
     IEConstructorArg i e => do
       e' <- dartExp e
-      pure (castTo "List" e' <+> "[" <+> shown i <+> "]")
+      pure (castTo "$.List" e' <+> "[" <+> shown i <+> "]")
     _ => pure (debug e)
 
   dartCase : {auto ctx : Ref Dart DartT}
@@ -393,7 +393,7 @@ dartImport (lib, alias) =
 compileToDart : Ref Ctxt Defs -> ClosedTerm -> Core Doc
 compileToDart defs term = do
   (impDefs, impMain) <- compileToImperative defs term
-  ctx <- newRef Dart (MkDartT empty)
+  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]))
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
   let imports' = dartImport <$> toList !(imports <$> get Dart)
