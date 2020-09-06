@@ -325,9 +325,16 @@ mutual
     _ => pure (debug e)
 
   dartPrimFnExt : {auto ctx : Ref Dart DartT} -> Name -> List Expression -> Core Doc
-  dartPrimFnExt (NS _ (UN "prim__getField")) (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _) = do
-    fTy <- foreignTypeName ty
-    pure (castTo fTy !(dartExp e) <+> dot <+> text f)
+  dartPrimFnExt
+    (NS _ (UN "prim__getField"))
+    (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _) = do
+      fTy <- foreignTypeName ty
+      pure (castTo fTy !(dartExp e) <+> dot <+> text f)
+  dartPrimFnExt
+    (NS _ (UN "prim__setField"))
+    (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _ :: rhs :: _) = do
+      fTy <- foreignTypeName ty
+      pure (castTo fTy !(dartExp e) <+> dot <+> text f <+> " = " <+> !(dartExp rhs))
   dartPrimFnExt n args = pure (debug (n, args))
 
   dartCase : {auto ctx : Ref Dart DartT}

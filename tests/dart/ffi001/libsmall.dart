@@ -13,3 +13,9 @@ String applyFn(String x, int y, StringFn f) {
   print("Applying callback to $x $y");
   return f(x, y);
 }
+
+class Point {
+  int x;
+  int y;
+  Point(this.x, this.y);
+}

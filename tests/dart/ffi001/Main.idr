@@ -59,6 +59,18 @@ namespace DateTime
   hour : DateTime -> Int
   hour dt = dt.getField "hour"
 
+Point : Type
+Point = Struct "Point,./libsmall.dart" [("x", Int), ("y", Int)]
+
+%foreign (libsmall "Point")
+prim__mkPoint : Int -> Int -> PrimIO Point
+
+mkPoint : Int -> Int -> IO Point
+mkPoint x y = primIO $ prim__mkPoint x y
+
+Show Point where
+  show pt = show (the Int (pt.getField "x"), the Int (pt.getField "y"))
+
 main : IO ()
 main = do
   printLn (add 70 24)
@@ -69,4 +81,9 @@ main = do
   applyFnIO "Tree" 1 pluraliseIO >>= putStrLn
   moonLanding <- DateTime.parse "1969-07-20 20:18:04Z"
   printLn moonLanding.hour
+  pt <- mkPoint 0 1
+  printLn pt
+  pt.setField "x" (the Int 2)
+  pt.setField "y" (the Int 3)
+  printLn pt
   pure ()
