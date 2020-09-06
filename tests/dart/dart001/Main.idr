@@ -14,5 +14,5 @@ main = do
   putStr "makePoint 0 $ 0 => "
   printLn origin
   where 
-   origin : Point
-   origin = makePoint 0 $ 0
+    origin : Point
+    origin = makePoint 0 $ 0

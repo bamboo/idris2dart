@@ -10,8 +10,7 @@ factorial : Integer -> Integer
 factorial n = factorialAux n 1
 
 main : IO ()
-main =
-   do
-      printLn $ factorial 100
-      printLn $ factorial 10000
-      printLn $ show $ the (Vect 3 String) ["red", "green", "blue"]
+main = do
+   printLn $ factorial 100
+   printLn $ factorial 10000
+   printLn $ show $ the (Vect 3 String) ["red", "green", "blue"]
