@@ -1,0 +1,8 @@
+package flutterdoodle
+
+main = Main
+modules = Main
+        , Flutter
+depends = contrib
+sourcedir = "lib"
+executable = "lib/main.dart"
