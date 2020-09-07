@@ -116,7 +116,7 @@ castTo : Doc -> Doc -> Doc
 castTo ty e = paren (e <+> " as " <+> ty)
 
 world' : Doc
-world' = text "#IdrisWorld"
+world' = text "#World"
 
 dartConstant : Constant -> Doc
 dartConstant c = case c of
@@ -214,6 +214,10 @@ foreignArg (n, ty) = case ty of
   CFFun a b => Just (foreignCallback n a b)
   _ => Just n
 
+singleExpFunction : Doc -> List Doc -> Doc -> Doc
+singleExpFunction n ps e =
+  n <+> tupled ps <+> block ("return " <+> e <+> semi)
+
 foreignFunctionProxy : Doc -> Doc -> List CFType -> CFType -> Doc
 foreignFunctionProxy n ff args ret =
   let
@@ -221,7 +225,7 @@ foreignFunctionProxy n ff args ret =
     fArgs = mapMaybe foreignArg (zip argNames args)
     fc = ff <+> tupled fArgs
   in
-    n <+> tupled argNames <+> " => " <+> indented (fc <+> semi)
+    singleExpFunction n argNames fc
 
 foreignMethodProxy : Doc -> Doc -> List CFType -> CFType -> Doc
 foreignMethodProxy n m args ret =
@@ -231,7 +235,7 @@ foreignMethodProxy n m args ret =
       (fThis :: fArgs) => fThis <+> dot <+> m <+> tupled fArgs
       _ => unsupported (m, args)
   in
-    n <+> tupled argNames <+> " => " <+> indented (mc <+> semi)
+    singleExpFunction n argNames mc
 
 foreignName : {auto ctx : Ref Dart DartT}
   -> Lib -> String -> Core Doc
@@ -247,7 +251,7 @@ dartForeign n (ForeignFunction f lib) args ret = do
   pure (foreignFunctionProxy (dartName n) ff args ret)
 dartForeign n (ForeignConst c lib) _ _ = do
   fc <- foreignName lib c
-  pure (dartName n <+> "() => " <+> indented (fc <+> semi))
+  pure (singleExpFunction (dartName n) [] fc)
 dartForeign n (ForeignMethod m) args ret = do
   pure (foreignMethodProxy (dartName n) (text m) args ret)
 
@@ -355,7 +359,8 @@ mutual
       pure (castTo "$.List" e' <+> "[" <+> shown i <+> "]")
     _ => pure (debug e)
 
-  dartPrimFnExt : {auto ctx : Ref Dart DartT} -> Name -> List Expression -> Core Doc
+  dartPrimFnExt : {auto ctx : Ref Dart DartT}
+    -> Name -> List Expression -> Core Doc
   dartPrimFnExt
     (NS _ (UN "prim__getField"))
     (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _) = do
@@ -402,7 +407,9 @@ mutual
     -> Core Doc
   dartStatement s = case s of
     FunDecl fc n ps body =>
-      pure (dartName n <+> !(dartLambda ps body))
+      pure (line <+> dartName n <+> !(dartLambda ps body))
+    ForeignDecl fc n ss args ret =>
+      pure (line <+> !(foreignDecl n ss args ret))
     SwitchStatement e cases@((IEConstant (BI _), _) :: _) maybeDefault =>
       dartSwitch (bigIntToInt !(dartExp e)) cases maybeDefault
     SwitchStatement e cases maybeDefault =>
@@ -419,8 +426,6 @@ mutual
       dartVar var' n maybeE
     MutateStatement n e =>
       pure (dartName n <+> " = " <+> !(dartExp e) <+> semi)
-    ForeignDecl fc n ss args ret =>
-      foreignDecl n ss args ret
     ErrorStatement s =>
       pure (assertionError (dartStringDoc s))
     ForEverLoop s =>
@@ -456,8 +461,8 @@ compileToDart defs term = do
   dartMain <- dartStatement impMain
   let imports' = dartImport <$> toList !(imports <$> get Dart)
   let header' = vcat (header ++ imports')
-  let mainDecl = "void main() {" <+> indented dartMain <+> "}"
-  pure (header' <+> line <+> mainDecl <+> line <+> dartDefs <+> line)
+  let mainDecl = "void main() {" <+> indented dartMain <+> "}" <+> line
+  pure (header' <+> emptyLine <+> mainDecl <+> dartDefs <+> line)
 
 compileToDartFile : String -> Ref Ctxt Defs -> ClosedTerm -> Core ()
 compileToDartFile file defs term = do

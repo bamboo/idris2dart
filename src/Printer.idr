@@ -40,6 +40,10 @@ line : Doc
 line = LineBreak
 
 export
+emptyLine : Doc
+emptyLine = line <+> line
+
+export
 text : String -> Doc
 text "" = Nil
 text "\n" = LineBreak
