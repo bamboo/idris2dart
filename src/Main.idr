@@ -153,6 +153,7 @@ Lib = String
 data ForeignDartSpec
   = ForeignFunction Lib String
   | ForeignConst Lib String
+  | ForeignMethod String
 
 foreignDartSpecFrom : String -> Maybe ForeignDartSpec
 foreignDartSpecFrom s =
@@ -164,7 +165,10 @@ foreignDartSpecFrom s =
       in
         if "const " `isPrefixOf` name
           then Just (ForeignConst lib (drop (length "const ") name))
-          else Just (ForeignFunction lib name)
+          else
+            if "." `isPrefixOf` name
+              then Just (ForeignMethod (drop 1 name))
+              else Just (ForeignFunction lib name)
     else
       Nothing
 
@@ -213,6 +217,16 @@ foreignFunctionProxy n ff args ret =
   in
     n <+> tupled argNames <+> " => " <+> indented (fc <+> semi)
 
+foreignMethodProxy : Doc -> Doc -> List CFType -> CFType -> Doc
+foreignMethodProxy n m args ret =
+  let
+    argNames = argNamesFor args "a$"
+    mc = case mapMaybe foreignArg (zip argNames args) of
+      (fThis :: fArgs) => fThis <+> dot <+> m <+> tupled fArgs
+      _ => unsupported (m, args)
+  in
+    n <+> tupled argNames <+> " => " <+> indented (mc <+> semi)
+
 foreignName : {auto ctx : Ref Dart DartT}
   -> Lib -> String -> Core Doc
 foreignName lib n =
@@ -228,6 +242,8 @@ dartForeign n (ForeignFunction lib f) args ret = do
 dartForeign n (ForeignConst lib c) _ _ = do
   fc <- foreignName lib c
   pure (dartName n <+> "() => " <+> indented (fc <+> semi))
+dartForeign n (ForeignMethod m) args ret = do
+  pure (foreignMethodProxy (dartName n) (text m) args ret)
 
 foreignDecl : {auto ctx : Ref Dart DartT}
   -> Name -> List String

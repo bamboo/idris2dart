@@ -68,6 +68,18 @@ prim__mkPoint : Int -> Int -> PrimIO Point
 mkPoint : Int -> Int -> IO Point
 mkPoint x y = primIO $ prim__mkPoint x y
 
+%foreign "Dart:.moveTo"
+prim__moveTo : Point -> Int -> Int -> PrimIO ()
+
+%foreign "Dart:.accept"
+prim__accept : Point -> (Point -> PrimIO ()) -> PrimIO ()
+
+moveTo : HasIO io => Point -> Int -> Int -> io ()
+moveTo p x y = primIO $ p.prim__moveTo x y
+
+accept : HasIO io => Point -> (Point -> IO ()) -> io ()
+accept p c = primIO $ p.prim__accept (\p => toPrim $ c p)
+
 Show Point where
   show pt = show (the Int (pt.getField "x"), the Int (pt.getField "y"))
 
@@ -104,6 +116,8 @@ main = do
   printLn pt
   pt.setField "x" (the Int 2)
   pt.setField "y" (the Int 3)
+  printLn pt
+  pt.accept (\pt => pt.moveTo 4 5)
   printLn pt
 
   -- Dart enums

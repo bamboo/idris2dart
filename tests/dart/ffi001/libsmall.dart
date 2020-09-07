@@ -18,6 +18,15 @@ class Point {
   int x;
   int y;
   Point(this.x, this.y);
+
+  void moveTo(int x, int y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  void accept(Function(Point) visitor) {
+    visitor(this);
+  }
 }
 
 enum PaintingStyle {
