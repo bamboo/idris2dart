@@ -151,26 +151,32 @@ Lib : Type
 Lib = String
 
 data ForeignDartSpec
-  = ForeignFunction Lib String
-  | ForeignConst Lib String
+  = ForeignFunction String Lib
+  | ForeignConst String Lib
   | ForeignMethod String
 
+dropPrefix : String -> String -> Maybe String
+dropPrefix p s =
+  if p `isPrefixOf` s
+    then Just (drop (length p) s)
+    else Nothing
+
 foreignDartSpecFrom : String -> Maybe ForeignDartSpec
-foreignDartSpecFrom s =
-  if "Dart:" `isPrefixOf` s
-    then
-      let
-        (_, nameCommaLib) = splitAtFirst ':' s
-        (name, lib) = splitAtFirst ',' nameCommaLib
-      in
-        if "const " `isPrefixOf` name
-          then Just (ForeignConst lib (drop (length "const ") name))
-          else
-            if "." `isPrefixOf` name
-              then Just (ForeignMethod (drop 1 name))
-              else Just (ForeignFunction lib name)
-    else
-      Nothing
+foreignDartSpecFrom s = do
+  (name, lib) <- dartNameAndLib s
+  method name <|> const name lib <|> function name lib
+  where
+    dartNameAndLib : String -> Maybe (String, Lib)
+    dartNameAndLib s = splitAtFirst ',' <$> dropPrefix "Dart:" s
+
+    method : String -> Maybe ForeignDartSpec
+    method m = ForeignMethod <$> dropPrefix "." m
+
+    const : String -> Lib -> Maybe ForeignDartSpec
+    const n lib = (`ForeignConst` lib) <$> dropPrefix "const " n
+
+    function : String -> Lib -> Maybe ForeignDartSpec
+    function n lib = Just (ForeignFunction n lib)
 
 uncurriedSignature : CFType -> CFType -> (List CFType, CFType)
 uncurriedSignature a b = go [a] b
@@ -236,10 +242,10 @@ dartForeign : {auto ctx : Ref Dart DartT}
   -> Name -> ForeignDartSpec
   -> List CFType -> CFType
   -> Core Doc
-dartForeign n (ForeignFunction lib f) args ret = do
+dartForeign n (ForeignFunction f lib) args ret = do
   ff <- foreignName lib f
   pure (foreignFunctionProxy (dartName n) ff args ret)
-dartForeign n (ForeignConst lib c) _ _ = do
+dartForeign n (ForeignConst c lib) _ _ = do
   fc <- foreignName lib c
   pure (dartName n <+> "() => " <+> indented (fc <+> semi))
 dartForeign n (ForeignMethod m) args ret = do
