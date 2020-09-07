@@ -6,18 +6,18 @@ This example demonstrates how to use [Idris FFI definitions](./lib/Flutter.idr) 
 
 Build `lib/main.dart` with:
 
-   $ idris2dart --build flutterdoodle.ipkg
+    $ idris2dart --build flutterdoodle.ipkg
 
 Repair the Flutter app (needs to be done only once) with:
 
-   $ flutter create .
+    $ flutter create .
    
 Run it:
 
-   $ flutter run
+    $ flutter run
 
 ## Setting up a hot-reload workflow
 
 I like to use [entr](http://eradman.com/entrproject/):
 
-   $ find lib -iname "*.idr" | entr time idris2dart --build flutterdoodle.ipkg
+    $ find lib -iname "*.idr" | entr time idris2dart --build flutterdoodle.ipkg
