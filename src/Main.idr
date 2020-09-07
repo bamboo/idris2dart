@@ -151,7 +151,8 @@ Lib : Type
 Lib = String
 
 data ForeignDartSpec
-  = ForeignDartName Lib String
+  = ForeignFunction Lib String
+  | ForeignConst Lib String
 
 foreignDartSpecFrom : String -> Maybe ForeignDartSpec
 foreignDartSpecFrom s =
@@ -161,7 +162,9 @@ foreignDartSpecFrom s =
         (_, nameCommaLib) = splitAtFirst ':' s
         (name, lib) = splitAtFirst ',' nameCommaLib
       in
-        Just (ForeignDartName lib name)
+        if "const " `isPrefixOf` name
+          then Just (ForeignConst lib (drop (length "const ") name))
+          else Just (ForeignFunction lib name)
     else
       Nothing
 
@@ -210,14 +213,21 @@ foreignFunctionProxy n ff args ret =
   in
     n <+> tupled argNames <+> " => " <+> indented (fc <+> semi)
 
+foreignName : {auto ctx : Ref Dart DartT}
+  -> Lib -> String -> Core Doc
+foreignName lib n =
+  pure (!(addImport lib) <+> dot <+> text n)
+
 dartForeign : {auto ctx : Ref Dart DartT}
   -> Name -> ForeignDartSpec
   -> List CFType -> CFType
   -> Core Doc
-dartForeign n (ForeignDartName lib f) args ret = do
-  alias <- addImport lib
-  let ff = alias <+> dot <+> text f
+dartForeign n (ForeignFunction lib f) args ret = do
+  ff <- foreignName lib f
   pure (foreignFunctionProxy (dartName n) ff args ret)
+dartForeign n (ForeignConst lib c) _ _ = do
+  fc <- foreignName lib c
+  pure (dartName n <+> "() => " <+> indented (fc <+> semi))
 
 foreignDecl : {auto ctx : Ref Dart DartT}
   -> Name -> List String
@@ -225,8 +235,8 @@ foreignDecl : {auto ctx : Ref Dart DartT}
   -> Core Doc
 foreignDecl n ss args ret = case n of
   NS _ (UN "prim__putStr") => do
-    alias <- addImport "dart:io"
-    pure (dartName n <+> "(s, w)" <+> block (alias <+> ".stdout.write(s);" <+> line <+> "return w;"))
+    stdout <- foreignName "dart:io" "stdout"
+    pure (dartName n <+> "(s, w)" <+> block (stdout <+> ".write(s);" <+> line <+> "return w;"))
   _ => case mapMaybe foreignDartSpecFrom ss of
     [s] => dartForeign n s args ret
     _ => pure (dartName n <+> "([a, b, c, d, e])" <+> block (unsupportedError ss))
@@ -234,8 +244,7 @@ foreignDecl n ss args ret = case n of
 foreignTypeName : {auto ctx : Ref Dart DartT} -> String -> Core Doc
 foreignTypeName ty = do
   let (tyN, lib) = splitAtFirst ',' ty
-  alias <- addImport lib
-  pure (alias <+> dot <+> text tyN)
+  foreignName lib tyN
 
 binOp : Doc -> Doc -> Doc -> Doc
 binOp o lhs rhs = paren (lhs <+> o <+> rhs)

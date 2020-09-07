@@ -71,6 +71,22 @@ mkPoint x y = primIO $ prim__mkPoint x y
 Show Point where
   show pt = show (the Int (pt.getField "x"), the Int (pt.getField "y"))
 
+PaintingStyle : Type
+PaintingStyle = Struct "PaintingStyle,./libsmall.dart" [("index", Int)]
+
+namespace PaintingStyle
+  export
+  %foreign (libsmall "const PaintingStyle.fill")
+  fill : PaintingStyle
+
+  export
+  %foreign (libsmall "const PaintingStyle.stroke")
+  stroke : PaintingStyle
+
+  export
+  index : PaintingStyle -> Int
+  index ps = ps.getField "index"
+
 main : IO ()
 main = do
   printLn (add 70 24)
@@ -79,11 +95,17 @@ main = do
   applyFn "Tree" 1 pluralise >>= putStrLn
   applyFnIO "Biscuit" 10 pluraliseIO >>= putStrLn
   applyFnIO "Tree" 1 pluraliseIO >>= putStrLn
+
+  -- Dart classes as records
   moonLanding <- DateTime.parse "1969-07-20 20:18:04Z"
   printLn moonLanding.hour
+
   pt <- mkPoint 0 1
   printLn pt
   pt.setField "x" (the Int 2)
   pt.setField "y" (the Int 3)
   printLn pt
+
+  -- Dart enums
+  printLn (PaintingStyle.fill.index, PaintingStyle.stroke.index)
   pure ()

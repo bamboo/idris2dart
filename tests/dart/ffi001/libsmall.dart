@@ -19,3 +19,8 @@ class Point {
   int y;
   Point(this.x, this.y);
 }
+
+enum PaintingStyle {
+  fill,
+  stroke,
+}
