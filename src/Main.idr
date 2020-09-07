@@ -461,7 +461,7 @@ compileToDart defs term = do
   dartMain <- dartStatement impMain
   let imports' = dartImport <$> toList !(imports <$> get Dart)
   let header' = vcat (header ++ imports')
-  let mainDecl = "void main() {" <+> indented dartMain <+> "}" <+> line
+  let mainDecl = "void main()" <+> block dartMain
   pure (header' <+> emptyLine <+> mainDecl <+> dartDefs <+> line)
 
 compileToDartFile : String -> Ref Ctxt Defs -> ClosedTerm -> Core ()
