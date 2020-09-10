@@ -227,20 +227,44 @@ foreignFunctionProxy n ff args ret =
   in
     singleExpFunction n argNames fc
 
-foreignMethodProxy : Doc -> Doc -> List CFType -> CFType -> Doc
-foreignMethodProxy n m args ret =
-  let
-    argNames = argNamesFor args "a$"
-    mc = case mapMaybe foreignArg (zip argNames args) of
-      (fThis :: fArgs) => fThis <+> dot <+> m <+> tupled fArgs
-      _ => unsupported (m, args)
-  in
-    singleExpFunction n argNames mc
-
 foreignName : {auto ctx : Ref Dart DartT}
   -> Lib -> String -> Core Doc
 foreignName lib n =
   pure (!(addImport lib) <+> dot <+> text n)
+
+foreignTypeName : {auto ctx : Ref Dart DartT}
+  -> String -> Core Doc
+foreignTypeName ty = do
+  let (tyN, lib) = splitAtFirst ',' ty
+  foreignName lib tyN
+
+intTy : Doc
+intTy = text "$.int"
+
+foreignTypeOf : {auto ctx : Ref Dart DartT} -> CFType -> Core Doc
+foreignTypeOf e = case e of
+  CFString => pure "$.String"
+  CFDouble => pure "$.double"
+  CFChar => pure intTy
+  CFInt => pure intTy
+  CFUnsigned8 => pure intTy
+  CFUnsigned16 => pure intTy
+  CFUnsigned32 => pure intTy
+  CFUnsigned64 => pure intTy
+  CFStruct name _ => foreignTypeName name
+  _ => pure "$.dynamic"
+
+foreignMethodProxy : {auto ctx : Ref Dart DartT}
+  -> Doc -> Doc -> List CFType -> CFType -> Core Doc
+foreignMethodProxy n m args@(thisTy :: _) ret = do
+  let argNames = argNamesFor args "a$"
+  case mapMaybe foreignArg (zip argNames args) of
+    fThis :: fArgs => do
+      let mc = castTo !(foreignTypeOf thisTy) fThis <+> dot <+> m <+> tupled fArgs
+      pure (singleExpFunction n argNames mc)
+    _ => pure (unsupported (m, args))
+foreignMethodProxy n m args ret =
+  pure (unsupported (m, args))
 
 dartForeign : {auto ctx : Ref Dart DartT}
   -> Name -> ForeignDartSpec
@@ -253,7 +277,7 @@ dartForeign n (ForeignConst c lib) _ _ = do
   fc <- foreignName lib c
   pure (singleExpFunction (dartName n) [] fc)
 dartForeign n (ForeignMethod m) args ret = do
-  pure (foreignMethodProxy (dartName n) (text m) args ret)
+  foreignMethodProxy (dartName n) (text m) args ret
 
 foreignDecl : {auto ctx : Ref Dart DartT}
   -> Name -> List String
@@ -266,11 +290,6 @@ foreignDecl n ss args ret = case n of
   _ => case mapMaybe foreignDartSpecFrom ss of
     [s] => dartForeign n s args ret
     _ => pure (dartName n <+> "([a, b, c, d, e])" <+> block (unsupportedError ss))
-
-foreignTypeName : {auto ctx : Ref Dart DartT} -> String -> Core Doc
-foreignTypeName ty = do
-  let (tyN, lib) = splitAtFirst ',' ty
-  foreignName lib tyN
 
 binOp : Doc -> Doc -> Doc -> Doc
 binOp o lhs rhs = paren (lhs <+> o <+> rhs)
