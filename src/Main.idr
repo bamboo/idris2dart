@@ -334,6 +334,7 @@ dartOp (Cast ty StringType) [x] = x <+> ".toString()"
 dartOp (Cast ty IntegerType) [x] = "$.BigInt.from" <+> paren x
 dartOp (Cast IntegerType IntType) [x] = bigIntToInt x
 dartOp (Cast CharType IntType) [x] = x
+dartOp BelieveMe [_, _, x] = x
 dartOp e args = unsupported (e, args)
 
 mutual
