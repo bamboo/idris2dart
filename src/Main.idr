@@ -293,6 +293,8 @@ foreignDecl : {auto ctx : Ref Dart DartT}
 foreignDecl n ss args ret = case n of
   NS _ (UN "prim__putStr") =>
     pure (dartName n <+> "(s, w)" <+> block (!dartStdout <+> ".write(s);" <+> line <+> "return w;"))
+  NS _ (UN "prim__putChar") =>
+    pure (dartName n <+> "(c, w)" <+> block (!dartStdout <+> ".writeCharCode(c);" <+> line <+> "return w;"))
   NS _ (UN "prim__getStr") =>
     pure (dartName n <+> "(w)" <+> block ("return " <+> !dartStdin <+> ".readLineSync();"))
   _ => case mapMaybe foreignDartSpecFrom ss of
