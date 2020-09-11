@@ -33,7 +33,7 @@ dartIdent s = concatMap okChar (unpack s)
   where
     okChar : Char -> String
     okChar c =
-      if isAlphaNum c
+      if isAlphaNum c || c == '_'
         then cast c
         else "$" ++ asHex (cast c)
 
