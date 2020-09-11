@@ -11,7 +11,7 @@ To explore what cross-platform app development with Idris 2 powered by [Flutter]
  - [x] data types, pattern matching, etc
  - [x] basic Char, String and numeric primitives
  - [x] [bidirectional FFI](./tests/dart/ffi001/Main.idr)
- - [ ] delay/force
+ - [x] delay/force
  - [ ] remaining cast primitives
  - [ ] remaining IO primitives
  - [ ] `IOArray` primitives

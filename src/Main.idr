@@ -20,6 +20,7 @@ data Dart : Type where
 record DartT where
   constructor MkDartT
   imports : StringMap Doc
+  usesDelay : Bool
 
 Statement : Type
 Statement = ImperativeStatement
@@ -279,14 +280,21 @@ dartForeign n (ForeignConst c lib) _ _ = do
 dartForeign n (ForeignMethod m) args ret = do
   foreignMethodProxy (dartName n) (text m) args ret
 
+dartStdout : {auto ctx : Ref Dart DartT} -> Core Doc
+dartStdout = foreignName "dart:io" "stdout"
+
+dartStdin : {auto ctx : Ref Dart DartT} -> Core Doc
+dartStdin = foreignName "dart:io" "stdin"
+
 foreignDecl : {auto ctx : Ref Dart DartT}
   -> Name -> List String
   -> List CFType -> CFType
   -> Core Doc
 foreignDecl n ss args ret = case n of
-  NS _ (UN "prim__putStr") => do
-    stdout <- foreignName "dart:io" "stdout"
-    pure (dartName n <+> "(s, w)" <+> block (stdout <+> ".write(s);" <+> line <+> "return w;"))
+  NS _ (UN "prim__putStr") =>
+    pure (dartName n <+> "(s, w)" <+> block (!dartStdout <+> ".write(s);" <+> line <+> "return w;"))
+  NS _ (UN "prim__getStr") =>
+    pure (dartName n <+> "(w)" <+> block ("return " <+> !dartStdin <+> ".readLineSync();"))
   _ => case mapMaybe foreignDartSpecFrom ss of
     [s] => dartForeign n s args ret
     _ => pure (dartName n <+> "([a, b, c, d, e])" <+> block (unsupportedError ss))
@@ -337,17 +345,15 @@ dartOp (Cast CharType IntType) [x] = x
 dartOp BelieveMe [_, _, x] = x
 dartOp e args = unsupported (e, args)
 
+useDelay : {auto ctx : Ref Dart DartT} -> Core ()
+useDelay = do
+  s <- get Dart
+  put Dart (record { usesDelay = True } s)
+
 mutual
   dartLambda : {auto ctx : Ref Dart DartT} -> List Name -> Statement -> Core Doc
   dartLambda ps s = pure (paramList ps <+> block !(dartStatement s))
 
-  {-
-    TODO:
-    data ImperativeExp =
-                      | IEPrimFnExt Name (List ImperativeExp)
-                      | IEDelay ImperativeExp
-                      | IEForce ImperativeExp
-  -}
   dartExp : {auto ctx : Ref Dart DartT}
     -> Expression
     -> Core Doc
@@ -377,6 +383,11 @@ mutual
     IEConstructorArg i e => do
       e' <- dartExp e
       pure (castTo "$.List" e' <+> "[" <+> shown i <+> "]")
+    IEDelay e => do
+      useDelay
+      pure ("$Delayed" <+> paren ("() => " <+> !(dartExp e)))
+    IEForce e =>
+      pure (castTo "$Delayed" !(dartExp e) <+> ".force()")
     _ => pure (debug e)
 
   dartPrimFnExt : {auto ctx : Ref Dart DartT}
@@ -475,16 +486,35 @@ header = [
   text "// ignore_for_file: unnecessary_cast"
 ]
 
+delayClass : Doc
+delayClass = text "
+class $Delayed {
+  $.dynamic Function() e;
+  $.dynamic value;
+  $Delayed(this.e);
+  $.dynamic force() {
+    if (e != null) {
+      final e = this.e;
+      this.value = e();
+      this.e = null;
+    }
+    return this.value;
+  }
+}
+"
+
 compileToDart : Ref Ctxt Defs -> ClosedTerm -> Core Doc
 compileToDart defs term = do
   (impDefs, impMain) <- compileToImperative defs term
-  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]))
+  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]) False)
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
-  let imports' = dartImport <$> toList !(imports <$> get Dart)
+  finalState <- get Dart
+  let imports' = dartImport <$> finalState.imports.toList
   let header' = vcat (header ++ imports')
   let mainDecl = "void main()" <+> block dartMain
-  pure (header' <+> emptyLine <+> mainDecl <+> dartDefs <+> line)
+  let footer = if finalState.usesDelay then delayClass else empty
+  pure (header' <+> emptyLine <+> mainDecl <+> dartDefs <+> line <+> delayClass)
 
 compileToDartFile : String -> Ref Ctxt Defs -> ClosedTerm -> Core ()
 compileToDartFile file defs term = do
