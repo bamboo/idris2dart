@@ -119,6 +119,15 @@ castTo ty e = paren (e <+> " as " <+> ty)
 world' : Doc
 world' = text "#World"
 
+intTy : Doc
+intTy = text "$.int"
+
+stringTy : Doc
+stringTy = text "$.String"
+
+doubleTy : Doc
+doubleTy = text "$.double"
+
 dartConstant : Constant -> Doc
 dartConstant c = case c of
   B8 i => shown i
@@ -137,9 +146,9 @@ dartConstant c = case c of
 
 runtimeTypeOf : Constant -> Doc
 runtimeTypeOf ty = case ty of
-  StringType => "$.String"
+  StringType => stringTy
   IntegerType => "$.BigInt"
-  DoubleType => "$.double"
+  DoubleType => doubleTy
   _ => "$.int"
 
 splitAtFirst : Char -> String -> (String, String)
@@ -239,13 +248,10 @@ foreignTypeName ty = do
   let (tyN, lib) = splitAtFirst ',' ty
   foreignName lib tyN
 
-intTy : Doc
-intTy = text "$.int"
-
 foreignTypeOf : {auto ctx : Ref Dart DartT} -> CFType -> Core Doc
 foreignTypeOf e = case e of
-  CFString => pure "$.String"
-  CFDouble => pure "$.double"
+  CFString => pure stringTy
+  CFDouble => pure doubleTy
   CFChar => pure intTy
   CFInt => pure intTy
   CFUnsigned8 => pure intTy
@@ -310,19 +316,37 @@ binOpOf' ty op lhs rhs = binOp op (castTo ty lhs) (castTo ty rhs)
 binOpOf : Constant -> Doc -> Doc -> Doc -> Doc
 binOpOf ty = binOpOf' (runtimeTypeOf ty)
 
+idrisBoolFrom : Doc -> Doc
+idrisBoolFrom e = paren (e <+> " ? 1 : 0")
+
 boolOpOf : Constant -> Doc -> Doc -> Doc -> Doc
-boolOpOf ty o lhs rhs = paren (binOpOf ty o lhs rhs <+> " ? 1 : 0")
+boolOpOf ty o lhs rhs = idrisBoolFrom (binOpOf ty o lhs rhs)
 
 stringOp : Doc -> Doc -> Doc
-stringOp s m = (castTo "$.String" s) <+> dot <+> m
+stringOp s m = (castTo stringTy s) <+> dot <+> m
+
+doubleOp : Doc -> Doc -> Doc
+doubleOp e m = (castTo doubleTy e) <+> dot <+> m
 
 bigIntToInt : Doc -> Doc
 bigIntToInt i = castTo "$.BigInt" i <+> ".toInt()"
+
+stringCompare : Doc -> Doc -> Doc -> Doc
+stringCompare zeroComparison lhs rhs =
+  idrisBoolFrom (stringOp lhs "compareTo" <+> paren rhs <+> zeroComparison)
+
+runtimeCastOf : Constant -> Doc -> Doc
+runtimeCastOf ty e = castTo (runtimeTypeOf ty) e
 
 dartOp : {auto ctx : Ref Dart DartT}
   -> PrimFn arity
   -> Vect arity Doc
   -> Doc
+dartOp (LT StringType) [x, y] = stringCompare " < 0" x y
+dartOp (LTE StringType) [x, y] = stringCompare " <= 0" x y
+dartOp (EQ StringType) [x, y] = stringCompare " == 0" x y
+dartOp (GTE StringType) [x, y] = stringCompare " >= 0" x y
+dartOp (GT StringType) [x, y] = stringCompare " > 0" x y
 dartOp (LT ty) [x, y] = boolOpOf ty "<" x y
 dartOp (LTE ty) [x, y] = boolOpOf ty "<=" x y
 dartOp (EQ ty) [x, y] = boolOpOf ty "==" x y
@@ -333,17 +357,21 @@ dartOp (Sub ty) [x, y] = binOpOf ty "-" x y
 dartOp (Mul ty) [x, y] = binOpOf ty "*" x y
 dartOp (Div ty) [x, y] = binOpOf ty "/" x y
 dartOp (Mod ty) [x, y] = binOpOf ty "%" x y
-dartOp (Neg ty) [x] = "(-" <+> castTo (runtimeTypeOf ty) x <+> ")"
+dartOp (Neg ty) [x] = paren ("-" <+> runtimeCastOf ty x)
 dartOp StrLength [x] = stringOp x "length"
 dartOp StrHead [x] = stringOp x "codeUnitAt(0)"
 dartOp StrIndex [x, y] = stringOp x "codeUnitAt" <+> paren y
 dartOp StrTail [x] = stringOp x "substring(1)"
-dartOp StrCons [x, y] = binOp "+" ("$.String.fromCharCode" <+> paren x) (castTo "$.String" y)
-dartOp StrAppend [x, y] = binOpOf' "$.String" "+" x y
+dartOp StrCons [x, y] = binOp "+" ("$.String.fromCharCode" <+> paren x) (castTo stringTy y)
+dartOp StrAppend [x, y] = binOpOf' stringTy "+" x y
 dartOp (Cast ty StringType) [x] = x <+> ".toString()"
 dartOp (Cast ty IntegerType) [x] = "$.BigInt.from" <+> paren x
+dartOp (Cast DoubleType IntType) [x] = doubleOp x "toInt()"
 dartOp (Cast IntegerType IntType) [x] = bigIntToInt x
 dartOp (Cast CharType IntType) [x] = x
+dartOp (Cast ty DoubleType) [x] = runtimeCastOf ty x <+> ".toDouble()"
+dartOp DoubleFloor [x] = doubleOp x "floorToDouble()"
+dartOp DoubleCeiling [x] = doubleOp x "ceilToDouble()"
 dartOp BelieveMe [_, _, x] = x
 dartOp e args = unsupported (e, args)
 
