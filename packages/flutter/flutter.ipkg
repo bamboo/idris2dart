@@ -1,0 +1,5 @@
+package flutter
+
+modules = Flutter
+
+sourcedir = "src"

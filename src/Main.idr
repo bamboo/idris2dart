@@ -8,7 +8,6 @@ import Data.List
 import Data.String.Extra
 import Data.StringMap
 import Data.Strings
-import FFI
 import Idris.Driver
 import Printer
 import System
@@ -369,6 +368,7 @@ dartOp (Cast ty IntegerType) [x] = "$.BigInt.from" <+> paren x
 dartOp (Cast DoubleType IntType) [x] = doubleOp x "toInt()"
 dartOp (Cast IntegerType IntType) [x] = bigIntToInt x
 dartOp (Cast CharType IntType) [x] = x
+dartOp (Cast IntType CharType) [x] = x
 dartOp (Cast ty DoubleType) [x] = runtimeCastOf ty x <+> ".toDouble()"
 dartOp DoubleFloor [x] = doubleOp x "floorToDouble()"
 dartOp DoubleCeiling [x] = doubleOp x "ceilToDouble()"

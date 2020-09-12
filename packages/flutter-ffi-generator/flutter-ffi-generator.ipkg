@@ -1,0 +1,14 @@
+package flutter-ffi-generator
+
+main = Main
+
+modules = Main
+        , SimpleFFI
+        , SimpleFFI.Spec
+        , SimpleFFI.Renderer
+
+depends = contrib
+
+executable = flutter-ffi-generator
+
+sourcedir = "src"

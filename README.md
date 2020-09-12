@@ -8,24 +8,24 @@ To explore what cross-platform app development with Idris 2 powered by [Flutter]
 
 ### Status
 
- - [x] data types, pattern matching, etc
- - [x] basic Char, String and numeric primitives
- - [x] [bidirectional FFI](./tests/dart/ffi001/Main.idr)
- - [x] delay/force
- - [ ] remaining cast primitives
- - [ ] remaining IO primitives
- - [ ] `IOArray` primitives
- - [ ] bounded int operations on `Bits*` values
+- [x] data types, pattern matching, etc
+- [x] basic Char, String and numeric primitives
+- [x] [bidirectional FFI](./tests/dart/ffi001/Main.idr)
+- [x] delay/force
+- [ ] remaining cast primitives
+- [ ] remaining IO primitives
+- [ ] `IOArray` primitives
+- [ ] bounded int operations on `Bits*` values
 
 ### Building
 
 1. Install the latest Idris 2 (must include the _idris2api_ package)
-2. Run `idris2 --build idris2dart.ipkg`
+2. `make all`
 3. Add `./build/exec/idris2dart` to your `PATH` or create an alias
 
 ### Using
 
-`idris2dart` is a fully functional Idris 2 environment except it comes with a single code generator, `dart`. 
+`idris2dart` is a fully functional Idris 2 environment except it comes with a single code generator, `dart`.
 
 For example, to compile an Idris module to Dart, use:
 
