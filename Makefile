@@ -3,6 +3,9 @@ idris2dart = build/exec/idris2dart
 .PHONY: all
 all: $(idris2dart) flutter
 
+.PHONY: install
+install: all
+
 $(idris2dart): src/*.idr idris2dart.ipkg
 	idris2 --build idris2dart.ipkg
 
@@ -23,7 +26,7 @@ $(Flutter.idr): $(flutter-ffi-generator)
 	$(flutter-ffi-generator) > $(Flutter.idr)
 
 $(flutter-ffi-generator): $(flutter-ffi-generator-dir)/src/*.idr
-	idris2 --build $(flutter-ffi-generator-dir)/flutter-ffi-generator.ipkg
+	cd $(flutter-ffi-generator-dir) && idris2 --build ./flutter-ffi-generator.ipkg
 
 runtests = ./tests/build/exec/runtests
 
@@ -31,10 +34,12 @@ runtests = ./tests/build/exec/runtests
 check: $(idris2dart) $(runtests)
 	cd tests && $(realpath $(runtests)) $(realpath $(idris2dart))
 
-$(runtests): ./tests/Main.idr ./tests/tests.ipkg
-	idris2 --build ./tests/tests.ipkg
+$(runtests): ./tests/*.idr ./tests/tests.ipkg
+	cd tests && idris2 --build ./tests.ipkg
 
 .PHONY: clean
 clean:
 	rm -fr ./build/
+	rm -fr ./tests/build/
 	rm -fr $(flutter-dir)/build/
+	rm -fr $(flutter-ffi-generator-dir)/build/
