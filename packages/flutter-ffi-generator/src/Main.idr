@@ -36,14 +36,30 @@ flutter = defModule "Flutter" [
       defConstructor "" [],
       defIO "moveTo" [p double "x", p double "y"] void,
       defIO "lineTo" [p double "x", p double "y"] void
+    ],
+    defClass "Velocity" [
+      final "Offset" "pixelsPerSecond"
     ]
   ],
   defLib gestures [
     defClass "TapDownDetails" [
+      final "Offset" "globalPosition",
+      final "Offset" "localPosition"
+    ],
+    defClass "TapUpDetails" [
+      final "Offset" "globalPosition",
+      final "Offset" "localPosition"
+    ],
+    defClass "LongPressStartDetails" [
+      final "Offset" "globalPosition",
       final "Offset" "localPosition"
     ],
     defClass "LongPressMoveUpdateDetails" [
       final "Offset" "localOffsetFromOrigin",
+      final "Offset" "localPosition"
+    ],
+    defClass "LongPressEndDetails" [
+      final "Offset" "globalPosition",
       final "Offset" "localPosition"
     ]
   ]

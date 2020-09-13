@@ -15,13 +15,25 @@ Point = (Double, Double)
 State : Type
 State = List Point
 
-onTapDown : TapDownDetails -> State -> IO State
-onTapDown d s = pure ((d.localPosition.dx, d.localPosition.dy) :: s)
+onTapUp : TapUpDetails -> State -> IO State
+onTapUp d s = pure ((d.localPosition.dx, d.localPosition.dy) :: s)
+
+onLongPressStart : LongPressStartDetails -> State -> IO State
+onLongPressStart d s = do
+  let pos = d.localPosition
+  putStrLn ("onLongPressStart(" ++ show (pos.dx) ++ "," ++ show pos.dy ++ ")")
+  pure s
 
 onLongPressMoveUpdate : LongPressMoveUpdateDetails -> State -> IO State
 onLongPressMoveUpdate d s = do
   let pos = d.localPosition
   putStrLn ("onLongPressMoveUpdate(" ++ show (pos.dx) ++ "," ++ show pos.dy ++ ")")
+  pure s
+
+onLongPressEnd : LongPressEndDetails -> State -> IO State
+onLongPressEnd d s = do
+  let pos = d.localPosition
+  putStrLn ("onLongPressEnd(" ++ show (pos.dx) ++ "," ++ show pos.dy ++ ")")
   pure s
 
 onPaint : Canvas -> Size -> State -> IO ()
@@ -35,4 +47,4 @@ onPaint c _ ((x0, y0) :: ps) = do
   c // drawPath path paint
 
 main : IO ()
-main = runDoodleApp [] onTapDown onLongPressMoveUpdate onPaint
+main = runDoodleApp [] onTapUp onLongPressStart onLongPressMoveUpdate onLongPressEnd onPaint

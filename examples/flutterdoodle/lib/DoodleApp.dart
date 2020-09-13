@@ -3,16 +3,20 @@ import 'package:flutter/material.dart';
 //@IdrisExport
 void runDoodleApp(
   initialState,
-  TapDownCallback onTapDown,
+  TapUpCallback onTapUp,
+  LongPressStartCallback onLongPressStart,
   LongPressMoveUpdateCallback onLongPressMoveUpdate,
+  LongPressEndCallback onLongPressEnd,
   PaintCallback onPaint,
 ) {
   runApp(
     DoodleAppRoot(
       doodleAppSpec: DoodleAppSpec(
         initialState,
-        onTapDown,
+        onTapUp,
+        onLongPressStart,
         onLongPressMoveUpdate,
+        onLongPressEnd,
         onPaint,
       ),
       child: DoodleApp(),
@@ -20,13 +24,23 @@ void runDoodleApp(
   );
 }
 
-typedef TapDownCallback = Object Function(
-  TapDownDetails,
+typedef TapUpCallback = Object Function(
+  TapUpDetails,
+  Object,
+);
+
+typedef LongPressStartCallback = Object Function(
+  LongPressStartDetails details,
   Object,
 );
 
 typedef LongPressMoveUpdateCallback = Object Function(
   LongPressMoveUpdateDetails details,
+  Object,
+);
+
+typedef LongPressEndCallback = Object Function(
+  LongPressEndDetails details,
   Object,
 );
 
@@ -63,13 +77,17 @@ class DoodleAppSpec {
   }
 
   final Object initialState;
-  final TapDownCallback onTapDown;
+  final TapUpCallback onTapUp;
+  final LongPressStartCallback onLongPressStart;
   final LongPressMoveUpdateCallback onLongPressMoveUpdate;
+  final LongPressEndCallback onLongPressEnd;
   final PaintCallback onPaint;
   DoodleAppSpec(
     this.initialState,
-    this.onTapDown,
+    this.onTapUp,
+    this.onLongPressStart,
     this.onLongPressMoveUpdate,
+    this.onLongPressEnd,
     this.onPaint,
   );
 }
@@ -121,15 +139,25 @@ class _DoodlePageState extends State<DoodlePage> {
       body: Center(
         child: CustomPaint(
           child: GestureDetector(
-            onTapDown: (details) {
+            onTapUp: (details) {
               modifyState((s) {
-                return DoodleAppSpec.of(context).onTapDown(details, s);
+                return DoodleAppSpec.of(context).onTapUp(details, s);
+              });
+            },
+            onLongPressStart: (details) {
+              modifyState((s) {
+                return DoodleAppSpec.of(context).onLongPressStart(details, s);
               });
             },
             onLongPressMoveUpdate: (details) {
               modifyState((s) {
                 return DoodleAppSpec.of(context)
                     .onLongPressMoveUpdate(details, s);
+              });
+            },
+            onLongPressEnd: (details) {
+              modifyState((s) {
+                return DoodleAppSpec.of(context).onLongPressEnd(details, s);
               });
             },
           ),

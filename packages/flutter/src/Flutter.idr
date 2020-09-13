@@ -38,8 +38,29 @@ mutual
   Path = Struct "Path,dart:ui" []
 
   public export
+  Velocity : Type
+  Velocity = Struct "Velocity,dart:ui" [
+    ("pixelsPerSecond", Offset)
+  ]
+
+  public export
   TapDownDetails : Type
   TapDownDetails = Struct "TapDownDetails,package:flutter/gestures.dart" [
+    ("globalPosition", Offset),
+    ("localPosition", Offset)
+  ]
+
+  public export
+  TapUpDetails : Type
+  TapUpDetails = Struct "TapUpDetails,package:flutter/gestures.dart" [
+    ("globalPosition", Offset),
+    ("localPosition", Offset)
+  ]
+
+  public export
+  LongPressStartDetails : Type
+  LongPressStartDetails = Struct "LongPressStartDetails,package:flutter/gestures.dart" [
+    ("globalPosition", Offset),
     ("localPosition", Offset)
   ]
 
@@ -47,6 +68,13 @@ mutual
   LongPressMoveUpdateDetails : Type
   LongPressMoveUpdateDetails = Struct "LongPressMoveUpdateDetails,package:flutter/gestures.dart" [
     ("localOffsetFromOrigin", Offset),
+    ("localPosition", Offset)
+  ]
+
+  public export
+  LongPressEndDetails : Type
+  LongPressEndDetails = Struct "LongPressEndDetails,package:flutter/gestures.dart" [
+    ("globalPosition", Offset),
     ("localPosition", Offset)
   ]
 
@@ -141,9 +169,39 @@ namespace Path
   lineTo x y this = primIO $ this.prim__lineTo x y
 
 
+namespace Velocity
+  export
+  pixelsPerSecond : Velocity -> Offset
+  pixelsPerSecond this = this.getField "pixelsPerSecond"
+
+
 namespace TapDownDetails
   export
+  globalPosition : TapDownDetails -> Offset
+  globalPosition this = this.getField "globalPosition"
+
+  export
   localPosition : TapDownDetails -> Offset
+  localPosition this = this.getField "localPosition"
+
+
+namespace TapUpDetails
+  export
+  globalPosition : TapUpDetails -> Offset
+  globalPosition this = this.getField "globalPosition"
+
+  export
+  localPosition : TapUpDetails -> Offset
+  localPosition this = this.getField "localPosition"
+
+
+namespace LongPressStartDetails
+  export
+  globalPosition : LongPressStartDetails -> Offset
+  globalPosition this = this.getField "globalPosition"
+
+  export
+  localPosition : LongPressStartDetails -> Offset
   localPosition this = this.getField "localPosition"
 
 
@@ -154,4 +212,14 @@ namespace LongPressMoveUpdateDetails
 
   export
   localPosition : LongPressMoveUpdateDetails -> Offset
+  localPosition this = this.getField "localPosition"
+
+
+namespace LongPressEndDetails
+  export
+  globalPosition : LongPressEndDetails -> Offset
+  globalPosition this = this.getField "globalPosition"
+
+  export
+  localPosition : LongPressEndDetails -> Offset
   localPosition this = this.getField "localPosition"
