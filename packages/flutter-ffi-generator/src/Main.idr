@@ -11,8 +11,8 @@ flutter = defModule "Flutter" [
   defLib dartUI [
     defClass "Canvas" [
       defIO "drawPath" [
-        p "path" "Path",
-        p "paint" "Paint"
+        p "Path" "path",
+        p "Paint" "paint"
       ] void
     ],
     defEnum "PaintingStyle" [
@@ -20,31 +20,31 @@ flutter = defModule "Flutter" [
     ],
     defClass "Paint" [
       defConstructor "" [],
-      var "style" "PaintingStyle",
-      var "strokeWidth" double
+      var "PaintingStyle" "style",
+      var double "strokeWidth"
     ],
     defClass "Offset" [
-      defConstructor "" [p "dx" double, p "dy" double],
-      final "dx" double,
-      final "dy" double
+      defConstructor "" [p double "dx", p double "dy"],
+      final double "dx",
+      final double "dy"
     ],
     defClass "Size" [
-      final "width" double,
-      final "height" double
+      final double "width",
+      final double "height"
     ],
     defClass "Path" [
       defConstructor "" [],
-      defIO "moveTo" [p "x" double, p "y" double] void,
-      defIO "lineTo" [p "x" double, p "y" double] void
+      defIO "moveTo" [p double "x", p double "y"] void,
+      defIO "lineTo" [p double "x", p double "y"] void
     ]
   ],
   defLib gestures [
     defClass "TapDownDetails" [
-      final "localPosition" "Offset"
+      final "Offset" "localPosition"
     ],
     defClass "LongPressMoveUpdateDetails" [
-      final "localOffsetFromOrigin" "Offset",
-      final "localPosition" "Offset"
+      final "Offset" "localOffsetFromOrigin",
+      final "Offset" "localPosition"
     ]
   ]
 ]

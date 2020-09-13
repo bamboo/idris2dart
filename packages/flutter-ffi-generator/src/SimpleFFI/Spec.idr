@@ -71,16 +71,16 @@ void : DartType
 void = VoidType
 
 export
-var : String -> DartType -> Member
-var n ty = FieldMember $ Var n ty
+var : DartType -> String -> Member
+var ty n = FieldMember $ Var n ty
 
 export
-final : String -> DartType -> Member
-final n ty = FieldMember $ Final n ty
+final : DartType -> String -> Member
+final ty n = FieldMember $ Final n ty
 
 export
-p : String -> DartType -> Parameter
-p = P
+p : DartType -> String -> Parameter
+p ty n = P n ty
 
 export
 defConstructor : String -> List Parameter -> Member
