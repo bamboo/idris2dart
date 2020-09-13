@@ -523,8 +523,8 @@ class $Delayed {
   $.dynamic value;
   $Delayed(this.e);
   $.dynamic force() {
+    final e = this.e;
     if (e != null) {
-      final e = this.e;
       this.value = e();
       this.e = null;
     }
