@@ -10,15 +10,13 @@ void runDoodleApp(
   PaintCallback onPaint,
 ) {
   runApp(
-    DoodleAppRoot(
-      doodleAppSpec: DoodleAppSpec(
-        initialState,
-        onTapUp,
-        onLongPressStart,
-        onLongPressMoveUpdate,
-        onLongPressEnd,
-        onPaint,
-      ),
+    DoodleAppSpec(
+      initialState: initialState,
+      onTapUp: onTapUp,
+      onLongPressStart: onLongPressStart,
+      onLongPressMoveUpdate: onLongPressMoveUpdate,
+      onLongPressEnd: onLongPressEnd,
+      onPaint: onPaint,
       child: DoodleApp(),
     ),
   );
@@ -50,30 +48,11 @@ typedef PaintCallback = void Function(
   Object,
 );
 
-class DoodleAppRoot extends InheritedWidget {
-  static DoodleAppRoot of(BuildContext context) {
-    return context
-        .getElementForInheritedWidgetOfExactType<DoodleAppRoot>()
-        .widget;
-  }
-
-  DoodleAppRoot({
-    Key key,
-    @required Widget child,
-    this.doodleAppSpec,
-  }) : super(key: key, child: child);
-
-  final DoodleAppSpec doodleAppSpec;
-
-  @override
-  bool updateShouldNotify(DoodleAppRoot oldWidget) {
-    return doodleAppSpec != oldWidget.doodleAppSpec;
-  }
-}
-
-class DoodleAppSpec {
+class DoodleAppSpec extends InheritedWidget {
   static DoodleAppSpec of(BuildContext context) {
-    return DoodleAppRoot.of(context).doodleAppSpec;
+    return context
+        .getElementForInheritedWidgetOfExactType<DoodleAppSpec>()
+        .widget;
   }
 
   final Object initialState;
@@ -82,14 +61,21 @@ class DoodleAppSpec {
   final LongPressMoveUpdateCallback onLongPressMoveUpdate;
   final LongPressEndCallback onLongPressEnd;
   final PaintCallback onPaint;
-  DoodleAppSpec(
+  DoodleAppSpec({
+    Key key,
     this.initialState,
     this.onTapUp,
     this.onLongPressStart,
     this.onLongPressMoveUpdate,
     this.onLongPressEnd,
     this.onPaint,
-  );
+    @required Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  bool updateShouldNotify(DoodleAppSpec oldWidget) {
+    return this != oldWidget;
+  }
 }
 
 class DoodleApp extends StatelessWidget {

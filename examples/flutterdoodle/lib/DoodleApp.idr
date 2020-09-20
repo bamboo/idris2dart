@@ -2,6 +2,7 @@
 module DoodleApp
 
 import public Flutter
+import public System.FFI
 
 %foreign "Dart:runDoodleApp,./DoodleApp.dart"
 prim__runDoodleApp :

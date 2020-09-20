@@ -9,42 +9,44 @@ infixr 1 //
 (//) : a -> (a -> b) -> b
 (//) a f = f a
 
-Point : Type
-Point = (Double, Double)
-
-State : Type
-State = List Point
+data State
+  = Idle (List Offset)
+  | Pressing Offset (List Offset)
 
 onTapUp : TapUpDetails -> State -> IO State
-onTapUp d s = pure ((d.localPosition.dx, d.localPosition.dy) :: s)
+onTapUp d s = case s of
+  Idle os => pure (Idle (d.localPosition :: os))
+  s => pure s
 
 onLongPressStart : LongPressStartDetails -> State -> IO State
-onLongPressStart d s = do
-  let pos = d.localPosition
-  putStrLn ("onLongPressStart(" ++ show (pos.dx) ++ "," ++ show pos.dy ++ ")")
-  pure s
+onLongPressStart d s = case s of
+  Idle os => pure (Pressing d.localPosition os)
+  s => pure s
 
 onLongPressMoveUpdate : LongPressMoveUpdateDetails -> State -> IO State
-onLongPressMoveUpdate d s = do
-  let pos = d.localPosition
-  putStrLn ("onLongPressMoveUpdate(" ++ show (pos.dx) ++ "," ++ show pos.dy ++ ")")
-  pure s
+onLongPressMoveUpdate d s = case s of
+  Pressing _ os => pure (Pressing d.localPosition os)
+  s => pure s
 
 onLongPressEnd : LongPressEndDetails -> State -> IO State
-onLongPressEnd d s = do
-  let pos = d.localPosition
-  putStrLn ("onLongPressEnd(" ++ show (pos.dx) ++ "," ++ show pos.dy ++ ")")
-  pure s
+onLongPressEnd d s = case s of
+  Pressing _ os => pure (Idle (d.localPosition :: os))
+  s => pure s
 
-onPaint : Canvas -> Size -> State -> IO ()
-onPaint c _ [] = pure ()
-onPaint c _ ((x0, y0) :: ps) = do
+drawLines : Canvas -> List Offset -> IO ()
+drawLines _ [] = pure ()
+drawLines c (o :: os) = do
   path <- Path.new
-  path // moveTo x0 y0
-  traverse (\(x, y) => path // lineTo x y) ps
+  path // moveTo o.dx o.dy
+  traverse (\o => path // lineTo o.dx o.dy) os
   paint <- Paint.new
   paint // setStyle PaintingStyle.stroke
   c // drawPath path paint
 
+onPaint : Canvas -> Size -> State -> IO ()
+onPaint c _ s = case s of
+  Idle os => drawLines c os
+  Pressing o os => drawLines c (o :: os)
+
 main : IO ()
-main = runDoodleApp [] onTapUp onLongPressStart onLongPressMoveUpdate onLongPressEnd onPaint
+main = runDoodleApp (Idle []) onTapUp onLongPressStart onLongPressMoveUpdate onLongPressEnd onPaint
