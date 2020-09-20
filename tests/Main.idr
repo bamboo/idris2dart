@@ -18,7 +18,9 @@ import System.Path
 
 dartTests : List String
 dartTests
-  = [ "dart001", "dart002", "tailrec001", "ffi001", "lazy001" ]
+  = [ "dart001", "dart002", "dart003",
+      "tailrec001", "ffi001", "lazy001",
+      "idiom001" ]
 
 ------------------------------------------------------------------------
 -- Options

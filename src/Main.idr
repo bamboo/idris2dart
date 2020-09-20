@@ -121,11 +121,17 @@ world' = text "#World"
 intTy : Doc
 intTy = text "$.int"
 
+bigIntTy : Doc
+bigIntTy = text "$.BigInt"
+
 stringTy : Doc
 stringTy = text "$.String"
 
 doubleTy : Doc
 doubleTy = text "$.double"
+
+maxDartInt : Integer
+maxDartInt = 9223372036854775807
 
 dartConstant : Constant -> Doc
 dartConstant c = case c of
@@ -136,7 +142,10 @@ dartConstant c = case c of
   I i => shown i
   BI 0 => text "$.BigInt.zero"
   BI 1 => text "$.BigInt.one"
-  BI i => "$.BigInt.from(" <+> shown i <+> ")"
+  BI i =>
+    if i > maxDartInt
+      then "$.BigInt.parse(\"" <+> shown i <+> "\")"
+      else "$.BigInt.from(" <+> shown i <+> ")"
   Ch c => shown (cast {to=Int} c)
   Str s => dartStringDoc s
   Db d => shown d
@@ -146,7 +155,7 @@ dartConstant c = case c of
 runtimeTypeOf : Constant -> Doc
 runtimeTypeOf ty = case ty of
   StringType => stringTy
-  IntegerType => "$.BigInt"
+  IntegerType => bigIntTy
   DoubleType => doubleTy
   _ => "$.int"
 
@@ -301,10 +310,10 @@ foreignDecl n ss args ret = case n of
   NS _ (UN "prim__putChar") =>
     pure (dartName n <+> "(c, w)" <+> block (!dartStdout <+> ".writeCharCode(c);" <+> line <+> "return w;"))
   NS _ (UN "prim__getStr") =>
-    pure (dartName n <+> "(w)" <+> block ("return " <+> !dartStdin <+> ".readLineSync();"))
+    pure (dartName n <+> "(w)" <+> block ("return " <+> !dartStdin <+> ".readLineSync() ?? \"\";"))
   _ => case mapMaybe foreignDartSpecFrom ss of
     [s] => dartForeign n s args ret
-    _ => pure (dartName n <+> "([a, b, c, d, e])" <+> block (unsupportedError ss))
+    _ => pure (dartName n <+> "([a, b, c, d, e, f, g, h, i, j, k])" <+> block (unsupportedError ss))
 
 binOp : Doc -> Doc -> Doc -> Doc
 binOp o lhs rhs = paren (lhs <+> o <+> rhs)
@@ -328,7 +337,7 @@ doubleOp : Doc -> Doc -> Doc
 doubleOp e m = (castTo doubleTy e) <+> dot <+> m
 
 bigIntToInt : Doc -> Doc
-bigIntToInt i = castTo "$.BigInt" i <+> ".toInt()"
+bigIntToInt i = castTo bigIntTy i <+> ".toInt()"
 
 stringCompare : Doc -> Doc -> Doc -> Doc
 stringCompare zeroComparison lhs rhs =
@@ -363,12 +372,15 @@ dartOp StrIndex [x, y] = stringOp x "codeUnitAt" <+> paren y
 dartOp StrTail [x] = stringOp x "substring(1)"
 dartOp StrCons [x, y] = binOp "+" ("$.String.fromCharCode" <+> paren x) (castTo stringTy y)
 dartOp StrAppend [x, y] = binOpOf' stringTy "+" x y
-dartOp (Cast ty StringType) [x] = x <+> ".toString()"
-dartOp (Cast ty IntegerType) [x] = "$.BigInt.from" <+> paren x
+dartOp (Cast StringType IntegerType) [x] = paren (bigIntTy <+> ".tryParse" <+> castTo stringTy x <+> " ?? " <+> bigIntTy <+> ".zero")
+dartOp (Cast StringType DoubleType) [x] = paren (doubleTy <+> ".tryParse" <+> castTo stringTy x <+> " ?? 0.0")
+dartOp (Cast StringType IntType) [x] = paren (intTy <+> ".tryParse" <+> castTo stringTy x <+> " ?? 0")
 dartOp (Cast DoubleType IntType) [x] = doubleOp x "toInt()"
 dartOp (Cast IntegerType IntType) [x] = bigIntToInt x
 dartOp (Cast CharType IntType) [x] = x
 dartOp (Cast IntType CharType) [x] = x
+dartOp (Cast ty StringType) [x] = x <+> ".toString()"
+dartOp (Cast ty IntegerType) [x] = "$.BigInt.from" <+> paren x
 dartOp (Cast ty DoubleType) [x] = runtimeCastOf ty x <+> ".toDouble()"
 dartOp DoubleFloor [x] = doubleOp x "floorToDouble()"
 dartOp DoubleCeiling [x] = doubleOp x "ceilToDouble()"
