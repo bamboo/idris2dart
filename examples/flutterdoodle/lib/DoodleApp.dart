@@ -17,7 +17,6 @@ void runDoodleApp(
       onLongPressMoveUpdate: onLongPressMoveUpdate,
       onLongPressEnd: onLongPressEnd,
       onPaint: onPaint,
-      child: DoodleApp(),
     ),
   );
 }
@@ -69,8 +68,7 @@ class DoodleAppSpec extends InheritedWidget {
     this.onLongPressMoveUpdate,
     this.onLongPressEnd,
     this.onPaint,
-    @required Widget child,
-  }) : super(key: key, child: child);
+  }) : super(key: key, child: DoodleApp());
 
   @override
   bool updateShouldNotify(DoodleAppSpec oldWidget) {
