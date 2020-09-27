@@ -88,6 +88,9 @@ dartStringDoc = text . dartString
 debug : Show e => e -> Doc
 debug = dartStringDoc . show
 
+comment : String -> Doc
+comment c = "/* " <+> text c <+> "*/"
+
 assertionError : Doc -> Doc
 assertionError e = "throw $.AssertionError" <+> paren e <+> semi
 
@@ -196,10 +199,16 @@ foreignDartSpecFrom s = do
     function : String -> Lib -> Maybe ForeignDartSpec
     function n lib = Just (ForeignFunction n lib)
 
-uncurriedSignature : CFType -> CFType -> (List CFType, CFType)
+FunctionType : Type
+FunctionType = (List CFType, CFType)
+
+mkFunctionType : List _ -> CFType -> FunctionType
+mkFunctionType ps ret = (const CFPtr <$> ps, ret)
+
+uncurriedSignature : CFType -> CFType -> FunctionType
 uncurriedSignature a b = go [a] b
   where
-    go : List CFType -> CFType -> (List CFType, CFType)
+    go : List CFType -> CFType -> FunctionType
     go ps (CFFun a b) = go (a :: ps) b
     go ps ret = (reverse ps, ret)
 
@@ -208,10 +217,9 @@ argNamesFor args p = text . (p ++) . show <$> [1..length args]
 
 ||| Adapts the foreign callback [c] so that it can be
 ||| invoked from Dart with the expected signature.
-foreignCallback : (c : Doc) -> CFType -> CFType -> Doc
-foreignCallback c a b =
+makeCallback : Doc -> FunctionType -> Doc
+makeCallback c (args, ret) =
   let
-    (args, ret) = uncurriedSignature a b
     argNames = argNamesFor args "c$"
     params = mapMaybe callbackParam (zip argNames args)
     worldArg = case ret of
@@ -229,7 +237,7 @@ foreignCallback c a b =
 foreignArg : (Doc, CFType) -> Maybe Doc
 foreignArg (n, ty) = case ty of
   CFWorld => Nothing
-  CFFun a b => Just (foreignCallback n a b)
+  CFFun a b => Just (makeCallback n (uncurriedSignature a b))
   CFUser (UN "Type") [] => Nothing
   CFUser (UN "__") [] => Nothing
   _ => Just n
@@ -244,8 +252,9 @@ foreignFunctionProxy n ff args ret =
     argNames = argNamesFor args "a$"
     fArgs = mapMaybe foreignArg (zip argNames args)
     fc = ff <+> tupled fArgs
+    di = empty -- text "// " <+> text (show args) <+> line
   in
-    singleExpFunction n argNames fc
+    di <+> singleExpFunction n argNames fc
 
 foreignName : {auto ctx : Ref Dart DartT}
   -> Lib -> String -> Core Doc
@@ -295,6 +304,21 @@ dartForeign n (ForeignConst c lib) _ _ = do
   pure (singleExpFunction (dartName n) [] fc)
 dartForeign n (ForeignMethod m) args ret = do
   foreignMethodProxy (dartName n) (text m) args ret
+
+
+parseFunctionType : Expression -> Maybe FunctionType
+parseFunctionType e =
+  case e of
+    IEConstructor (Right "->") [a, b] => Just (go [a] b)
+    _ => Nothing
+  where
+    go : List Expression -> Expression -> FunctionType
+    go ps (IELambda _ (ReturnStatement (IEConstructor (Right ty) args))) =
+      case (ty, args) of
+        ("->", [a, b]) => go (a :: ps) b
+        ("PrimIO.IO", _) => mkFunctionType ps (CFIORes CFPtr)
+        _ => mkFunctionType ps CFPtr
+    go ps _ = mkFunctionType ps CFPtr
 
 dartStdout : {auto ctx : Ref Dart DartT} -> Core Doc
 dartStdout = foreignName "dart:io" "stdout"
@@ -387,12 +411,13 @@ dartOp (Cast ty DoubleType) [x] = runtimeCastOf ty x <+> ".toDouble()"
 dartOp DoubleFloor [x] = doubleOp x "floorToDouble()"
 dartOp DoubleCeiling [x] = doubleOp x "ceilToDouble()"
 dartOp BelieveMe [_, _, x] = x
-dartOp e args = unsupported (e, args)
+dartOp e args = unsupported ("dartOp", e, args)
 
 useDelay : {auto ctx : Ref Dart DartT} -> Core ()
 useDelay = do
   s <- get Dart
   put Dart (record { usesDelay = True } s)
+
 
 mutual
   dartLambda : {auto ctx : Ref Dart DartT} -> List Name -> Statement -> Core Doc
@@ -406,6 +431,8 @@ mutual
     IEConstant c => pure (dartConstant c)
     IEVar v => pure (dartName v)
     IELambda ps s => dartLambda ps s
+    IEApp (IEVar (NS ns (UN "believe_me"))) [_, _, arg] =>
+      dartExp arg
     IEApp f args => do
       f' <- dartExp f
       args' <- traverse dartExp args
@@ -446,7 +473,43 @@ mutual
     (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _ :: rhs :: _) = do
       fTy <- foreignTypeName ty
       pure (castTo fTy !(dartExp e) <+> dot <+> text f <+> " = " <+> !(dartExp rhs))
+  dartPrimFnExt
+    (NS _ (UN "prim__dart_new"))
+    [ IENull, IENull, IENull -- erased type arguments
+      , IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _)
+      , positional
+      , named
+      , rest
+    ] = do
+      let pos' = collectPositional positional
+      let named' = collectNamed named
+      fTy <- foreignTypeName ty
+      posArgs <- traverse dartExp pos'
+      namedArgs <- traverse dartNamedParam named'
+      pure (fTy <+> tupled (posArgs ++ namedArgs))
   dartPrimFnExt n args = pure (debug (n, args))
+
+  dartNamedParam : {auto ctx : Ref Dart DartT} -> (Expression, String, Expression) -> Core Doc
+  dartNamedParam (ty, name, value) = do
+    let fTy = parseFunctionType ty
+    value' <- dartExp value
+    pure (text name <+> ": " <+> maybe value' (makeCallback value') fTy)
+
+  ||| Collects the parameter name and value pairs from the expression
+  ||| representing a `ParamList _`.
+  collectNamed : Expression -> List (Expression, String, Expression)
+  collectNamed e = go [] e
+    where
+      go : List (Expression, String, Expression) -> Expression -> List (Expression, String, Expression)
+      go acc ({- ParamList.:: -} IEConstructor (Left 1) [{- Assign key value -} IEConstructor (Left 0) [ty, IEConstant (Str key), value],  es]) = go ((ty, key, value) :: acc) es
+      go acc _ = reverse acc
+
+  collectPositional : Expression -> List Expression
+  collectPositional e = go [] e
+    where
+      go : List Expression -> Expression -> List Expression
+      go acc ({- HVect.:: -} IEConstructor (Left 1) (e :: es :: _)) = go (e :: acc) es
+      go acc _ = reverse acc
 
   dartCase : {auto ctx : Ref Dart DartT}
     -> (Expression, Statement)
@@ -506,7 +569,7 @@ mutual
     ForEverLoop s =>
       pure ("while (true)" <+> block !(dartStatement s))
     CommentStatement c =>
-      pure ("/* " <+> text c <+> "*/")
+      pure (comment c)
     DoNothing => pure empty
 
   dartVar : {auto ctx : Ref Dart DartT}

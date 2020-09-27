@@ -1,0 +1,9 @@
+package dart-ffi
+
+modules
+  = Dart.Core
+  , Dart.FFI
+
+sourcedir = "src"
+
+depends = contrib
