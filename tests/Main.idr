@@ -149,7 +149,7 @@ firstExists (x :: xs) = if !(exists x) then pure (Just x) else firstExists xs
 pathLookup : List String -> IO (Maybe String)
 pathLookup names = do
   path <- getEnv "PATH"
-  let pathList = List1.toList $ split (== pathSeparator) $ fromMaybe "/usr/bin:/usr/local/bin" path
+  let pathList = forget $ split (== pathSeparator) $ fromMaybe "/usr/bin:/usr/local/bin" path
   let candidates = [p ++ "/" ++ x | p <- pathList,
                                     x <- names]
   firstExists candidates
