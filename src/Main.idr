@@ -230,6 +230,8 @@ foreignArg : (Doc, CFType) -> Maybe Doc
 foreignArg (n, ty) = case ty of
   CFWorld => Nothing
   CFFun a b => Just (foreignCallback n a b)
+  CFUser (UN "Type") [] => Nothing
+  CFUser (UN "__") [] => Nothing
   _ => Just n
 
 singleExpFunction : Doc -> List Doc -> Doc -> Doc
