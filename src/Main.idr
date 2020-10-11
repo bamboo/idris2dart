@@ -63,6 +63,7 @@ dartNameString n = case n of
   CaseBlock x y => "case__" ++ dartIdent x ++ "_" ++ show y
   WithBlock x y => "with__" ++ dartIdent x ++ "_" ++ show y
   Resolved i => "fn__" ++ show i
+  RF n => "rf__" ++ dartIdent n
 
 dartName : Name -> Doc
 dartName = text . dartNameString
@@ -617,7 +618,7 @@ compileToDart defs term = do
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
   finalState <- get Dart
-  let imports' = dartImport <$> finalState.imports.toList
+  let imports' = dartImport <$> toList finalState.imports
   let header' = vcat (header ++ imports')
   let mainDecl = "void main()" <+> block dartMain
   let footer = if finalState.usesDelay then delayClass else empty

@@ -31,7 +31,7 @@ $(dart-ffi-install-cookie): $(dart-ffi-dir)/src/**/*.idr
 $(Flutter.idr): $(flutter-ffi-generator)
 	$(flutter-ffi-generator) > $(Flutter.idr)
 
-$(flutter-ffi-generator): $(flutter-ffi-generator-dir)/src/*.idr
+$(flutter-ffi-generator): $(flutter-ffi-generator-dir)/src/**/*.idr
 	cd $(flutter-ffi-generator-dir) && idris2 --build ./flutter-ffi-generator.ipkg
 
 runtests = ./tests/build/exec/runtests

@@ -85,7 +85,7 @@ namespace Canvas
 
   export
   drawPath : HasIO io => (path : Path) -> (paint : Paint) -> (this : Canvas) -> io ()
-  drawPath path paint this = primIO $ this.prim__drawPath path paint
+  drawPath path paint this = primIO $ prim__drawPath this path paint
 
 
 namespace PaintingStyle
@@ -104,19 +104,19 @@ namespace Paint
 
   export
   style : Paint -> PaintingStyle
-  style this = this.getField "style"
+  style this = getField this "style"
 
   export
   setStyle : PaintingStyle -> Paint -> IO ()
-  setStyle value this = this.setField "style" value
+  setStyle value this = setField this "style" value
 
   export
   strokeWidth : Paint -> Double
-  strokeWidth this = this.getField "strokeWidth"
+  strokeWidth this = getField this "strokeWidth"
 
   export
   setStrokeWidth : Double -> Paint -> IO ()
-  setStrokeWidth value this = this.setField "strokeWidth" value
+  setStrokeWidth value this = setField this "strokeWidth" value
 
 
 namespace Offset
@@ -129,21 +129,21 @@ namespace Offset
 
   export
   dx : Offset -> Double
-  dx this = this.getField "dx"
+  dx this = getField this "dx"
 
   export
   dy : Offset -> Double
-  dy this = this.getField "dy"
+  dy this = getField this "dy"
 
 
 namespace Size
   export
   width : Size -> Double
-  width this = this.getField "width"
+  width this = getField this "width"
 
   export
   height : Size -> Double
-  height this = this.getField "height"
+  height this = getField this "height"
 
 
 namespace Path
@@ -159,67 +159,67 @@ namespace Path
 
   export
   moveTo : HasIO io => (x : Double) -> (y : Double) -> (this : Path) -> io ()
-  moveTo x y this = primIO $ this.prim__moveTo x y
+  moveTo x y this = primIO $ prim__moveTo this x y
 
   %foreign "Dart:.lineTo"
   prim__lineTo : (this : Path) -> (x : Double) -> (y : Double) -> PrimIO ()
 
   export
   lineTo : HasIO io => (x : Double) -> (y : Double) -> (this : Path) -> io ()
-  lineTo x y this = primIO $ this.prim__lineTo x y
+  lineTo x y this = primIO $ prim__lineTo this x y
 
 
 namespace Velocity
   export
   pixelsPerSecond : Velocity -> Offset
-  pixelsPerSecond this = this.getField "pixelsPerSecond"
+  pixelsPerSecond this = getField this "pixelsPerSecond"
 
 
 namespace TapDownDetails
   export
   globalPosition : TapDownDetails -> Offset
-  globalPosition this = this.getField "globalPosition"
+  globalPosition this = getField this "globalPosition"
 
   export
   localPosition : TapDownDetails -> Offset
-  localPosition this = this.getField "localPosition"
+  localPosition this = getField this "localPosition"
 
 
 namespace TapUpDetails
   export
   globalPosition : TapUpDetails -> Offset
-  globalPosition this = this.getField "globalPosition"
+  globalPosition this = getField this "globalPosition"
 
   export
   localPosition : TapUpDetails -> Offset
-  localPosition this = this.getField "localPosition"
+  localPosition this = getField this "localPosition"
 
 
 namespace LongPressStartDetails
   export
   globalPosition : LongPressStartDetails -> Offset
-  globalPosition this = this.getField "globalPosition"
+  globalPosition this = getField this "globalPosition"
 
   export
   localPosition : LongPressStartDetails -> Offset
-  localPosition this = this.getField "localPosition"
+  localPosition this = getField this "localPosition"
 
 
 namespace LongPressMoveUpdateDetails
   export
   localOffsetFromOrigin : LongPressMoveUpdateDetails -> Offset
-  localOffsetFromOrigin this = this.getField "localOffsetFromOrigin"
+  localOffsetFromOrigin this = getField this "localOffsetFromOrigin"
 
   export
   localPosition : LongPressMoveUpdateDetails -> Offset
-  localPosition this = this.getField "localPosition"
+  localPosition this = getField this "localPosition"
 
 
 namespace LongPressEndDetails
   export
   globalPosition : LongPressEndDetails -> Offset
-  globalPosition this = this.getField "globalPosition"
+  globalPosition this = getField this "globalPosition"
 
   export
   localPosition : LongPressEndDetails -> Offset
-  localPosition this = this.getField "localPosition"
+  localPosition this = getField this "localPosition"

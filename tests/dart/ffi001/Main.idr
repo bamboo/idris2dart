@@ -57,7 +57,7 @@ namespace DateTime
 
   export
   hour : DateTime -> Int
-  hour dt = dt.getField "hour"
+  hour dt = getField dt "hour"
 
 Point : Type
 Point = Struct "Point,./libsmall.dart" [("x", Int), ("y", Int)]
@@ -75,13 +75,13 @@ prim__moveTo : Point -> Int -> Int -> PrimIO ()
 prim__accept : Point -> (Point -> PrimIO ()) -> PrimIO ()
 
 moveTo : HasIO io => Point -> Int -> Int -> io ()
-moveTo p x y = primIO $ p.prim__moveTo x y
+moveTo p x y = primIO $ prim__moveTo p x y
 
 accept : HasIO io => Point -> (Point -> IO ()) -> io ()
-accept p c = primIO $ p.prim__accept (\p => toPrim $ c p)
+accept p c = primIO $ prim__accept p (\p => toPrim $ c p)
 
 Show Point where
-  show pt = show (the Int (pt.getField "x"), the Int (pt.getField "y"))
+  show pt = show (the Int (getField pt "x"), the Int (getField pt "y"))
 
 PaintingStyle : Type
 PaintingStyle = Struct "PaintingStyle,./libsmall.dart" [("index", Int)]
@@ -97,7 +97,7 @@ namespace PaintingStyle
 
   export
   index : PaintingStyle -> Int
-  index ps = ps.getField "index"
+  index ps = getField ps "index"
 
 main : IO ()
 main = do
@@ -110,16 +110,16 @@ main = do
 
   -- Dart classes as records
   moonLanding <- DateTime.parse "1969-07-20 20:18:04Z"
-  printLn moonLanding.hour
+  printLn (hour moonLanding)
 
   pt <- mkPoint 0 1
   printLn pt
-  pt.setField "x" (the Int 2)
-  pt.setField "y" (the Int 3)
+  setField pt "x" (the Int 2)
+  setField pt "y" (the Int 3)
   printLn pt
-  pt.accept (\pt => pt.moveTo 4 5)
+  accept pt (\pt => moveTo pt 4 5)
   printLn pt
 
   -- Dart enums
-  printLn (PaintingStyle.fill.index, PaintingStyle.stroke.index)
+  printLn (index PaintingStyle.fill, index PaintingStyle.stroke)
   pure ()

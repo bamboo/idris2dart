@@ -75,7 +75,7 @@ nameAndType (Final n ty) = (n, ty)
 
 typeDeclFor : {auto lib : Lib} -> Declaration -> Doc ()
 typeDeclFor (ClassDecl c) =
-  typeDecl c.name (nameAndType <$> c.fields)
+  typeDecl c.name (nameAndType <$> fields c)
 typeDeclFor (EnumDecl n fs) =
   typeDecl n []
 
@@ -106,7 +106,7 @@ setter owner field ty =
     export_
       <+> n <++> colon <++> funType [ty', pretty owner, ioUnit] <+> hardline
       <+> n <++> val <++> this <++> equals
-      <++> this <+> dot <+> pretty "setField" <++> dquotes field' <++> val
+      <++> pretty "setField" <++> this <++> dquotes field' <++> val
 
 getter : String -> String -> DartType -> Doc ()
 getter owner field ty =
@@ -117,7 +117,7 @@ getter owner field ty =
     export_
       <+> field' <++> colon <++> funType [pretty owner, ty'] <+> hardline
       <+> field' <++> this <++> equals
-      <++> this <+> dot <+> pretty "getField" <++> dquotes field'
+      <++> pretty "getField" <++> this <++> dquotes field'
 
 foreign : Doc ()
 foreign = pretty "%foreign"
@@ -134,7 +134,7 @@ methodPrimsFor (Fun n ps ret) =
     thisTy = parens (this <++> colon <++> pretty c.name)
     ret' = prettyType ret
     ps' = prettyParameter <$> ps
-    psNames = ps.parameterNames
+    psNames = parameterNames ps
     primName = pretty ("prim__" ++ n)
     prim =
       foreign <++> dquotes (pretty ("Dart:." ++ n)) <+> hardline
@@ -142,7 +142,7 @@ methodPrimsFor (Fun n ps ret) =
     method =
       export_ <+> pretty n <++> colon <++> pretty "HasIO io =>" <++> funType (ps' ++ [thisTy, pretty "io" <++> ret']) <+> hardline
         <+> pretty n <++> hsep psNames <++> this <++> equals
-        <++> pretty "primIO $" <++> this <+> dot <+> primName <++> hsep psNames
+        <++> pretty "primIO $" <++> primName <++> this <++> hsep psNames
   in
     [prim, method]
 
@@ -151,7 +151,7 @@ ctorPrimsFor n ps =
   let
     ret' = pretty c.name
     ps' = prettyParameter <$> ps
-    psNames = ps.parameterNames
+    psNames = parameterNames ps
     (idrisSuffix, dartSuffix, funName) =
       if length n == 0
         then ("", "", "new")
@@ -205,7 +205,7 @@ export
 renderModule : Module -> IO ()
 renderModule ffi = do
   let decls = concatMap typeDeclsForLib ffi.libs
-  let mutualDecls = pretty "mutual" <+> indented decls.sepByLines
+  let mutualDecls = pretty "mutual" <+> indented (sepByLines decls)
   let prims = concatMap primsForLib ffi.libs
   let doc = the (Doc ()) (sepByLines (header (pretty ffi.name) :: mutualDecls :: prims))
   let pageWidth = AvailablePerLine 120 1

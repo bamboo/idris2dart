@@ -11,7 +11,7 @@ Point : Type
 Point = Struct "Point,./libsmall.dart" [("x", Int), ("y", Int)]
 
 Show Point where
-  show pt = show (the Int (pt.getField "x"), the Int (pt.getField "y"))
+  show pt = show (the Int (getField pt "x"), the Int (getField pt "y"))
 
 namespace Point
 
@@ -74,7 +74,7 @@ main = do
     one @= (\i => i * 2),
     two @= (\i => printLn i *> pure (i * 2))
   ]
-  printLn (cb.callOne 21)
-  printLn !(primIO (cb.callTwo 21))
+  printLn (callOne cb 21)
+  printLn !(primIO (callTwo cb 21))
 
 
