@@ -189,71 +189,77 @@ namespace VisualDensity
 
 
 namespace ThemeData
-  namespace ThemeData.New
-    %inline
-    public export
-    primarySwatch : Param
-    primarySwatch = ("primarySwatch", MaterialColor)
+  namespace New
+    data Tag : Type where
 
     %inline
     public export
-    visualDensity : Param
-    visualDensity = ("visualDensity", VisualDensity)
+    primarySwatch : Parameter ThemeData.New.Tag
+    primarySwatch = mkParameter "primarySwatch" MaterialColor
+
     %inline
     public export
-    Parameters : Type
-    Parameters = ParamList [ThemeData.New.primarySwatch, ThemeData.New.visualDensity]
+    visualDensity : Parameter ThemeData.New.Tag
+    visualDensity = mkParameter "visualDensity" VisualDensity
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [ThemeData.New.primarySwatch, ThemeData.New.visualDensity]
 
 
   %inline
   public export
-  new : HasIO io => ThemeData.New.Parameters -> io ThemeData
+  new : HasIO io => ThemeData.New.NamedParameters -> io ThemeData
   new  ps = primIO $ prim__dart_new ThemeData [] ps
 
 
 namespace Scaffold
-  namespace Scaffold.New
-    %inline
-    public export
-    appBar : Param
-    appBar = ("appBar", Widget)
+  namespace New
+    data Tag : Type where
 
     %inline
     public export
-    body : Param
-    body = ("body", Widget)
+    appBar : Parameter Scaffold.New.Tag
+    appBar = mkParameter "appBar" Widget
 
     %inline
     public export
-    floatingActionButton : Param
-    floatingActionButton = ("floatingActionButton", Widget)
+    body : Parameter Scaffold.New.Tag
+    body = mkParameter "body" Widget
+
     %inline
     public export
-    Parameters : Type
-    Parameters = ParamList [Scaffold.New.appBar, Scaffold.New.body, Scaffold.New.floatingActionButton]
+    floatingActionButton : Parameter Scaffold.New.Tag
+    floatingActionButton = mkParameter "floatingActionButton" Widget
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [Scaffold.New.appBar, Scaffold.New.body, Scaffold.New.floatingActionButton]
 
 
   %inline
   public export
-  new : HasIO io => Scaffold.New.Parameters -> io Scaffold
+  new : HasIO io => Scaffold.New.NamedParameters -> io Scaffold
   new  ps = primIO $ prim__dart_new Scaffold [] ps
 
 
 namespace AppBar
-  namespace AppBar.New
+  namespace New
+    data Tag : Type where
+
     %inline
     public export
-    title : Param
-    title = ("title", Widget)
+    title : Parameter AppBar.New.Tag
+    title = mkParameter "title" Widget
     %inline
     public export
-    Parameters : Type
-    Parameters = ParamList [AppBar.New.title]
+    NamedParameters : Type
+    NamedParameters = Parameters [AppBar.New.title]
 
 
   %inline
   public export
-  new : HasIO io => AppBar.New.Parameters -> io AppBar
+  new : HasIO io => AppBar.New.NamedParameters -> io AppBar
   new  ps = primIO $ prim__dart_new AppBar [] ps
 
 
@@ -264,114 +270,124 @@ namespace Icons
 
 
 namespace FloatingActionButton
-  namespace FloatingActionButton.New
-    %inline
-    public export
-    onPressed : Param
-    onPressed = ("onPressed", (()))
+  namespace New
+    data Tag : Type where
 
     %inline
     public export
-    tooltip : Param
-    tooltip = ("tooltip", String)
+    onPressed : Parameter FloatingActionButton.New.Tag
+    onPressed = mkParameter "onPressed" (())
 
     %inline
     public export
-    child : Param
-    child = ("child", Widget)
+    tooltip : Parameter FloatingActionButton.New.Tag
+    tooltip = mkParameter "tooltip" String
+
     %inline
     public export
-    Parameters : Type
-    Parameters = ParamList [ FloatingActionButton.New.onPressed
+    child : Parameter FloatingActionButton.New.Tag
+    child = mkParameter "child" Widget
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [ FloatingActionButton.New.onPressed
     , FloatingActionButton.New.tooltip
     , FloatingActionButton.New.child ]
 
 
   %inline
   public export
-  new : HasIO io => FloatingActionButton.New.Parameters -> io FloatingActionButton
+  new : HasIO io => FloatingActionButton.New.NamedParameters -> io FloatingActionButton
   new  ps = primIO $ prim__dart_new FloatingActionButton [] ps
 
 
 namespace MaterialApp
-  namespace MaterialApp.New
-    %inline
-    public export
-    title : Param
-    title = ("title", String)
+  namespace New
+    data Tag : Type where
 
     %inline
     public export
-    home : Param
-    home = ("home", Widget)
+    title : Parameter MaterialApp.New.Tag
+    title = mkParameter "title" String
 
     %inline
     public export
-    theme : Param
-    theme = ("theme", ThemeData)
+    home : Parameter MaterialApp.New.Tag
+    home = mkParameter "home" Widget
+
     %inline
     public export
-    Parameters : Type
-    Parameters = ParamList [MaterialApp.New.title, MaterialApp.New.home, MaterialApp.New.theme]
+    theme : Parameter MaterialApp.New.Tag
+    theme = mkParameter "theme" ThemeData
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [MaterialApp.New.title, MaterialApp.New.home, MaterialApp.New.theme]
 
 
   %inline
   public export
-  new : HasIO io => MaterialApp.New.Parameters -> io MaterialApp
+  new : HasIO io => MaterialApp.New.NamedParameters -> io MaterialApp
   new  ps = primIO $ prim__dart_new MaterialApp [] ps
 
 
 namespace Icon
-  namespace Icon.New
+  namespace New
+    data Tag : Type where
+
     %inline
     public export
-    key : Param
-    key = ("key", Key)
+    key : Parameter Icon.New.Tag
+    key = mkParameter "key" Key
     %inline
     public export
-    Parameters : Type
-    Parameters = ParamList [Icon.New.key]
+    NamedParameters : Type
+    NamedParameters = Parameters [Icon.New.key]
 
 
   %inline
   public export
-  new : HasIO io => (icon : IconData) -> Icon.New.Parameters -> io Icon
+  new : HasIO io => (icon : IconData) -> Icon.New.NamedParameters -> io Icon
   new icon ps = primIO $ prim__dart_new Icon [icon] ps
 
 
 namespace Center
-  namespace Center.New
+  namespace New
+    data Tag : Type where
+
     %inline
     public export
-    child : Param
-    child = ("child", Widget)
+    child : Parameter Center.New.Tag
+    child = mkParameter "child" Widget
     %inline
     public export
-    Parameters : Type
-    Parameters = ParamList [Center.New.child]
+    NamedParameters : Type
+    NamedParameters = Parameters [Center.New.child]
 
 
   %inline
   public export
-  new : HasIO io => Center.New.Parameters -> io Center
+  new : HasIO io => Center.New.NamedParameters -> io Center
   new  ps = primIO $ prim__dart_new Center [] ps
 
 
 namespace Text
-  namespace Text.New
+  namespace New
+    data Tag : Type where
+
     %inline
     public export
-    textScaleFactor : Param
-    textScaleFactor = ("textScaleFactor", Double)
+    textScaleFactor : Parameter Text.New.Tag
+    textScaleFactor = mkParameter "textScaleFactor" Double
     %inline
     public export
-    Parameters : Type
-    Parameters = ParamList [Text.New.textScaleFactor]
+    NamedParameters : Type
+    NamedParameters = Parameters [Text.New.textScaleFactor]
 
 
   %inline
   public export
-  new : HasIO io => (text : String) -> Text.New.Parameters -> io Text
+  new : HasIO io => (text : String) -> Text.New.NamedParameters -> io Text
   new text ps = primIO $ prim__dart_new Text [text] ps
 
 
@@ -394,7 +410,7 @@ namespace Paint
   %inline
   public export
   new : HasIO io => io Paint
-  new  = primIO $ prim__dart_new Paint [] (the (ParamList []) [])
+  new  = primIO $ prim__dart_new Paint [] (the (Parameters {tag = Void} []) [])
 
   export
   style : Paint -> PaintingStyle
@@ -417,7 +433,7 @@ namespace Offset
   %inline
   public export
   new : HasIO io => (dx : Double) -> (dy : Double) -> io Offset
-  new dx dy = primIO $ prim__dart_new Offset [dx, dy] (the (ParamList []) [])
+  new dx dy = primIO $ prim__dart_new Offset [dx, dy] (the (Parameters {tag = Void} []) [])
 
   export
   dx : Offset -> Double
@@ -442,7 +458,7 @@ namespace Path
   %inline
   public export
   new : HasIO io => io Path
-  new  = primIO $ prim__dart_new Path [] (the (ParamList []) [])
+  new  = primIO $ prim__dart_new Path [] (the (Parameters {tag = Void} []) [])
 
   %foreign "Dart:.moveTo"
   prim__moveTo : (this : Path) -> (x : Double) -> (y : Double) -> PrimIO ()
