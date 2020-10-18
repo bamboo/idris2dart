@@ -1,6 +1,7 @@
 module SimpleFFI.Renderer
 
 import SimpleFFI.Spec
+import Data.Either
 import Data.List
 import Data.SortedMap
 import Text.PrettyPrint.Prettyprinter
@@ -9,25 +10,40 @@ import Text.PrettyPrint.Prettyprinter.Render.String
 emptyLine : Doc ()
 emptyLine = hardline <+> hardline
 
+stringLit : String -> Doc ()
+stringLit = dquotes . pretty
+
 sepByLines : List (Doc ()) -> Doc ()
 sepByLines ds@(d::_) = foldl1 (\acc, d => acc <+> emptyLine <+> d) ds
 sepByLines [] = emptyDoc
 
+indented : Doc () -> Doc ()
+indented d = nest 2 (hardline <+> d) <+> hardline
+
+inline : Doc ()
+inline = pretty "%inline"
+
 pubExport : Doc ()
-pubExport = pretty "public export" <+> hardline
+pubExport = pretty "public export"
 
 export_ : Doc ()
 export_ = pretty "export" <+> hardline
 
 typeHeader : Doc () -> Doc ()
-typeHeader n =
-  pubExport <+> n <++> colon <++> pretty "Type"
+typeHeader n = vcat [
+  inline,
+  pubExport,
+  n <++> colon <++> pretty "Type"
+]
 
 arr : Doc ()
 arr = pretty " ->"
 
 funType : List (Doc ()) -> Doc ()
 funType = hsep . punctuate arr
+
+namespaced : String -> Doc () -> Doc ()
+namespaced n body = pretty ("namespace " ++ n) <+> indented body
 
 prettyType : DartType -> Doc ()
 prettyType ty = case ty of
@@ -42,10 +58,7 @@ prettyType ty = case ty of
 
 structField : (String, DartType) -> Doc ()
 structField (n, ty) =
-  parens $ hsep $ punctuate comma $ [dquotes (pretty n), prettyType ty]
-
-indented : Doc () -> Doc ()
-indented d = nest 2 (hardline <+> d) <+> hardline
+  parens $ hsep $ punctuate comma $ [stringLit n, prettyType ty]
 
 fieldList : List (String, DartType) -> Doc ()
 fieldList [] = pretty "[]"
@@ -119,14 +132,75 @@ getter owner field ty =
       <+> field' <++> this <++> equals
       <++> pretty "getField" <++> this <++> dquotes field'
 
-foreign : Doc ()
-foreign = pretty "%foreign"
+foreign' : Doc ()
+foreign' = pretty "%foreign"
+
+foreign : String -> Doc ()
+foreign n = foreign' <++> dquotes (pretty ("Dart:" ++ n))
 
 prettyParameter : Parameter -> Doc ()
 prettyParameter (P n ty) = parens (pretty n <++> colon <++> prettyType ty)
+prettyParameter _ = emptyDoc
+
+partitionParameters : List Parameter -> (List (String, DartType), List (String, DartType))
+partitionParameters ps = partitionEithers . flip map ps $ \case
+  P n ty => Left (n, ty)
+  N n ty => Right (n, ty)
 
 parameterNames : List Parameter -> List (Doc ())
-parameterNames ps = (\(P n _) => pretty n) <$> ps
+parameterNames ps = flip mapMaybe ps $ \case
+  P n _ => Just (pretty n)
+  _ => Nothing
+
+namedParameterDeclarationsFor : String -> List (String, DartType) -> Doc ()
+namedParameterDeclarationsFor _ [] = emptyDoc
+namedParameterDeclarationsFor ns ps = namespaced ns (sepByLines (decl <$> ps) <+> hardline <+> schema)
+  where
+    schema : Doc ()
+    schema = vcat [
+      inline,
+      pubExport,
+      pretty "Parameters" <++> colon <++> pretty "Type",
+      pretty "Parameters" <++> equals <++> pretty "ParamList" <++> list ((\(n, _) => pretty (ns ++ "." ++ n)) <$> ps)
+    ]
+
+    decl : (String, DartType) -> Doc ()
+    decl (n, ty) = vcat [
+      inline,
+      pubExport,
+      pretty n <++> colon <++> pretty "Param",
+      pretty n <++> equals <++> tupled [stringLit n, prettyType ty]
+    ]
+
+ctorPrimsFor : {auto lib : Lib} -> {auto c : Class} -> String -> List Parameter -> List (Doc ())
+ctorPrimsFor n ps =
+  let
+    funName = if length n == 0 then "new" else n
+    namedParameterNS = capitalize funName
+    ret' = pretty c.name
+    (positionalPs, namedPs) = partitionParameters ps
+    positionalPs' = (\(n, ty) => parens (pretty n <++> colon <++> prettyType ty)) <$> positionalPs
+    psNames = pretty . fst <$> positionalPs
+    (ps', pTys', args') = if isNil namedPs
+      then (
+        hsep psNames,
+        positionalPs',
+        list psNames <++> parens (pretty "the (ParamList [])" <++> list [])
+      ) else (
+        hsep psNames <++> pretty "ps",
+        positionalPs' ++ [ret' <+> dot <+> pretty namedParameterNS <+> dot <+> pretty "Parameters"],
+        list psNames <++> pretty "ps"
+      )
+    fun = vcat [
+      inline,
+      pubExport,
+      pretty funName <++> colon <++> pretty "HasIO io =>" <++> funType (pTys' ++ [pretty "io" <++> ret']),
+      pretty funName <++> ps' <++> equals <++> pretty "primIO $ prim__dart_new" <++> ret' <++> args'
+    ]
+  in
+    if isNil namedPs
+      then [fun]
+      else [namedParameterDeclarationsFor (c.name ++ "." ++ namedParameterNS) namedPs, fun]
 
 methodPrimsFor : {auto c : Class} -> Function -> List (Doc ())
 methodPrimsFor (Fun n ps ret) =
@@ -137,7 +211,7 @@ methodPrimsFor (Fun n ps ret) =
     psNames = parameterNames ps
     primName = pretty ("prim__" ++ n)
     prim =
-      foreign <++> dquotes (pretty ("Dart:." ++ n)) <+> hardline
+      foreign ("." ++ n) <+> hardline
         <+> primName <++> colon <++> funType (thisTy :: ps' ++ [pretty "PrimIO" <++> ret'])
     method =
       export_ <+> pretty n <++> colon <++> pretty "HasIO io =>" <++> funType (ps' ++ [thisTy, pretty "io" <++> ret']) <+> hardline
@@ -146,41 +220,22 @@ methodPrimsFor (Fun n ps ret) =
   in
     [prim, method]
 
-ctorPrimsFor : {auto lib : Lib} -> {auto c : Class} -> String -> List Parameter -> List (Doc ())
-ctorPrimsFor n ps =
-  let
-    ret' = pretty c.name
-    ps' = prettyParameter <$> ps
-    psNames = parameterNames ps
-    (idrisSuffix, dartSuffix, funName) =
-      if length n == 0
-        then ("", "", "new")
-        else ("_" ++ n, "." ++ n, n)
-    primName = pretty "prim__" <+> ret' <+> pretty idrisSuffix
-    prim =
-      foreign <++> dquotes (pretty ("Dart:" ++ c.name ++ dartSuffix ++ "," ++ lib.package)) <+> hardline
-        <+> primName <++> colon <++> funType (ps' ++ [pretty "PrimIO" <++> ret'])
-    fun =
-      export_ <+> pretty funName <++> colon <++> pretty "HasIO io =>" <++> funType (ps' ++ [pretty "io" <++> ret']) <+> hardline
-        <+> pretty funName <++> hsep psNames <++> equals
-        <++> pretty "primIO $" <++> primName <++> hsep psNames
-  in
-    [prim, fun]
+constPrim : {auto lib : Lib} -> String -> String -> DartType -> Doc ()
+constPrim owner field ty =
+  export_ <+> foreign ("const " ++ owner ++ "." ++ field ++ "," ++ lib.package) <+> hardline
+    <+> pretty field <++> colon <++> prettyType ty
+
+enumPrim : {auto lib : Lib} -> String -> String -> Doc ()
+enumPrim n f = constPrim n f (NamedType n)
 
 classMemberPrim : {auto lib : Lib} -> Class -> Member -> List (Doc ())
 classMemberPrim c m = case m of
-  Method f => methodPrimsFor f
   Constructor n ps => ctorPrimsFor n ps
+  Method f => methodPrimsFor f
   FieldMember (Var n ty) => [getter c.name n ty, setter c.name n ty]
   FieldMember (Final n ty) => [getter c.name n ty]
-
-enumPrim : {auto lib : Lib} -> String -> String -> Doc ()
-enumPrim n f =
-  export_ <+> foreign <++> dquotes (pretty ("Dart:const " ++ n ++ "." ++ f ++ "," ++ lib.package)) <+> hardline
-    <+> pretty f <++> colon <++> pretty n
-
-namespaced : String -> Doc () -> Doc ()
-namespaced n body = pretty ("namespace " ++ n) <+> indented body
+  Extends _ => []
+  Const n ty => [constPrim c.name n ty]
 
 prettyPrims : {auto lib : Lib} -> Declaration -> Maybe (Doc ())
 prettyPrims (ClassDecl c) =
@@ -199,7 +254,7 @@ header : Doc () -> Doc ()
 header n =
   pretty "||| FFI definitions for the " <++> n <++> "API." <+> hardline
     <+> pretty "module" <++> n <+> hardline <+> hardline
-    <+> pretty "import System.FFI"
+    <+> pretty "import Dart.FFI"
 
 export
 renderModule : Module -> IO ()

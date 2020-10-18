@@ -18,6 +18,7 @@ mutual
   public export
   data Parameter
     = P String DartType
+    | N String DartType
 
   public export
   data Function
@@ -28,6 +29,8 @@ mutual
     = FieldMember Field
     | Method Function
     | Constructor String (List Parameter)
+    | Extends String
+    | Const String DartType
 
   public export
   record Class where
@@ -63,12 +66,20 @@ FromString DartType where
   fromString = NamedType
 
 export
+string : DartType
+string = StringType
+
+export
 double : DartType
 double = DoubleType
 
 export
 void : DartType
 void = VoidType
+
+export
+function : List DartType -> DartType -> DartType
+function = FunctionType
 
 export
 var : DartType -> String -> Member
@@ -79,8 +90,16 @@ final : DartType -> String -> Member
 final ty n = FieldMember $ Final n ty
 
 export
-p : DartType -> String -> Parameter
-p ty n = P n ty
+positional : DartType -> String -> Parameter
+positional ty n = P n ty
+
+export
+defConst : DartType -> String -> Member
+defConst ty n = Const n ty
+
+export
+named : DartType -> String -> Parameter
+named ty n = N n ty
 
 export
 defConstructor : String -> List Parameter -> Member
@@ -106,3 +125,7 @@ defLib = MkLibDef
 export
 defModule : String -> List LibDef -> Module
 defModule = MkModule
+
+export
+extends : String -> Member
+extends = Extends
