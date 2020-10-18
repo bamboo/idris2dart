@@ -4,30 +4,34 @@ import public System.FFI
 import public Data.HVect
 import public Data.List.Elem
 
-%inline
 public export
-Param : Type
-Param = (String, Type)
+data Parameter : (tag : Type) -> Type where
+  MkParameter : (name : String) -> (ty : Type) -> (0 tag : Type) -> Parameter tag
 
 %inline
 public export
-typeOf : Param -> Type
-typeOf = snd
-
-public export
-data Arg : Param -> Type where
-  Assign : {ty : Type} -> (key : String) -> (value : ty) -> Arg (key, ty)
+mkParameter : {tag : Type} -> String -> Type -> Parameter tag
+mkParameter name ty = MkParameter name ty tag
 
 %inline
 public export
-ParamSchema : Type
-ParamSchema = List Param
+typeOf : Parameter tag -> Type
+typeOf (MkParameter _ ty _) = ty
 
 public export
-data ParamList : ParamSchema -> Type where
-  Nil : {0 schema : ParamSchema} -> ParamList schema
-  (::) : {0 param : Param} -> {0 schema : ParamSchema}
-      -> Arg param -> ParamList schema -> {auto 0 isValid : Elem param schema} -> ParamList schema
+data Argument : Parameter tag -> Type where
+  Assign : {0 tag : Type} -> {ty : Type} -> (name : String) -> (value : ty) -> Argument (MkParameter name ty tag)
+
+%inline
+public export
+Schema : (tag : Type) -> Type
+Schema tag = List (Parameter tag)
+
+public export
+data Parameters : Schema tag -> Type where
+  Nil : {0 schema : Schema tag} -> Parameters schema
+  (::) : {0 p : Parameter tag} -> {0 schema : Schema tag}
+      -> Argument p -> Parameters schema -> {auto 0 isValid : Elem p schema} -> Parameters schema
 
 ||| Values of type [b] can be [upcast] to [a].
 public export
@@ -45,14 +49,14 @@ infix 1 @=>
 
 %inline
 public export
-(@=) : (p : Param) -> typeOf p -> Arg p
-(@=) (name, _) value = Assign name value
+(@=) : {tag : Type} -> (p : Parameter tag) -> typeOf p -> Argument p
+(@=) (MkParameter name _ _) value = Assign {tag = tag} name value
 
 ||| Upcast assignment.
 %inline
 public export
-(@=>) : (p : Param) -> ty -> {auto isAssignable : typeOf p `IsAssignableFrom` ty} -> Arg p
-(@=>) (name, _) value = Assign name (upcast value)
+(@=>) : {tag : Type} -> (p : Parameter tag) -> ty -> {auto isAssignable : typeOf p `IsAssignableFrom` ty} -> Argument p
+(@=>) (MkParameter name _ _) value = Assign {tag = tag} name (upcast value)
 
 public export
-%extern prim__dart_new : (ty : Type) -> HVect positional -> ParamList named -> (1 x : %World) -> IORes ty
+%extern prim__dart_new : (ty : Type) -> HVect positional -> Parameters named -> (1 x : %World) -> IORes ty

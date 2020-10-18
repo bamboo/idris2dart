@@ -16,19 +16,22 @@ Show Point where
 namespace Point
 
   namespace New
-    %inline
-    public export
-    x : Param
-    x = ("x", Int)
+
+    data Tag : Type where
 
     %inline
     public export
-    y : Param
-    y = ("y", Int)
+    x : Parameter Tag
+    x = MkParameter "x" Int Tag
+
+    %inline
+    public export
+    y : Parameter Tag
+    y = MkParameter "y" Int Tag
 
   %inline
   public export
-  new : ParamList [New.x, New.y] -> IO Point
+  new : Parameters [New.x, New.y] -> IO Point
   new ps = primIO $ prim__dart_new Point [] ps
 
 %inline
@@ -39,28 +42,31 @@ Callbacks = Struct "Callbacks,./libsmall.dart" []
 namespace Callbacks
 
   namespace New
-    %inline
-    public export
-    one : Param
-    one = ("one", Int -> Int)
+
+    data Tag : Type where
 
     %inline
     public export
-    two : Param
-    two = ("two", Int -> IO Int)
+    x : Parameter Tag
+    x = MkParameter "x" (Int -> Int) Tag
+
+    %inline
+    public export
+    y : Parameter Tag
+    y = MkParameter "y" (Int -> IO Int) Tag
 
   %inline
   public export
-  new : ParamList [New.one, New.two] -> IO Callbacks
+  new : Parameters [Callbacks.New.x, Callbacks.New.y] -> IO Callbacks
   new ps = primIO $ prim__dart_new Callbacks [] ps
 
   export
-  %foreign "Dart:.callOne"
-  callOne : Callbacks -> Int -> Int
+  %foreign "Dart:.callX"
+  callX : Callbacks -> Int -> Int
 
   export
-  %foreign "Dart:.callTwo"
-  callTwo : Callbacks -> Int -> PrimIO Int
+  %foreign "Dart:.callY"
+  callY : Callbacks -> Int -> PrimIO Int
 
 main : IO ()
 main = do
@@ -71,10 +77,8 @@ main = do
   printLn pt
 
   cb <- Callbacks.new [
-    one @= (\i => i * 2),
-    two @= (\i => printLn i *> pure (i * 2))
+    x @= (\i => i * 2),
+    y @= (\i => printLn i *> pure (i * 2))
   ]
-  printLn (callOne cb 21)
-  printLn !(primIO (callTwo cb 21))
-
-
+  printLn (callX cb 21)
+  printLn !(primIO (callY cb 21))

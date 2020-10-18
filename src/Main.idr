@@ -476,7 +476,7 @@ mutual
       pure (castTo fTy !(dartExp e) <+> dot <+> text f <+> " = " <+> !(dartExp rhs))
   dartPrimFnExt
     (NS _ (UN "prim__dart_new"))
-    [ IENull, IENull, IENull -- erased type arguments
+    [ IENull, IENull, IENull, IENull -- erased type arguments
       , IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _)
       , positional
       , named

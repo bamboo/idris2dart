@@ -7,9 +7,9 @@ class Point {
 }
 
 class Callbacks {
-  Object Function(Object) one;
-  Object Function(Object) two;
-  Callbacks({this.one, this.two});
-  Object callOne(Object arg) => one(arg);
-  Object callTwo(Object arg) => two(arg);
+  Object Function(Object) x;
+  Object Function(Object) y;
+  Callbacks({this.x, this.y});
+  Object callX(Object arg) => x(arg);
+  Object callY(Object arg) => y(arg);
 }

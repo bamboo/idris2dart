@@ -3,6 +3,6 @@ package flutterdoodle
 main = Main
 modules = Main
         , DoodleApp
-depends = contrib, flutter
+depends = contrib, flutter, dart-ffi
 sourcedir = "lib"
 executable = "lib/main.dart"

@@ -152,24 +152,33 @@ parameterNames ps = flip mapMaybe ps $ \case
   P n _ => Just (pretty n)
   _ => Nothing
 
-namedParameterDeclarationsFor : String -> List (String, DartType) -> Doc ()
-namedParameterDeclarationsFor _ [] = emptyDoc
-namedParameterDeclarationsFor ns ps = namespaced ns (sepByLines (decl <$> ps) <+> hardline <+> schema)
+parameters' : Doc ()
+parameters'= pretty "NamedParameters"
+
+namedParameterDeclarationsFor : String -> String -> List (String, DartType) -> Doc ()
+namedParameterDeclarationsFor typeName _ [] = emptyDoc
+namedParameterDeclarationsFor typeName ns ps = namespaced ns (sepByLines (tag :: (decl <$> ps)) <+> hardline <+> schema)
   where
+    qualified : String -> Doc ()
+    qualified n = pretty (typeName ++ "." ++ ns ++ "." ++ n)
+
+    tag : Doc ()
+    tag = pretty "data Tag : Type where"
+
     schema : Doc ()
     schema = vcat [
       inline,
       pubExport,
-      pretty "Parameters" <++> colon <++> pretty "Type",
-      pretty "Parameters" <++> equals <++> pretty "ParamList" <++> list ((\(n, _) => pretty (ns ++ "." ++ n)) <$> ps)
+      parameters' <++> colon <++> pretty "Type",
+      parameters' <++> equals <++> pretty "Parameters" <++> list ((\(n, _) => qualified n) <$> ps)
     ]
 
     decl : (String, DartType) -> Doc ()
     decl (n, ty) = vcat [
       inline,
       pubExport,
-      pretty n <++> colon <++> pretty "Param",
-      pretty n <++> equals <++> tupled [stringLit n, prettyType ty]
+      pretty n <++> colon <++> pretty "Parameter" <++> qualified "Tag",
+      pretty n <++> equals <++> pretty "mkParameter" <++> hsep [stringLit n, prettyType ty]
     ]
 
 ctorPrimsFor : {auto lib : Lib} -> {auto c : Class} -> String -> List Parameter -> List (Doc ())
@@ -185,10 +194,10 @@ ctorPrimsFor n ps =
       then (
         hsep psNames,
         positionalPs',
-        list psNames <++> parens (pretty "the (ParamList [])" <++> list [])
+        list psNames <++> parens (pretty "the (Parameters {tag = Void} [])" <++> list [])
       ) else (
         hsep psNames <++> pretty "ps",
-        positionalPs' ++ [ret' <+> dot <+> pretty namedParameterNS <+> dot <+> pretty "Parameters"],
+        positionalPs' ++ [ret' <+> dot <+> pretty namedParameterNS <+> dot <+> parameters'],
         list psNames <++> pretty "ps"
       )
     fun = vcat [
@@ -200,7 +209,7 @@ ctorPrimsFor n ps =
   in
     if isNil namedPs
       then [fun]
-      else [namedParameterDeclarationsFor (c.name ++ "." ++ namedParameterNS) namedPs, fun]
+      else [namedParameterDeclarationsFor c.name namedParameterNS namedPs, fun]
 
 methodPrimsFor : {auto c : Class} -> Function -> List (Doc ())
 methodPrimsFor (Fun n ps ret) =
