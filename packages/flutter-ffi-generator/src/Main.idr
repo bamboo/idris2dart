@@ -6,13 +6,97 @@ dartUI = MkLib "dartUI" "dart:ui"
 gestures : Lib
 gestures = MkLib "gestures" "package:flutter/gestures.dart"
 
+widgets : Lib
+widgets = MkLib "widgets" "package:flutter/widgets.dart"
+
+material : Lib
+material = MkLib "material" "package:flutter/material.dart"
+
+foundation : Lib
+foundation = MkLib "foundation" "package:flutter/foundation.dart"
+
 flutter : Module
 flutter = defModule "Flutter" [
+  defLib foundation [
+    defClass "Key" [
+    ]
+  ],
+  defLib material [
+    defClass "MaterialColor" [
+    ],
+    defClass "Colors" [
+      defConst "MaterialColor" "blue"
+    ],
+    defClass "VisualDensity" [
+      defConst "VisualDensity" "adaptivePlatformDensity"
+    ],
+    defClass "ThemeData" [
+      defConstructor "" [
+        named "MaterialColor" "primarySwatch",
+        named "VisualDensity" "visualDensity"
+      ]
+    ],
+    defClass "Scaffold" [
+      defConstructor "" [
+        named "Widget" "appBar",
+        named "Widget" "body",
+        named "Widget" "floatingActionButton"
+      ]
+    ],
+    defClass "AppBar" [
+      defConstructor "" [
+        named "Widget" "title"
+      ]
+    ],
+    defClass "Icons" [
+      defConst "IconData" "add"
+    ],
+    defClass "FloatingActionButton" [
+      defConstructor "" [
+        named (function [] void) "onPressed",
+        named string "tooltip",
+        named "Widget" "child"
+      ]
+    ],
+    defClass "MaterialApp" [
+      extends "Widget", -- generates IsAssignableFrom Widget MaterialApp
+      defConstructor "" [
+        named string "title",
+        named "Widget" "home",
+        named "ThemeData" "theme"
+      ]
+    ]
+  ],
+  defLib widgets [
+    defClass "IconData" [
+    ],
+    defClass "Icon" [
+      defConstructor "" [
+        positional "IconData" "icon",
+        named "Key" "key"
+      ]
+    ],
+    defClass "Widget" [
+    ],
+    defClass "BuildContext" [
+    ],
+    defClass "Center" [
+      defConstructor "" [named "Widget" "child"]
+    ],
+    defClass "Text" [
+      defConstructor "" [
+        positional string "text",
+        named double "textScaleFactor"
+      ]
+    ]
+  ],
   defLib dartUI [
+    defClass "Color" [
+    ],
     defClass "Canvas" [
       defIO "drawPath" [
-        p "Path" "path",
-        p "Paint" "paint"
+        positional "Path" "path",
+        positional "Paint" "paint"
       ] void
     ],
     defEnum "PaintingStyle" [
@@ -24,7 +108,7 @@ flutter = defModule "Flutter" [
       var double "strokeWidth"
     ],
     defClass "Offset" [
-      defConstructor "" [p double "dx", p double "dy"],
+      defConstructor "" [positional double "dx", positional double "dy"],
       final double "dx",
       final double "dy"
     ],
@@ -34,8 +118,8 @@ flutter = defModule "Flutter" [
     ],
     defClass "Path" [
       defConstructor "" [],
-      defIO "moveTo" [p double "x", p double "y"] void,
-      defIO "lineTo" [p double "x", p double "y"] void
+      defIO "moveTo" [positional double "x", positional double "y"] void,
+      defIO "lineTo" [positional double "x", positional double "y"] void
     ],
     defClass "Velocity" [
       final "Offset" "pixelsPerSecond"
