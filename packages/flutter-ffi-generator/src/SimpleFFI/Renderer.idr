@@ -53,8 +53,8 @@ prettyType ty = case ty of
   VoidType => pretty "()"
   NamedType n => pretty n
   FunctionType ps ret =>
-    let sig = ps ++ [ret]
-    in parens (funType (prettyType <$> sig))
+    let sig = (prettyType <$> ps) ++ [pretty "IO" <++> prettyType ret]
+    in parens (funType sig)
 
 structField : (String, DartType) -> Doc ()
 structField (n, ty) =

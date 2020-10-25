@@ -276,7 +276,7 @@ namespace FloatingActionButton
     %inline
     public export
     onPressed : Parameter FloatingActionButton.New.Tag
-    onPressed = mkParameter "onPressed" (())
+    onPressed = mkParameter "onPressed" (IO ())
 
     %inline
     public export

@@ -203,7 +203,7 @@ foreignDartSpecFrom s = do
 FunctionType : Type
 FunctionType = (List CFType, CFType)
 
-mkFunctionType : List _ -> CFType -> FunctionType
+mkFunctionType : List Expression -> CFType -> FunctionType
 mkFunctionType ps ret = (const CFPtr <$> ps, ret)
 
 uncurriedSignature : CFType -> CFType -> FunctionType
@@ -311,6 +311,7 @@ parseFunctionType : Expression -> Maybe FunctionType
 parseFunctionType e =
   case e of
     IEConstructor (Right "->") [a, b] => Just (go [a] b)
+    IEConstructor (Right "PrimIO.IO") [_] => Just (mkFunctionType [] (CFIORes CFPtr))
     _ => Nothing
   where
     go : List Expression -> Expression -> FunctionType
