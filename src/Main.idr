@@ -306,7 +306,6 @@ dartForeign n (ForeignConst c lib) _ _ = do
 dartForeign n (ForeignMethod m) args ret = do
   foreignMethodProxy (dartName n) (text m) args ret
 
-
 parseFunctionType : Expression -> Maybe FunctionType
 parseFunctionType e =
   case e of
@@ -489,6 +488,13 @@ mutual
       posArgs <- traverse dartExp pos'
       namedArgs <- traverse dartNamedParam named'
       pure (fTy <+> tupled (posArgs ++ namedArgs))
+  dartPrimFnExt
+    (NS _ (UN "prim__dart_list_new"))
+    [ IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _)
+    , _
+    ] = do
+      fTy <- foreignTypeName ty
+      pure (text "$.List<" <+> fTy <+> text ">()")
   dartPrimFnExt n args = pure (debug (n, args))
 
   dartNamedParam : {auto ctx : Ref Dart DartT} -> (Expression, String, Expression) -> Core Doc

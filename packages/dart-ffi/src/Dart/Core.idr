@@ -31,25 +31,23 @@ namespace Object
   toString : HasIO io => a -> io String
   toString o = primIO $ prim__toString (believe_me o)
 
-namespace List
-  export
-  %foreign "Dart:List.empty,dart:core"
-  empty : DartList _
+public export
+%extern prim__dart_list_new : (elTy : Type) -> (1 x : %World) -> IORes (DartList elTy)
 
-  %foreign "Dart:List,dart:core"
-  prim__new : PrimIO (DartList _)
+namespace List
+  %inline
+  export
+  new : HasIO io => {elTy : Type} -> io (DartList elTy)
+  new = primIO (prim__dart_list_new elTy)
+
+  export
+  %foreign "Dart:.add"
+  prim__list_add : DartList AnyPtr -> AnyPtr -> PrimIO ()
 
   %inline
   export
-  new : HasIO io => io (DartList _)
-  new = primIO prim__new
-
-  %foreign "Dart:.add"
-  prim__add : DartList ty -> ty -> PrimIO ()
-
-  export
-  add : HasIO io => {0 ty : Type} -> ty -> DartList ty -> io ()
-  add e list = primIO $ prim__add list e
+  add : HasIO io => {0 elTy : Type} -> elTy -> DartList elTy -> io ()
+  add e list = primIO $ prim__list_add (believe_me list) (believe_me e)
 
 namespace Map
   %foreign "Dart:Map,dart:core"
