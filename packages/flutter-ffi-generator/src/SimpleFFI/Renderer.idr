@@ -52,6 +52,7 @@ prettyType ty = case ty of
   DoubleType => pretty "Double"
   VoidType => pretty "()"
   NamedType n => pretty n
+  ListType a => parens (pretty "DartList" <++> prettyType a)
   FunctionType ps ret =>
     let sig = (prettyType <$> ps) ++ [pretty "IO" <++> prettyType ret]
     in parens (funType sig)
@@ -237,13 +238,17 @@ constPrim owner field ty =
 enumPrim : {auto lib : Lib} -> String -> String -> Doc ()
 enumPrim n f = constPrim n f (NamedType n)
 
+isAssignableFromInstance : String -> String -> Doc ()
+isAssignableFromInstance super sub =
+  export_ <+> pretty "IsAssignableFrom" <++> pretty super <++> pretty sub <++> pretty "where"
+
 classMemberPrim : {auto lib : Lib} -> Class -> Member -> List (Doc ())
 classMemberPrim c m = case m of
   Constructor n ps => ctorPrimsFor n ps
   Method f => methodPrimsFor f
   FieldMember (Var n ty) => [getter c.name n ty, setter c.name n ty]
   FieldMember (Final n ty) => [getter c.name n ty]
-  Extends _ => []
+  Extends ty => [isAssignableFromInstance ty c.name]
   Const n ty => [constPrim c.name n ty]
 
 prettyPrims : {auto lib : Lib} -> Declaration -> Maybe (Doc ())
@@ -263,6 +268,7 @@ header : Doc () -> Doc ()
 header n =
   pretty "||| FFI definitions for the " <++> n <++> "API." <+> hardline
     <+> pretty "module" <++> n <+> hardline <+> hardline
+    <+> pretty "import Dart.Core" <+> hardline
     <+> pretty "import Dart.FFI"
 
 export

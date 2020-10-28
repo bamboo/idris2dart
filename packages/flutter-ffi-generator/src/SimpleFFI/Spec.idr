@@ -9,6 +9,7 @@ mutual
     | VoidType
     | NamedType String
     | FunctionType (List DartType) DartType
+    | ListType DartType
 
   public export
   data Field
@@ -80,6 +81,10 @@ void = VoidType
 export
 function : List DartType -> DartType -> DartType
 function = FunctionType
+
+export
+listOf : DartType -> DartType
+listOf = ListType
 
 export
 var : DartType -> String -> Member

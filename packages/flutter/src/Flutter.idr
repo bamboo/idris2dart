@@ -1,6 +1,7 @@
 ||| FFI definitions for the  Flutter API.
 module Flutter
 
+import Dart.Core
 import Dart.FFI
 
 mutual
@@ -56,6 +57,11 @@ mutual
 
   %inline
   public export
+  MainAxisAlignment : Type
+  MainAxisAlignment = Struct "MainAxisAlignment,package:flutter/widgets.dart" []
+
+  %inline
+  public export
   IconData : Type
   IconData = Struct "IconData,package:flutter/widgets.dart" []
 
@@ -78,6 +84,11 @@ mutual
   public export
   Center : Type
   Center = Struct "Center,package:flutter/widgets.dart" []
+
+  %inline
+  public export
+  Column : Type
+  Column = Struct "Column,package:flutter/widgets.dart" []
 
   %inline
   public export
@@ -214,6 +225,9 @@ namespace ThemeData
 
 
 namespace Scaffold
+  export
+  IsAssignableFrom Widget Scaffold where
+
   namespace New
     data Tag : Type where
 
@@ -244,6 +258,9 @@ namespace Scaffold
 
 
 namespace AppBar
+  export
+  IsAssignableFrom Widget AppBar where
+
   namespace New
     data Tag : Type where
 
@@ -270,6 +287,9 @@ namespace Icons
 
 
 namespace FloatingActionButton
+  export
+  IsAssignableFrom Widget FloatingActionButton where
+
   namespace New
     data Tag : Type where
 
@@ -302,6 +322,9 @@ namespace FloatingActionButton
 
 
 namespace MaterialApp
+  export
+  IsAssignableFrom Widget MaterialApp where
+
   namespace New
     data Tag : Type where
 
@@ -331,7 +354,31 @@ namespace MaterialApp
   new  ps = primIO $ prim__dart_new MaterialApp [] ps
 
 
+namespace MainAxisAlignment
+  export
+  %foreign "Dart:const MainAxisAlignment.start,package:flutter/widgets.dart"
+  start : MainAxisAlignment
+  export
+  %foreign "Dart:const MainAxisAlignment.end,package:flutter/widgets.dart"
+  end : MainAxisAlignment
+  export
+  %foreign "Dart:const MainAxisAlignment.center,package:flutter/widgets.dart"
+  center : MainAxisAlignment
+  export
+  %foreign "Dart:const MainAxisAlignment.spaceBetween,package:flutter/widgets.dart"
+  spaceBetween : MainAxisAlignment
+  export
+  %foreign "Dart:const MainAxisAlignment.spaceAround,package:flutter/widgets.dart"
+  spaceAround : MainAxisAlignment
+  export
+  %foreign "Dart:const MainAxisAlignment.spaceEvenly,package:flutter/widgets.dart"
+  spaceEvenly : MainAxisAlignment
+
+
 namespace Icon
+  export
+  IsAssignableFrom Widget Icon where
+
   namespace New
     data Tag : Type where
 
@@ -352,6 +399,9 @@ namespace Icon
 
 
 namespace Center
+  export
+  IsAssignableFrom Widget Center where
+
   namespace New
     data Tag : Type where
 
@@ -371,7 +421,38 @@ namespace Center
   new  ps = primIO $ prim__dart_new Center [] ps
 
 
+namespace Column
+  export
+  IsAssignableFrom Widget Column where
+
+  namespace New
+    data Tag : Type where
+
+    %inline
+    public export
+    children : Parameter Column.New.Tag
+    children = mkParameter "children" (DartList Widget)
+
+    %inline
+    public export
+    mainAxisAlignment : Parameter Column.New.Tag
+    mainAxisAlignment = mkParameter "mainAxisAlignment" MainAxisAlignment
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [Column.New.children, Column.New.mainAxisAlignment]
+
+
+  %inline
+  public export
+  new : HasIO io => Column.New.NamedParameters -> io Column
+  new  ps = primIO $ prim__dart_new Column [] ps
+
+
 namespace Text
+  export
+  IsAssignableFrom Widget Text where
+
   namespace New
     data Tag : Type where
 

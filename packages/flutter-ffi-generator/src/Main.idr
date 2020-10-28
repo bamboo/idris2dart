@@ -37,6 +37,7 @@ flutter = defModule "Flutter" [
       ]
     ],
     defClass "Scaffold" [
+      extends "Widget",
       defConstructor "" [
         named "Widget" "appBar",
         named "Widget" "body",
@@ -44,6 +45,7 @@ flutter = defModule "Flutter" [
       ]
     ],
     defClass "AppBar" [
+      extends "Widget",
       defConstructor "" [
         named "Widget" "title"
       ]
@@ -52,6 +54,7 @@ flutter = defModule "Flutter" [
       defConst "IconData" "add"
     ],
     defClass "FloatingActionButton" [
+      extends "Widget",
       defConstructor "" [
         named (function [] void) "onPressed",
         named string "tooltip",
@@ -59,7 +62,7 @@ flutter = defModule "Flutter" [
       ]
     ],
     defClass "MaterialApp" [
-      extends "Widget", -- generates IsAssignableFrom Widget MaterialApp
+      extends "Widget",
       defConstructor "" [
         named string "title",
         named "Widget" "home",
@@ -68,9 +71,13 @@ flutter = defModule "Flutter" [
     ]
   ],
   defLib widgets [
+    defEnum "MainAxisAlignment" [
+      "start", "end", "center", "spaceBetween", "spaceAround", "spaceEvenly"
+    ],
     defClass "IconData" [
     ],
     defClass "Icon" [
+      extends "Widget",
       defConstructor "" [
         positional "IconData" "icon",
         named "Key" "key"
@@ -81,9 +88,20 @@ flutter = defModule "Flutter" [
     defClass "BuildContext" [
     ],
     defClass "Center" [
-      defConstructor "" [named "Widget" "child"]
+      extends "Widget",
+      defConstructor "" [
+        named "Widget" "child"
+      ]
+    ],
+    defClass "Column" [
+      extends "Widget",
+      defConstructor "" [
+        named (listOf "Widget") "children",
+        named "MainAxisAlignment" "mainAxisAlignment"
+      ]
     ],
     defClass "Text" [
+      extends "Widget",
       defConstructor "" [
         positional string "text",
         named double "textScaleFactor"
