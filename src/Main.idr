@@ -5,6 +5,7 @@ import Compiler.ES.Imperative
 import Core.CompileExpr
 import Core.Context
 import Data.List
+import Data.SortedSet as SortedSet
 import Data.String.Extra
 import Data.StringMap
 import Data.Strings
@@ -19,6 +20,7 @@ data Dart : Type where
 record DartT where
   constructor MkDartT
   imports : StringMap Doc
+  includes : SortedSet String
   usesDelay : Bool
 
 Statement : Type
@@ -46,6 +48,11 @@ addImport lib = do
       pure alias
     Just alias =>
       pure alias
+
+include : {auto ctx : Ref Dart DartT} -> String -> Core ()
+include code = do
+  s <- get Dart
+  put Dart (record { includes $= insert code } s)
 
 keywordSafe : String -> String
 keywordSafe s = case s of
@@ -262,11 +269,17 @@ foreignName : {auto ctx : Ref Dart DartT}
 foreignName lib n =
   pure (!(addImport lib) <+> dot <+> text n)
 
+-- TODO: cache results
 foreignTypeName : {auto ctx : Ref Dart DartT}
   -> String -> Core Doc
 foreignTypeName ty = do
   let (tyN, lib) = splitAtFirst ',' ty
-  foreignName lib tyN
+  case fastUnpack lib of
+    [] => pure (text tyN)
+    ('\n' :: rest) => do
+      include lib
+      pure (text tyN)
+    _  => foreignName lib tyN
 
 foreignTypeOf : {auto ctx : Ref Dart DartT} -> CFType -> Core Doc
 foreignTypeOf e = case e of
@@ -621,15 +634,19 @@ class $Delayed {
 compileToDart : Ref Ctxt Defs -> ClosedTerm -> Core Doc
 compileToDart defs term = do
   (impDefs, impMain) <- compileToImperative defs term
-  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]) False)
+  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]) empty False)
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
   finalState <- get Dart
+  let includeLines = concatMap lines (SortedSet.toList finalState.includes)
+  let (importLines, nonImportLines) = partition ("import " `isPrefixOf`) includeLines
+  let includeImports' = text <$> importLines
+  let includes' = text (unlines nonImportLines)
   let imports' = dartImport <$> toList finalState.imports
-  let header' = vcat (header ++ imports')
+  let header' = vcat (header ++ imports' ++ includeImports')
   let mainDecl = "void main()" <+> block dartMain
   let footer = if finalState.usesDelay then delayClass else empty
-  pure (header' <+> emptyLine <+> mainDecl <+> line <+> dartDefs <+> line <+> delayClass)
+  pure (header' <+> emptyLine <+> mainDecl <+> line <+> dartDefs <+> line <+> delayClass <+> includes')
 
 compileToDartFile : String -> Ref Ctxt Defs -> ClosedTerm -> Core ()
 compileToDartFile file defs term = do
