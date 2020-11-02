@@ -1,0 +1,7 @@
+package fluttertemplate
+
+main = Main
+modules = Main
+depends = contrib, flutter, dart-ffi
+sourcedir = "lib"
+executable = "lib/main.dart"
