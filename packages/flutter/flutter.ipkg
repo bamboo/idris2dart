@@ -4,8 +4,8 @@ sourcedir = "src"
 
 modules
   = Flutter
-  , Flutter.Combinators
   , Flutter.FFI
+  , Flutter.Widgets.Functions
 
 depends
   = dart-ffi
