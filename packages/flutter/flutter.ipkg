@@ -6,6 +6,8 @@ modules
   = Flutter
   , Flutter.FFI
   , Flutter.Widgets.Functions
+  , Flutter.Widgets.Stateful
+  , Flutter.Widgets.Stateless
 
 depends
   = dart-ffi
