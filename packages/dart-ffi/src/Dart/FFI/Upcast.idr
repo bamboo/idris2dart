@@ -1,12 +1,11 @@
 module Dart.FFI.Upcast
-
  
-||| Values of type [b] can be [upcast] to [a].
+||| Instances of type [subclass] can be [upcast] to type [superclass].
 public export
-interface IsAssignableFrom a b where
+interface IsAssignableFrom superclass subclass where
   %inline
-  upcast : b -> a
-  upcast b = believe_me b
+  upcast : subclass -> superclass
+  upcast sub = believe_me sub
 
 public export
 IsAssignableFrom a a where
