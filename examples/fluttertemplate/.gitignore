@@ -39,3 +39,7 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+# Idris output
+lib/main.dart
+
