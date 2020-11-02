@@ -29,6 +29,7 @@ mutual
   data Member
     = FieldMember Field
     | Method Function
+    | Static Function
     | Constructor String (List Parameter)
     | Extends String
     | Const String DartType
@@ -113,6 +114,10 @@ defConstructor = Constructor
 export
 defIO : String -> List Parameter -> DartType -> Member
 defIO n ps ret = Method $ Fun n ps ret
+
+export
+defStatic : String -> List Parameter -> DartType -> Member
+defStatic n ps ret = Static $ Fun n ps ret
 
 export
 defClass : String -> List Member -> Declaration

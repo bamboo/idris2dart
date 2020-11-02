@@ -12,6 +12,11 @@ mutual
 
   %inline
   public export
+  TextStyle : Type
+  TextStyle = Struct "TextStyle,package:flutter/painting.dart" []
+
+  %inline
+  public export
   MaterialColor : Type
   MaterialColor = Struct "MaterialColor,package:flutter/material.dart" []
 
@@ -27,8 +32,25 @@ mutual
 
   %inline
   public export
+  TextTheme : Type
+  TextTheme = Struct "TextTheme,package:flutter/material.dart" [
+    ("headline1", TextStyle),
+    ("headline2", TextStyle),
+    ("headline3", TextStyle),
+    ("headline4", TextStyle)
+  ]
+
+  %inline
+  public export
+  Theme : Type
+  Theme = Struct "Theme,package:flutter/material.dart" []
+
+  %inline
+  public export
   ThemeData : Type
-  ThemeData = Struct "ThemeData,package:flutter/material.dart" []
+  ThemeData = Struct "ThemeData,package:flutter/material.dart" [
+    ("textTheme", TextTheme)
+  ]
 
   %inline
   public export
@@ -239,6 +261,33 @@ namespace VisualDensity
   adaptivePlatformDensity : VisualDensity
 
 
+namespace TextTheme
+  export
+  headline1 : TextTheme -> TextStyle
+  headline1 this = getField this "headline1"
+
+  export
+  headline2 : TextTheme -> TextStyle
+  headline2 this = getField this "headline2"
+
+  export
+  headline3 : TextTheme -> TextStyle
+  headline3 this = getField this "headline3"
+
+  export
+  headline4 : TextTheme -> TextStyle
+  headline4 this = getField this "headline4"
+
+
+namespace Theme
+  %foreign "Dart:Theme.of,package:flutter/material.dart"
+  prim__of : (context : BuildContext) -> PrimIO ThemeData
+
+  export
+  of_ : HasIO io => (context : BuildContext) -> io ThemeData
+  of_ context = primIO $ prim__of context
+
+
 namespace ThemeData
   namespace New
     data Tag : Type where
@@ -262,6 +311,10 @@ namespace ThemeData
   public export
   new : HasIO io => ThemeData.New.NamedParameters -> io ThemeData
   new  ps = primIO $ prim__dart_new ThemeData [] ps
+
+  export
+  textTheme : ThemeData -> TextTheme
+  textTheme this = getField this "textTheme"
 
 
 namespace Scaffold
@@ -500,10 +553,15 @@ namespace Text
     public export
     textScaleFactor : Parameter Text.New.Tag
     textScaleFactor = mkParameter "textScaleFactor" Double
+
+    %inline
+    public export
+    style : Parameter Text.New.Tag
+    style = mkParameter "style" TextStyle
     %inline
     public export
     NamedParameters : Type
-    NamedParameters = Parameters [Text.New.textScaleFactor]
+    NamedParameters = Parameters [Text.New.textScaleFactor, Text.New.style]
 
 
   %inline

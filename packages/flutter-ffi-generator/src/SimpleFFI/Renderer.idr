@@ -67,11 +67,14 @@ fieldList fs =
   enclose "[" "]"
     (indented . vsep . punctuate comma $ (structField <$> fs))
 
+foreignNameOf : {auto lib : Lib} -> String -> String
+foreignNameOf name = name ++ "," ++ lib.package
+
 typeDecl : {auto lib : Lib} -> String -> List (String, DartType) -> Doc ()
 typeDecl name fields =
   let
     name' = pretty name
-    foreignTypeName = dquotes (name' <+> comma <+> pretty lib.package)
+    foreignTypeName = dquotes (pretty (foreignNameOf name))
     struct = pretty "Struct" <++> foreignTypeName <++> fieldList fields
   in
     typeHeader name' <+> hardline <+> name' <++> equals <++> struct
@@ -212,23 +215,36 @@ ctorPrimsFor n ps =
       then [fun]
       else [namedParameterDeclarationsFor c.name namedParameterNS namedPs, fun]
 
-methodPrimsFor : {auto c : Class} -> Function -> List (Doc ())
-methodPrimsFor (Fun n ps ret) =
+isIdrisKeyword : String -> Bool
+isIdrisKeyword s = case s of
+  "of" => True
+  _ => False
+
+functionPrimsFor : {auto c : Class} -> Function -> String -> Bool -> List (Doc ())
+functionPrimsFor (Fun n ps ret) foreignName hasThis =
   let
-    thisTy = parens (this <++> colon <++> pretty c.name)
     ret' = prettyType ret
     ps' = prettyParameter <$> ps
     psNames = parameterNames ps
     primName = pretty ("prim__" ++ n)
+    primRet = pretty "PrimIO" <++> ret'
+    primParamTys = ps' ++ [primRet]
+    proxyParamTys = [pretty "io" <++> ret']
+    thisTy = the (Lazy (Doc())) (parens (this <++> colon <++> pretty c.name))
+    proxyName = pretty (if isIdrisKeyword n then n ++ "_" else n)
     prim =
-      foreign ("." ++ n) <+> hardline
-        <+> primName <++> colon <++> funType (thisTy :: ps' ++ [pretty "PrimIO" <++> ret'])
-    method =
-      export_ <+> pretty n <++> colon <++> pretty "HasIO io =>" <++> funType (ps' ++ [thisTy, pretty "io" <++> ret']) <+> hardline
-        <+> pretty n <++> hsep psNames <++> this <++> equals
-        <++> pretty "primIO $" <++> primName <++> this <++> hsep psNames
+      foreign foreignName <+> hardline
+        <+> primName <++> colon <++> funType (ifHasThis (thisTy :: primParamTys) primParamTys)
+    proxy =
+      export_ <+> proxyName <++> colon <++> pretty "HasIO io =>"
+        <++> funType (ps' ++ ifHasThis (thisTy :: proxyParamTys) proxyParamTys) <+> hardline
+        <+> proxyName <++> hsep psNames <++> ifHasThis (this <++> equals) equals
+        <++> pretty "primIO $" <++> primName <++> hsep (ifHasThis (this :: psNames) psNames)
   in
-    [prim, method]
+    [prim, proxy]
+  where
+    ifHasThis : Lazy a -> Lazy a -> a
+    ifHasThis ifTrue ifFalse = if hasThis then ifTrue else ifFalse
 
 constPrim : {auto lib : Lib} -> String -> String -> DartType -> Doc ()
 constPrim owner field ty =
@@ -245,7 +261,8 @@ isAssignableFromInstance super sub =
 classMemberPrim : {auto lib : Lib} -> Class -> Member -> List (Doc ())
 classMemberPrim c m = case m of
   Constructor n ps => ctorPrimsFor n ps
-  Method f => methodPrimsFor f
+  Method f@(Fun n _ _) => functionPrimsFor f ("." ++ n) True
+  Static f@(Fun n _ _) => functionPrimsFor f (foreignNameOf (c.name ++ "." ++ n)) False
   FieldMember (Var n ty) => [getter c.name n ty, setter c.name n ty]
   FieldMember (Final n ty) => [getter c.name n ty]
   Extends ty => [isAssignableFromInstance ty c.name]

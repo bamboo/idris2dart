@@ -6,6 +6,9 @@ dartUI = MkLib "dartUI" "dart:ui"
 gestures : Lib
 gestures = MkLib "gestures" "package:flutter/gestures.dart"
 
+painting : Lib
+painting = MkLib "gestures" "package:flutter/painting.dart"
+
 widgets : Lib
 widgets = MkLib "widgets" "package:flutter/widgets.dart"
 
@@ -19,6 +22,10 @@ flutter : Module
 flutter = defModule "Flutter.FFI" [
   defLib foundation [
     defClass "Key" [
+    ]
+  ],
+  defLib painting [
+    defClass "TextStyle" [
     ]
   ],
   defLib material [
@@ -40,11 +47,21 @@ flutter = defModule "Flutter.FFI" [
     defClass "VisualDensity" [
       defConst "VisualDensity" "adaptivePlatformDensity"
     ],
+    defClass "TextTheme" [
+      final "TextStyle" "headline1",
+      final "TextStyle" "headline2",
+      final "TextStyle" "headline3",
+      final "TextStyle" "headline4"
+    ],
+    defClass "Theme" [
+      defStatic "of" [positional "BuildContext" "context"] "ThemeData"
+    ],
     defClass "ThemeData" [
       defConstructor "" [
         named "MaterialColor" "primarySwatch",
         named "VisualDensity" "visualDensity"
-      ]
+      ],
+      final "TextTheme" "textTheme"
     ],
     defClass "Scaffold" [
       extends "Widget",
@@ -114,7 +131,8 @@ flutter = defModule "Flutter.FFI" [
       extends "Widget",
       defConstructor "" [
         positional string "text",
-        named double "textScaleFactor"
+        named double "textScaleFactor",
+        named "TextStyle" "style"
       ]
     ]
   ],
