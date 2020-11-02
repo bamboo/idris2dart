@@ -25,7 +25,17 @@ flutter = defModule "Flutter" [
     defClass "MaterialColor" [
     ],
     defClass "Colors" [
-      defConst "MaterialColor" "blue"
+      defConst "MaterialColor" "black",
+      defConst "MaterialColor" "blue",
+      defConst "MaterialColor" "brown",
+      defConst "MaterialColor" "cyan",
+      defConst "MaterialColor" "green",
+      defConst "MaterialColor" "grey",
+      defConst "MaterialColor" "purple",
+      defConst "MaterialColor" "red",
+      defConst "MaterialColor" "transparent",
+      defConst "MaterialColor" "white",
+      defConst "MaterialColor" "yellow"
     ],
     defClass "VisualDensity" [
       defConst "VisualDensity" "adaptivePlatformDensity"

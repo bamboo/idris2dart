@@ -189,8 +189,48 @@ mutual
 
 namespace Colors
   export
+  %foreign "Dart:const Colors.black,package:flutter/material.dart"
+  black : MaterialColor
+
+  export
   %foreign "Dart:const Colors.blue,package:flutter/material.dart"
   blue : MaterialColor
+
+  export
+  %foreign "Dart:const Colors.brown,package:flutter/material.dart"
+  brown : MaterialColor
+
+  export
+  %foreign "Dart:const Colors.cyan,package:flutter/material.dart"
+  cyan : MaterialColor
+
+  export
+  %foreign "Dart:const Colors.green,package:flutter/material.dart"
+  green : MaterialColor
+
+  export
+  %foreign "Dart:const Colors.grey,package:flutter/material.dart"
+  grey : MaterialColor
+
+  export
+  %foreign "Dart:const Colors.purple,package:flutter/material.dart"
+  purple : MaterialColor
+
+  export
+  %foreign "Dart:const Colors.red,package:flutter/material.dart"
+  red : MaterialColor
+
+  export
+  %foreign "Dart:const Colors.transparent,package:flutter/material.dart"
+  transparent : MaterialColor
+
+  export
+  %foreign "Dart:const Colors.white,package:flutter/material.dart"
+  white : MaterialColor
+
+  export
+  %foreign "Dart:const Colors.yellow,package:flutter/material.dart"
+  yellow : MaterialColor
 
 
 namespace VisualDensity
