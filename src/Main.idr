@@ -451,7 +451,6 @@ useDelay = do
   s <- get Dart
   put Dart (record { usesDelay = True } s)
 
-
 mutual
   dartLambda : {auto ctx : Ref Dart DartT} -> List Name -> Statement -> Core Doc
   dartLambda ps s = pure (paramList ps <+> block !(dartStatement s))

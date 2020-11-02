@@ -16,7 +16,7 @@ foundation : Lib
 foundation = MkLib "foundation" "package:flutter/foundation.dart"
 
 flutter : Module
-flutter = defModule "Flutter" [
+flutter = defModule "Flutter.FFI" [
   defLib foundation [
     defClass "Key" [
     ]

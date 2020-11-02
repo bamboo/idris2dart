@@ -3,6 +3,9 @@ package dart-ffi
 modules
   = Dart.Core
   , Dart.FFI
+  , Dart.FFI.Constructors
+  , Dart.FFI.Upcast
+  , Dart.FFI.UpcastList
 
 sourcedir = "src"
 

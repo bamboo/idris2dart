@@ -13,18 +13,27 @@ dart-ffi-dir = ./packages/dart-ffi
 dart-ffi-install-cookie = $(dart-ffi-dir)/build/installed
 flutter-dir = ./packages/flutter
 flutter-install-cookie = $(flutter-dir)/build/installed
-Flutter.idr = $(flutter-dir)/src/Flutter.idr
+Flutter.idr = $(flutter-dir)/src/Flutter/FFI.idr
 flutter-ffi-generator-dir = ./packages/flutter-ffi-generator
 flutter-ffi-generator = $(flutter-ffi-generator-dir)/build/exec/flutter-ffi-generator
 
 .PHONY: flutter
 flutter: $(flutter-install-cookie)
 
-$(flutter-install-cookie): $(Flutter.idr) $(dart-ffi-install-cookie)
+flutter-ffi-sources = \
+	$(wildcard $(flutter-dir)/src/*.idr) \
+	$(wildcard $(flutter-dir)/src/**/*.idr)
+
+$(flutter-install-cookie): $(Flutter.idr) $(flutter-ffi-sources) $(dart-ffi-install-cookie)
 	cd $(flutter-dir) && idris2 --install ./flutter.ipkg
 	touch $(flutter-install-cookie)
 
-$(dart-ffi-install-cookie): $(dart-ffi-dir)/src/**/*.idr
+dart-ffi-sources = \
+	$(wildcard $(dart-ffi-dir)/src/*.idr) \
+	$(wildcard $(dart-ffi-dir)/src/**/*.idr) \
+	$(wildcard $(dart-ffi-dir)/src/**/**/*.idr)
+
+$(dart-ffi-install-cookie): $(dart-ffi-sources)
 	cd $(dart-ffi-dir) && idris2 --install ./dart-ffi.ipkg
 	touch $(dart-ffi-install-cookie)
 

@@ -1,7 +1,12 @@
 package flutter
 
-modules = Flutter
-
 sourcedir = "src"
 
-depends = dart-ffi, contrib
+modules
+  = Flutter
+  , Flutter.Combinators
+  , Flutter.FFI
+
+depends
+  = dart-ffi
+  , contrib
