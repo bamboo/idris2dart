@@ -260,9 +260,8 @@ foreignFunctionProxy n ff args ret =
     argNames = argNamesFor args "a$"
     fArgs = mapMaybe foreignArg (zip argNames args)
     fc = ff <+> tupled fArgs
-    di = empty -- text "// " <+> text (show args) <+> line
   in
-    di <+> singleExpFunction n argNames fc
+    singleExpFunction n argNames fc
 
 foreignName : {auto ctx : Ref Dart DartT}
   -> Lib -> String -> Core Doc
