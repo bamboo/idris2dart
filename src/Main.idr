@@ -21,6 +21,7 @@ record DartT where
   constructor MkDartT
   imports : StringMap Doc
   includes : SortedSet String
+  foreignTypeNames : StringMap Doc
   usesDelay : Bool
 
 Statement : Type
@@ -268,10 +269,9 @@ foreignName : {auto ctx : Ref Dart DartT}
 foreignName lib n =
   pure (!(addImport lib) <+> dot <+> text n)
 
--- TODO: cache results
-foreignTypeName : {auto ctx : Ref Dart DartT}
+parseForeignTypeName : {auto ctx : Ref Dart DartT}
   -> String -> Core Doc
-foreignTypeName ty = do
+parseForeignTypeName ty = do
   let (tyN, lib) = splitAtFirst ',' ty
   case fastUnpack lib of
     [] => pure (text tyN)
@@ -279,6 +279,26 @@ foreignTypeName ty = do
       include lib
       pure (text tyN)
     _  => foreignName lib tyN
+
+lookupForeignType : {auto ctx : Ref Dart DartT}
+  -> String -> Core (Maybe Doc)
+lookupForeignType ty =
+  lookup ty . foreignTypeNames <$> get Dart
+
+putForeignType : {auto ctx : Ref Dart DartT}
+  -> String -> Doc -> Core ()
+putForeignType ty doc =
+  put Dart (record { foreignTypeNames $= insert ty doc } !(get Dart))
+
+foreignTypeName : {auto ctx : Ref Dart DartT}
+  -> String -> Core Doc
+foreignTypeName ty = do
+  case !(lookupForeignType ty) of
+    Just doc => pure doc
+    Nothing => do
+      doc <- parseForeignTypeName ty
+      putForeignType ty doc
+      pure doc
 
 foreignTypeOf : {auto ctx : Ref Dart DartT} -> CFType -> Core Doc
 foreignTypeOf e = case e of
@@ -633,7 +653,7 @@ class $Delayed {
 compileToDart : Ref Ctxt Defs -> ClosedTerm -> Core Doc
 compileToDart defs term = do
   (impDefs, impMain) <- compileToImperative defs term
-  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]) empty False)
+  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]) empty empty False)
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
   finalState <- get Dart
