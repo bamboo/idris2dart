@@ -69,3 +69,9 @@ namespace Map
 public export
 Duration : Type
 Duration = Struct "Duration,dart:core" [("inMilliseconds", Int)]
+
+namespace Duration
+  %inline
+  public export
+  inMilliseconds : Duration -> Int
+  inMilliseconds = (`getField` "inMilliseconds")
