@@ -387,6 +387,34 @@ namespace Icons
   %foreign "Dart:const Icons.play_arrow,package:flutter/material.dart"
   play_arrow : IconData
 
+  export
+  %foreign "Dart:const Icons.stop,package:flutter/material.dart"
+  stop : IconData
+
+  export
+  %foreign "Dart:const Icons.stop_circle,package:flutter/material.dart"
+  stop_circle : IconData
+
+  export
+  %foreign "Dart:const Icons.stop_circle_outlined,package:flutter/material.dart"
+  stop_circle_outlined : IconData
+
+  export
+  %foreign "Dart:const Icons.stop_circle_rounded,package:flutter/material.dart"
+  stop_circle_rounded : IconData
+
+  export
+  %foreign "Dart:const Icons.stop_circle_sharp,package:flutter/material.dart"
+  stop_circle_sharp : IconData
+
+  export
+  %foreign "Dart:const Icons.stop_outlined,package:flutter/material.dart"
+  stop_outlined : IconData
+
+  export
+  %foreign "Dart:const Icons.stop_rounded,package:flutter/material.dart"
+  stop_rounded : IconData
+
 
 namespace FloatingActionButton
   export
