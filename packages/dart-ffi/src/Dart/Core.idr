@@ -65,3 +65,7 @@ namespace Map
   put : HasIO io => {0 key : Type} -> key -> {0 val : Type} -> val -> DartMap key val -> io ()
   put k v m = primIO $ prim__put m k v
 
+%inline
+public export
+Duration : Type
+Duration = Struct "Duration,dart:core" [("inMilliseconds", Int)]
