@@ -74,6 +74,11 @@ mutual
 
   %inline
   public export
+  Slider : Type
+  Slider = Struct "Slider,package:flutter/material.dart" []
+
+  %inline
+  public export
   MaterialApp : Type
   MaterialApp = Struct "MaterialApp,package:flutter/material.dart" []
 
@@ -416,6 +421,71 @@ namespace FloatingActionButton
   public export
   new : HasIO io => FloatingActionButton.New.NamedParameters -> io FloatingActionButton
   new  ps = primIO $ prim__dart_new FloatingActionButton [] ps
+
+
+namespace Slider
+  export
+  IsAssignableFrom Widget Slider where
+
+  namespace New
+    data Tag : Type where
+
+    %inline
+    public export
+    value : Parameter Slider.New.Tag
+    value = mkParameter "value" Double
+
+    %inline
+    public export
+    onChanged : Parameter Slider.New.Tag
+    onChanged = mkParameter "onChanged" (Double -> IO ())
+
+    %inline
+    public export
+    onChangeStart : Parameter Slider.New.Tag
+    onChangeStart = mkParameter "onChangeStart" (Double -> IO ())
+
+    %inline
+    public export
+    onChangeEnd : Parameter Slider.New.Tag
+    onChangeEnd = mkParameter "onChangeEnd" (Double -> IO ())
+
+    %inline
+    public export
+    min : Parameter Slider.New.Tag
+    min = mkParameter "min" Double
+
+    %inline
+    public export
+    max : Parameter Slider.New.Tag
+    max = mkParameter "max" Double
+
+    %inline
+    public export
+    divisions : Parameter Slider.New.Tag
+    divisions = mkParameter "divisions" Int
+
+    %inline
+    public export
+    label : Parameter Slider.New.Tag
+    label = mkParameter "label" String
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [ Slider.New.value
+    , Slider.New.onChanged
+    , Slider.New.onChangeStart
+    , Slider.New.onChangeEnd
+    , Slider.New.min
+    , Slider.New.max
+    , Slider.New.divisions
+    , Slider.New.label ]
+
+
+  %inline
+  public export
+  new : HasIO io => Slider.New.NamedParameters -> io Slider
+  new  ps = primIO $ prim__dart_new Slider [] ps
 
 
 namespace MaterialApp

@@ -89,6 +89,19 @@ flutter = defModule "Flutter.FFI" [
         named "Widget" "child"
       ]
     ],
+    defClass "Slider" [
+      extends "Widget",
+      defConstructor "" [
+        named double "value",
+        named (function [double] void) "onChanged",
+        named (function [double] void) "onChangeStart",
+        named (function [double] void) "onChangeEnd",
+        named double "min",
+        named double "max",
+        named int "divisions",
+        named string "label"
+      ]
+    ],
     defClass "MaterialApp" [
       extends "Widget",
       defConstructor "" [

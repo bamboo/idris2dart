@@ -76,6 +76,10 @@ double : DartType
 double = DoubleType
 
 export
+int : DartType
+int = IntType
+
+export
 void : DartType
 void = VoidType
 
