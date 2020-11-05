@@ -78,7 +78,8 @@ flutter = defModule "Flutter.FFI" [
       ]
     ],
     defClass "Icons" [
-      defConst "IconData" "add"
+      defConst "IconData" "add",
+      defConst "IconData" "play_arrow"
     ],
     defClass "FloatingActionButton" [
       extends "Widget",

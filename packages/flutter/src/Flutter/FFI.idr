@@ -378,6 +378,10 @@ namespace Icons
   %foreign "Dart:const Icons.add,package:flutter/material.dart"
   add : IconData
 
+  export
+  %foreign "Dart:const Icons.play_arrow,package:flutter/material.dart"
+  play_arrow : IconData
+
 
 namespace FloatingActionButton
   export
