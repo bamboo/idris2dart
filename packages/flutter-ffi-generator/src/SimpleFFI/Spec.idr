@@ -4,6 +4,7 @@ mutual
   public export
   data DartType
     = IntType
+    | BoolType
     | StringType
     | DoubleType
     | VoidType
@@ -78,6 +79,10 @@ double = DoubleType
 export
 int : DartType
 int = IntType
+
+export
+bool : DartType
+bool = BoolType
 
 export
 void : DartType

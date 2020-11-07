@@ -47,6 +47,7 @@ namespaced n body = pretty ("namespace " ++ n) <+> indented body
 
 prettyType : DartType -> Doc ()
 prettyType ty = case ty of
+  BoolType => pretty "Bool"
   IntType => pretty "Int"
   StringType => pretty "String"
   DoubleType => pretty "Double"

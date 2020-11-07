@@ -155,6 +155,41 @@ flutter = defModule "Flutter.FFI" [
         named double "textScaleFactor",
         named "TextStyle" "style"
       ]
+    ],
+    defClass "GestureDetector" [
+      extends "Widget",
+      defConstructor "" [
+        named "Key" "key",
+        named "Widget" "child",
+        named (function ["TapDownDetails"] void) "onTapDown",
+        named (function ["TapUpDetails"] void) "onTapUp",
+        named (function [] void) "onTap",
+        named (function [] void) "onTapCancel",
+        named (function [] void) "onSecondaryTap",
+        named (function [] void) "onSecondaryTapCancel",
+        named (function [] void) "onDoubleTap",
+        named (function [] void) "onDoubleTapCancel",
+        named (function ["TapDownDetails"] void) "onSecondaryTapDown",
+        named (function ["TapUpDetails"] void) "onSecondaryTapUp",
+        named (function [] void) "onLongPress",
+        named (function ["LongPressStartDetails"] void) "onLongPressStart",
+        named (function ["LongPressMoveUpdateDetails"] void) "onLongPressMoveUpdate",
+        named (function ["LongPressEndDetails"] void) "onLongPressEnd"
+      ]
+    ],
+    defClass "CustomPaint" [
+      extends "Widget",
+      defConstructor "" [
+        named "Key" "key",
+        named "Widget" "child",
+        named "CustomPainter" "painter",
+        named "CustomPainter" "foregroundPainter",
+        named "Size" "size",
+        named bool "isComplex",
+        named bool "willChange"
+      ]
+    ],
+    defClass "CustomPainter" [
     ]
   ],
   defLib dartUI [

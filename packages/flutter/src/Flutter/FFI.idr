@@ -124,6 +124,21 @@ mutual
 
   %inline
   public export
+  GestureDetector : Type
+  GestureDetector = Struct "GestureDetector,package:flutter/widgets.dart" []
+
+  %inline
+  public export
+  CustomPaint : Type
+  CustomPaint = Struct "CustomPaint,package:flutter/widgets.dart" []
+
+  %inline
+  public export
+  CustomPainter : Type
+  CustomPainter = Struct "CustomPainter,package:flutter/widgets.dart" []
+
+  %inline
+  public export
   Color : Type
   Color = Struct "Color,dart:ui" []
 
@@ -670,6 +685,178 @@ namespace Text
   public export
   new : HasIO io => (text : String) -> Text.New.NamedParameters -> io Text
   new text ps = primIO $ prim__dart_new Text [text] ps
+
+
+namespace GestureDetector
+  export
+  IsAssignableFrom Widget GestureDetector where
+
+  namespace New
+    data Tag : Type where
+
+    %inline
+    public export
+    key : Parameter GestureDetector.New.Tag
+    key = mkParameter "key" Key
+
+    %inline
+    public export
+    child : Parameter GestureDetector.New.Tag
+    child = mkParameter "child" Widget
+
+    %inline
+    public export
+    onTapDown : Parameter GestureDetector.New.Tag
+    onTapDown = mkParameter "onTapDown" (TapDownDetails -> IO ())
+
+    %inline
+    public export
+    onTapUp : Parameter GestureDetector.New.Tag
+    onTapUp = mkParameter "onTapUp" (TapUpDetails -> IO ())
+
+    %inline
+    public export
+    onTap : Parameter GestureDetector.New.Tag
+    onTap = mkParameter "onTap" (IO ())
+
+    %inline
+    public export
+    onTapCancel : Parameter GestureDetector.New.Tag
+    onTapCancel = mkParameter "onTapCancel" (IO ())
+
+    %inline
+    public export
+    onSecondaryTap : Parameter GestureDetector.New.Tag
+    onSecondaryTap = mkParameter "onSecondaryTap" (IO ())
+
+    %inline
+    public export
+    onSecondaryTapCancel : Parameter GestureDetector.New.Tag
+    onSecondaryTapCancel = mkParameter "onSecondaryTapCancel" (IO ())
+
+    %inline
+    public export
+    onDoubleTap : Parameter GestureDetector.New.Tag
+    onDoubleTap = mkParameter "onDoubleTap" (IO ())
+
+    %inline
+    public export
+    onDoubleTapCancel : Parameter GestureDetector.New.Tag
+    onDoubleTapCancel = mkParameter "onDoubleTapCancel" (IO ())
+
+    %inline
+    public export
+    onSecondaryTapDown : Parameter GestureDetector.New.Tag
+    onSecondaryTapDown = mkParameter "onSecondaryTapDown" (TapDownDetails -> IO ())
+
+    %inline
+    public export
+    onSecondaryTapUp : Parameter GestureDetector.New.Tag
+    onSecondaryTapUp = mkParameter "onSecondaryTapUp" (TapUpDetails -> IO ())
+
+    %inline
+    public export
+    onLongPress : Parameter GestureDetector.New.Tag
+    onLongPress = mkParameter "onLongPress" (IO ())
+
+    %inline
+    public export
+    onLongPressStart : Parameter GestureDetector.New.Tag
+    onLongPressStart = mkParameter "onLongPressStart" (LongPressStartDetails -> IO ())
+
+    %inline
+    public export
+    onLongPressMoveUpdate : Parameter GestureDetector.New.Tag
+    onLongPressMoveUpdate = mkParameter "onLongPressMoveUpdate" (LongPressMoveUpdateDetails -> IO ())
+
+    %inline
+    public export
+    onLongPressEnd : Parameter GestureDetector.New.Tag
+    onLongPressEnd = mkParameter "onLongPressEnd" (LongPressEndDetails -> IO ())
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [ GestureDetector.New.key
+    , GestureDetector.New.child
+    , GestureDetector.New.onTapDown
+    , GestureDetector.New.onTapUp
+    , GestureDetector.New.onTap
+    , GestureDetector.New.onTapCancel
+    , GestureDetector.New.onSecondaryTap
+    , GestureDetector.New.onSecondaryTapCancel
+    , GestureDetector.New.onDoubleTap
+    , GestureDetector.New.onDoubleTapCancel
+    , GestureDetector.New.onSecondaryTapDown
+    , GestureDetector.New.onSecondaryTapUp
+    , GestureDetector.New.onLongPress
+    , GestureDetector.New.onLongPressStart
+    , GestureDetector.New.onLongPressMoveUpdate
+    , GestureDetector.New.onLongPressEnd ]
+
+
+  %inline
+  public export
+  new : HasIO io => GestureDetector.New.NamedParameters -> io GestureDetector
+  new  ps = primIO $ prim__dart_new GestureDetector [] ps
+
+
+namespace CustomPaint
+  export
+  IsAssignableFrom Widget CustomPaint where
+
+  namespace New
+    data Tag : Type where
+
+    %inline
+    public export
+    key : Parameter CustomPaint.New.Tag
+    key = mkParameter "key" Key
+
+    %inline
+    public export
+    child : Parameter CustomPaint.New.Tag
+    child = mkParameter "child" Widget
+
+    %inline
+    public export
+    painter : Parameter CustomPaint.New.Tag
+    painter = mkParameter "painter" CustomPainter
+
+    %inline
+    public export
+    foregroundPainter : Parameter CustomPaint.New.Tag
+    foregroundPainter = mkParameter "foregroundPainter" CustomPainter
+
+    %inline
+    public export
+    size : Parameter CustomPaint.New.Tag
+    size = mkParameter "size" Size
+
+    %inline
+    public export
+    isComplex : Parameter CustomPaint.New.Tag
+    isComplex = mkParameter "isComplex" Bool
+
+    %inline
+    public export
+    willChange : Parameter CustomPaint.New.Tag
+    willChange = mkParameter "willChange" Bool
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [ CustomPaint.New.key
+    , CustomPaint.New.child
+    , CustomPaint.New.painter
+    , CustomPaint.New.foregroundPainter
+    , CustomPaint.New.size
+    , CustomPaint.New.isComplex
+    , CustomPaint.New.willChange ]
+
+
+  %inline
+  public export
+  new : HasIO io => CustomPaint.New.NamedParameters -> io CustomPaint
+  new  ps = primIO $ prim__dart_new CustomPaint [] ps
 
 
 namespace Canvas
