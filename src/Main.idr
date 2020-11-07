@@ -649,6 +649,9 @@ class $Delayed {
 }
 "
 
+nubSort : Ord a => List a -> List a
+nubSort = SortedSet.toList . SortedSet.fromList
+
 compileToDart : Ref Ctxt Defs -> ClosedTerm -> Core Doc
 compileToDart defs term = do
   (impDefs, impMain) <- compileToImperative defs term
@@ -658,7 +661,7 @@ compileToDart defs term = do
   finalState <- get Dart
   let includeLines = concatMap lines (SortedSet.toList finalState.includes)
   let (importLines, nonImportLines) = partition ("import " `isPrefixOf`) includeLines
-  let includeImports' = text <$> importLines
+  let includeImports' = text <$> nubSort importLines
   let includes' = text (unlines nonImportLines)
   let imports' = dartImport <$> toList finalState.imports
   let header' = vcat (header ++ imports' ++ includeImports')
