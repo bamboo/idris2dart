@@ -8,6 +8,7 @@ modules
   , Flutter.Widgets.Functions
   , Flutter.Widgets.Stateful
   , Flutter.Widgets.Stateless
+  , Flutter.Widgets.Painter
 
 depends
   = dart-ffi

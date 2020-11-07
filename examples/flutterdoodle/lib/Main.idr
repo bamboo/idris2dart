@@ -1,7 +1,6 @@
 module Main
 
 import Flutter
-import Painter
 
 infixr 1 //
 
