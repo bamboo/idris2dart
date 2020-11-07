@@ -1,6 +1,7 @@
 module Main
 
-import DoodleApp
+import Flutter
+import Painter
 
 infixr 1 //
 
@@ -13,25 +14,25 @@ data State
   = Idle (List Offset)
   | Pressing Offset (List Offset)
 
-onTapUp : TapUpDetails -> State -> IO State
+onTapUp : TapUpDetails -> State -> State
 onTapUp d s = case s of
-  Idle os => pure (Idle (localPosition d :: os))
-  s => pure s
+  Idle os => Idle (localPosition d :: os)
+  s => s
 
-onLongPressStart : LongPressStartDetails -> State -> IO State
+onLongPressStart : LongPressStartDetails -> State -> State
 onLongPressStart d s = case s of
-  Idle os => pure (Pressing (localPosition d) os)
-  s => pure s
+  Idle os => Pressing (localPosition d) os
+  s => s
 
-onLongPressMoveUpdate : LongPressMoveUpdateDetails -> State -> IO State
+onLongPressMoveUpdate : LongPressMoveUpdateDetails -> State -> State
 onLongPressMoveUpdate d s = case s of
-  Pressing _ os => pure (Pressing (localPosition d) os)
-  s => pure s
+  Pressing _ os => Pressing (localPosition d) os
+  s => s
 
-onLongPressEnd : LongPressEndDetails -> State -> IO State
+onLongPressEnd : LongPressEndDetails -> State -> State
 onLongPressEnd d s = case s of
-  Pressing _ os => pure (Idle (localPosition d :: os))
-  s => pure s
+  Pressing _ os => Idle (localPosition d :: os)
+  s => s
 
 drawLines : Canvas -> List Offset -> IO ()
 drawLines _ [] = pure ()
@@ -43,10 +44,46 @@ drawLines c (o :: os) = do
   paint // setStyle PaintingStyle.stroke
   c // drawPath path paint
 
-onPaint : Canvas -> Size -> State -> IO ()
-onPaint c _ s = case s of
+onPaint : State -> Canvas -> Size -> IO ()
+onPaint s c _ = case s of
   Idle os => drawLines c os
   Pressing o os => drawLines c (o :: os)
 
+appTitle : String
+appTitle = "Try taps and long presses"
+
+appHome : IO Stateful
+appHome = Stateful.new [initialState @= Idle [], onBuild @= build]
+  where
+    build : StatefulWidgetState State -> BuildContext -> IO Widget
+    build state context = upcast <$> Scaffold.new [
+      appBar @=> !(AppBar.new [
+        title @=> !(Text.new appTitle [])
+      ]),
+      body @=> !(Center.new [
+        child @=> !(CustomPaint.new [
+          child @=> !(GestureDetector.new [
+            onTapUp @= modify state . onTapUp,
+            onLongPressStart @= modify state . onLongPressStart,
+            onLongPressMoveUpdate @= modify state . onLongPressMoveUpdate,
+            onLongPressEnd @= modify state . onLongPressEnd
+          ]),
+          painter @=> !(Painter.new [
+            onPaint @= onPaint (get state)
+          ])
+        ])
+      ])
+    ]
+
+app : IO MaterialApp
+app = MaterialApp.new [
+  title @= appTitle,
+  theme @= !(ThemeData.new [
+    primarySwatch @= Colors.blue,
+    visualDensity @= VisualDensity.adaptivePlatformDensity
+  ]),
+  home @=> !appHome
+]
+
 main : IO ()
-main = runDoodleApp (Idle []) onTapUp onLongPressStart onLongPressMoveUpdate onLongPressEnd onPaint
+main = runApp !app

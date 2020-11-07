@@ -2,7 +2,7 @@ package flutterdoodle
 
 main = Main
 modules = Main
-        , DoodleApp
+        , Painter
 depends = contrib, flutter, dart-ffi
 sourcedir = "lib"
 executable = "lib/main.dart"

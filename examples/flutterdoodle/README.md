@@ -1,11 +1,5 @@
 ## A sample Flutter application
 
-This example demonstrates how to combine Idris and Dart in a [Flutter](https://flutter.dev/) application.
-
-The state handling and drawing logic is [implemented in Idris](./lib/Main.idr).
-
-The Flutter widget hiearchy is [implemented in Dart](./lib/DoodleApp.dart) and [exported for use by Idris](./lib/DoodleApp.idr).
-
 ## Building
 
 Build `lib/main.dart` with:
