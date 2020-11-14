@@ -68,10 +68,31 @@ namespace Map
 %inline
 public export
 Duration : Type
-Duration = Struct "Duration,dart:core" [("inMilliseconds", Int)]
+Duration = Struct "Duration,dart:core" [
+  ("inMilliseconds", Int),
+  ("inMicroseconds", Int)
+]
 
 namespace Duration
+
+  %foreign "Dart:const Duration.microsecondsPerMinute,dart:core"
+  public export
+  microsecondsPerMinute : Int
+
+  %foreign "Dart:const Duration.microsecondsPerSecond,dart:core"
+  public export
+  microsecondsPerSecond : Int
+
+  %foreign "Dart:const Duration.microsecondsPerMillisecond,dart:core"
+  public export
+  microsecondsPerMillisecond : Int
+
   %inline
   public export
   inMilliseconds : Duration -> Int
   inMilliseconds = (`getField` "inMilliseconds")
+
+  %inline
+  public export
+  inMicroseconds : Duration -> Int
+  inMicroseconds = (`getField` "inMicroseconds")
