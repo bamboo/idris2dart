@@ -33,3 +33,7 @@ enum PaintingStyle {
   fill,
   stroke,
 }
+
+Object ifBool(bool condition, Object then, Object else_) {
+  return condition ? then : else_;
+}

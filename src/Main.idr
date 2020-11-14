@@ -4,6 +4,7 @@ import Compiler.Common
 import Compiler.ES.Imperative
 import Core.CompileExpr
 import Core.Context
+import Core.Name.Namespace
 import Data.List
 import Data.SortedSet as SortedSet
 import Data.String.Extra
@@ -249,6 +250,10 @@ foreignArg (n, ty) = case ty of
   CFFun a b => Just (makeCallback n (uncurriedSignature a b))
   CFUser (UN "Type") [] => Nothing
   CFUser (UN "__") [] => Nothing
+  CFUser (NS ns (UN "Bool")) [] =>
+    if ns == basicsNS
+      then Just (n <+> " == 0")
+      else Just n
   _ => Just n
 
 singleExpFunction : Doc -> List Doc -> Doc -> Doc
