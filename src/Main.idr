@@ -280,18 +280,18 @@ foreignFunctionProxy n ff args ret =
 foreignName : {auto ctx : Ref Dart DartT}
   -> Lib -> String -> Core Doc
 foreignName lib n =
-  pure (!(addImport lib) <+> dot <+> text n)
+  case fastUnpack lib of
+    ('\n' :: rest) => do
+      include lib
+      pure (text n)
+    [] => pure (text n)
+    _ => pure (!(addImport lib) <+> dot <+> text n)
 
 parseForeignTypeName : {auto ctx : Ref Dart DartT}
   -> String -> Core Doc
-parseForeignTypeName ty = do
+parseForeignTypeName ty =
   let (tyN, lib) = splitAtFirst ',' ty
-  case fastUnpack lib of
-    [] => pure (text tyN)
-    ('\n' :: rest) => do
-      include lib
-      pure (text tyN)
-    _  => foreignName lib tyN
+  in foreignName lib tyN
 
 lookupForeignType : {auto ctx : Ref Dart DartT}
   -> String -> Core (Maybe Doc)

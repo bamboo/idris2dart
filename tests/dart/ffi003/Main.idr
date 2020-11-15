@@ -84,6 +84,14 @@ namespace Callbacks
   %foreign "Dart:.callY"
   callY : Callbacks -> Int -> PrimIO Int
 
+%foreign "Dart:prim__dartEq,
+$.Object prim__dartEq($.Object x, $.Object y) => x == y;"
+prim__dartEq : AnyPtr -> AnyPtr -> Bool
+
+%inline
+dartEq : a -> a -> Bool
+dartEq x y = prim__dartEq (believe_me x) (believe_me y)
+
 main : IO ()
 main = do
   pt <- Point.new [
@@ -98,3 +106,6 @@ main = do
   ]
   printLn (callX cb 21)
   printLn !(primIO (callY cb 21))
+
+  printLn (dartEq 1 2)
+  printLn (dartEq 1 1)
