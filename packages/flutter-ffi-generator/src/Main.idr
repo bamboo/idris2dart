@@ -193,6 +193,12 @@ flutter = defModule "Flutter.FFI" [
     ]
   ],
   defLib dartUI [
+    defEnum "AppLifecycleState" [
+      "detached",
+      "inactive",
+      "paused",
+      "resumed"
+    ],
     defClass "Color" [
     ],
     defClass "Canvas" [

@@ -139,6 +139,11 @@ mutual
 
   %inline
   public export
+  AppLifecycleState : Type
+  AppLifecycleState = Struct "AppLifecycleState,dart:ui" []
+
+  %inline
+  public export
   Color : Type
   Color = Struct "Color,dart:ui" []
 
@@ -857,6 +862,21 @@ namespace CustomPaint
   public export
   new : HasIO io => CustomPaint.New.NamedParameters -> io CustomPaint
   new  ps = primIO $ prim__dart_new CustomPaint [] ps
+
+
+namespace AppLifecycleState
+  export
+  %foreign "Dart:const AppLifecycleState.detached,dart:ui"
+  detached : AppLifecycleState
+  export
+  %foreign "Dart:const AppLifecycleState.inactive,dart:ui"
+  inactive : AppLifecycleState
+  export
+  %foreign "Dart:const AppLifecycleState.paused,dart:ui"
+  paused : AppLifecycleState
+  export
+  %foreign "Dart:const AppLifecycleState.resumed,dart:ui"
+  resumed : AppLifecycleState
 
 
 namespace Canvas
