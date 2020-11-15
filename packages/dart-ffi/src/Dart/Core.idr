@@ -2,6 +2,13 @@ module Dart.Core
 
 import System.FFI
 
+%foreign "Dart:print,dart:core"
+prim__print : AnyPtr -> PrimIO ()
+
+export
+print : HasIO io => a -> io ()
+print a = primIO $ prim__print (believe_me a)
+
 mutual
   public export
   Object : Type
@@ -38,7 +45,7 @@ namespace List
   %inline
   export
   new : HasIO io => {elTy : Type} -> io (DartList elTy)
-  new = primIO (prim__dart_list_new elTy)
+  new = primIO $ prim__dart_list_new elTy
 
   export
   %foreign "Dart:.add"
