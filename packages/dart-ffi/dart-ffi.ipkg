@@ -4,6 +4,7 @@ modules
   = Dart.Core
   , Dart.FFI
   , Dart.FFI.Constructors
+  , Dart.FFI.Enums
   , Dart.FFI.Upcast
   , Dart.FFI.UpcastList
 
