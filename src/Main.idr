@@ -260,6 +260,14 @@ singleExpFunction : Doc -> List Doc -> Doc -> Doc
 singleExpFunction n ps e =
   n <+> tupled ps <+> block ("return " <+> e <+> semi)
 
+convertForeignReturnType : CFType -> Doc -> Doc
+convertForeignReturnType retTy e = case retTy of
+  CFUser (NS ns (UN "Bool")) [] =>
+    if ns == basicsNS
+      then e <+> " ? 0 : 1"
+      else e
+  _ => e
+
 foreignFunctionProxy : Doc -> Doc -> List CFType -> CFType -> Doc
 foreignFunctionProxy n ff args ret =
   let
@@ -267,7 +275,7 @@ foreignFunctionProxy n ff args ret =
     fArgs = mapMaybe foreignArg (zip argNames args)
     fc = ff <+> tupled fArgs
   in
-    singleExpFunction n argNames fc
+    singleExpFunction n argNames (convertForeignReturnType ret fc)
 
 foreignName : {auto ctx : Ref Dart DartT}
   -> Lib -> String -> Core Doc
@@ -325,7 +333,7 @@ foreignMethodProxy n m args@(thisTy :: _) ret = do
   case mapMaybe foreignArg (zip argNames args) of
     fThis :: fArgs => do
       let mc = castTo !(foreignTypeOf thisTy) fThis <+> dot <+> m <+> tupled fArgs
-      pure (singleExpFunction n argNames mc)
+      pure (singleExpFunction n argNames (convertForeignReturnType ret mc))
     _ => pure (unsupported (m, args))
 foreignMethodProxy n m args ret =
   pure (unsupported (m, args))
