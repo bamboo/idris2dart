@@ -1,3 +1,4 @@
+// @dart = 2.6
 class Point {
   final int x;
   final int y;

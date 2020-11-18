@@ -85,7 +85,7 @@ namespace Callbacks
   callY : Callbacks -> Int -> PrimIO Int
 
 %foreign "Dart:prim__dartEq,
-$.Object prim__dartEq($.Object x, $.Object y) => x == y;"
+$.bool prim__dartEq($.Object x, $.Object y) => x == y;"
 prim__dartEq : AnyPtr -> AnyPtr -> Bool
 
 %inline
