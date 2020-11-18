@@ -26,6 +26,7 @@ flutter = defModule "Flutter.FFI" [
   ],
   defLib painting [
     defClass "TextStyle" [
+      final "TextAlign" "textAlign"
     ]
   ],
   defLib material [
@@ -148,12 +149,20 @@ flutter = defModule "Flutter.FFI" [
         named "MainAxisAlignment" "mainAxisAlignment"
       ]
     ],
+    defClass "Row" [
+      extends "Widget",
+      defConstructor "" [
+        named (listOf "Widget") "children",
+        named "MainAxisAlignment" "mainAxisAlignment"
+      ]
+    ],
     defClass "Text" [
       extends "Widget",
       defConstructor "" [
         positional string "text",
         named double "textScaleFactor",
-        named "TextStyle" "style"
+        named "TextStyle" "style",
+        named "TextAlign" "textAlign"
       ]
     ],
     defClass "GestureDetector" [
@@ -231,7 +240,8 @@ flutter = defModule "Flutter.FFI" [
     ],
     defClass "Velocity" [
       final "Offset" "pixelsPerSecond"
-    ]
+    ],
+    defEnum "TextAlign" ["left", "right", "center", "start", "end", "justify"]
   ],
   defLib gestures [
     defClass "TapDownDetails" [

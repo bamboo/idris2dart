@@ -13,7 +13,9 @@ mutual
   %inline
   public export
   TextStyle : Type
-  TextStyle = Struct "TextStyle,package:flutter/painting.dart" []
+  TextStyle = Struct "TextStyle,package:flutter/painting.dart" [
+    ("textAlign", TextAlign)
+  ]
 
   %inline
   public export
@@ -119,6 +121,11 @@ mutual
 
   %inline
   public export
+  Row : Type
+  Row = Struct "Row,package:flutter/widgets.dart" []
+
+  %inline
+  public export
   Text : Type
   Text = Struct "Text,package:flutter/widgets.dart" []
 
@@ -195,6 +202,11 @@ mutual
 
   %inline
   public export
+  TextAlign : Type
+  TextAlign = Struct "TextAlign,dart:ui" []
+
+  %inline
+  public export
   TapDownDetails : Type
   TapDownDetails = Struct "TapDownDetails,package:flutter/gestures.dart" [
     ("globalPosition", Offset),
@@ -232,6 +244,12 @@ mutual
     ("globalPosition", Offset),
     ("localPosition", Offset)
   ]
+
+
+namespace TextStyle
+  export
+  textAlign : TextStyle -> TextAlign
+  textAlign this = getField this "textAlign"
 
 
 namespace Colors
@@ -664,6 +682,34 @@ namespace Column
   new  ps = primIO $ prim__dart_new Column [] ps
 
 
+namespace Row
+  export
+  IsAssignableFrom Widget Row where
+
+  namespace New
+    data Tag : Type where
+
+    %inline
+    public export
+    children : Parameter Row.New.Tag
+    children = mkParameter "children" (DartList Widget)
+
+    %inline
+    public export
+    mainAxisAlignment : Parameter Row.New.Tag
+    mainAxisAlignment = mkParameter "mainAxisAlignment" MainAxisAlignment
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [Row.New.children, Row.New.mainAxisAlignment]
+
+
+  %inline
+  public export
+  new : HasIO io => Row.New.NamedParameters -> io Row
+  new  ps = primIO $ prim__dart_new Row [] ps
+
+
 namespace Text
   export
   IsAssignableFrom Widget Text where
@@ -680,10 +726,15 @@ namespace Text
     public export
     style : Parameter Text.New.Tag
     style = mkParameter "style" TextStyle
+
+    %inline
+    public export
+    textAlign : Parameter Text.New.Tag
+    textAlign = mkParameter "textAlign" TextAlign
     %inline
     public export
     NamedParameters : Type
-    NamedParameters = Parameters [Text.New.textScaleFactor, Text.New.style]
+    NamedParameters = Parameters [Text.New.textScaleFactor, Text.New.style, Text.New.textAlign]
 
 
   %inline
@@ -967,6 +1018,27 @@ namespace Velocity
   export
   pixelsPerSecond : Velocity -> Offset
   pixelsPerSecond this = getField this "pixelsPerSecond"
+
+
+namespace TextAlign
+  export
+  %foreign "Dart:const TextAlign.left,dart:ui"
+  left : TextAlign
+  export
+  %foreign "Dart:const TextAlign.right,dart:ui"
+  right : TextAlign
+  export
+  %foreign "Dart:const TextAlign.center,dart:ui"
+  center : TextAlign
+  export
+  %foreign "Dart:const TextAlign.start,dart:ui"
+  start : TextAlign
+  export
+  %foreign "Dart:const TextAlign.end,dart:ui"
+  end : TextAlign
+  export
+  %foreign "Dart:const TextAlign.justify,dart:ui"
+  justify : TextAlign
 
 
 namespace TapDownDetails
