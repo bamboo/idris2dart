@@ -12,10 +12,10 @@ To explore what cross-platform app development with Idris 2 powered by [Flutter]
 - [x] basic Char, String and numeric primitives
 - [x] [bidirectional FFI](./tests/dart/ffi001/Main.idr)
 - [x] delay/force
-- [ ] remaining cast primitives
+- [x] remaining cast primitives
+- [x] bounded int operations on `Bits*` values
 - [ ] remaining IO primitives
 - [ ] `IOArray` primitives
-- [ ] bounded int operations on `Bits*` values
 
 ### Building
 

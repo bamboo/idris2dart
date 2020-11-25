@@ -146,19 +146,22 @@ doubleTy = text "$.double"
 maxDartInt : Integer
 maxDartInt = 9223372036854775807
 
+bigIntConstant : Integer -> Doc
+bigIntConstant = \case
+  0 => text "$.BigInt.zero"
+  1 => text "$.BigInt.one"
+  i => if i > maxDartInt
+    then "$.BigInt.parse(\"" <+> shown i <+> "\")"
+    else "$.BigInt.from(" <+> shown i <+> ")"
+
 dartConstant : Constant -> Doc
 dartConstant c = case c of
   B8 i => shown i
   B16 i => shown i
   B32 i => shown i
-  B64 i => shown i
+  B64 i => bigIntConstant i
+  BI i => bigIntConstant i
   I i => shown i
-  BI 0 => text "$.BigInt.zero"
-  BI 1 => text "$.BigInt.one"
-  BI i =>
-    if i > maxDartInt
-      then "$.BigInt.parse(\"" <+> shown i <+> "\")"
-      else "$.BigInt.from(" <+> shown i <+> ")"
   Ch c => shown (cast {to=Int} c)
   Str s => dartStringDoc s
   Db d => shown d
@@ -169,6 +172,7 @@ runtimeTypeOf : Constant -> Doc
 runtimeTypeOf ty = case ty of
   StringType => stringTy
   IntegerType => bigIntTy
+  Bits64Type => bigIntTy
   DoubleType => doubleTy
   _ => "$.int"
 
@@ -408,8 +412,30 @@ stringOp s m = (castTo stringTy s) <+> dot <+> m
 doubleOp : Doc -> Doc -> Doc
 doubleOp e m = (castTo doubleTy e) <+> dot <+> m
 
+bigIntFrom : Doc -> Doc
+bigIntFrom num = "$.BigInt.from" <+> paren num
+
+toUnsigned : Int -> Doc -> Doc
+toUnsigned width num = num <+> ".toUnsigned" <+> paren (shown width)
+
+bigIntToBits : Int -> Doc -> Doc
+bigIntToBits 64 i = toUnsigned 64 (castTo bigIntTy i)
+bigIntToBits width i = toUnsigned width (castTo bigIntTy i) <+> ".toInt()"
+
 bigIntToInt : Doc -> Doc
-bigIntToInt i = castTo bigIntTy i <+> ".toInt()"
+bigIntToInt i = toUnsigned 64 (castTo bigIntTy i) <+> ".toInt()"
+
+intToBits : Int -> Doc -> Doc
+intToBits 64 i = bigIntFrom i
+intToBits width i = bigIntToBits width (bigIntFrom i)
+
+boundedUIntOp : Int -> Doc -> Doc -> Doc -> Doc
+boundedUIntOp 64 op x y = toUnsigned 64 (binOpOf' bigIntTy op x y)
+boundedUIntOp width op x y = toUnsigned width (binOpOf' intTy op x y )
+
+boundedShiftOp : Int -> Doc -> Doc -> Doc -> Doc
+boundedShiftOp 64 op x y = toUnsigned 64 (bigIntFrom x <+> op <+> y)
+boundedShiftOp width op x y = bigIntToBits width (bigIntFrom x <+> op <+> y)
 
 stringCompare : Doc -> Doc -> Doc -> Doc
 stringCompare zeroComparison lhs rhs =
@@ -432,6 +458,39 @@ dartOp (LTE ty) [x, y] = boolOpOf ty "<=" x y
 dartOp (EQ ty) [x, y] = boolOpOf ty "==" x y
 dartOp (GTE ty) [x, y] = boolOpOf ty ">=" x y
 dartOp (GT ty) [x, y] = boolOpOf ty ">" x y
+dartOp (Add Bits8Type) [x, y] = boundedUIntOp 8 "+" x y
+dartOp (Sub Bits8Type) [x, y] = boundedUIntOp 8 "-" x y
+dartOp (Mul Bits8Type) [x, y] = boundedUIntOp 8 "*" x y
+dartOp (Div Bits8Type) [x, y] = boundedUIntOp 8 "/" x y
+dartOp (Mod Bits8Type) [x, y] = boundedUIntOp 8 "%" x y
+dartOp (Add Bits16Type) [x, y] = boundedUIntOp 16 "+" x y
+dartOp (Sub Bits16Type) [x, y] = boundedUIntOp 16 "-" x y
+dartOp (Mul Bits16Type) [x, y] = boundedUIntOp 16 "*" x y
+dartOp (Div Bits16Type) [x, y] = boundedUIntOp 16 "/" x y
+dartOp (Mod Bits16Type) [x, y] = boundedUIntOp 16 "%" x y
+dartOp (Add Bits32Type) [x, y] = boundedUIntOp 32 "+" x y
+dartOp (Sub Bits32Type) [x, y] = boundedUIntOp 32 "-" x y
+dartOp (Mul Bits32Type) [x, y] = boundedUIntOp 32 "*" x y
+dartOp (Div Bits32Type) [x, y] = boundedUIntOp 32 "/" x y
+dartOp (Mod Bits32Type) [x, y] = boundedUIntOp 32 "%" x y
+dartOp (Add Bits64Type) [x, y] = boundedUIntOp 64 "+" x y
+dartOp (Sub Bits64Type) [x, y] = boundedUIntOp 64 "-" x y
+dartOp (Mul Bits64Type) [x, y] = boundedUIntOp 64 "*" x y
+dartOp (Div Bits64Type) [x, y] = boundedUIntOp 64 "/" x y
+dartOp (Mod Bits64Type) [x, y] = boundedUIntOp 64 "%" x y
+dartOp (ShiftL Bits8Type) [x, y] = boundedShiftOp 8 "<<" x y
+dartOp (ShiftL Bits16Type) [x, y] = boundedShiftOp 16 "<<" x y
+dartOp (ShiftL Bits32Type) [x, y] = boundedShiftOp 32 "<<" x y
+dartOp (ShiftL Bits64Type) [x, y] = boundedShiftOp 64 "<<" x y
+dartOp (ShiftL ty) [x, y] = binOpOf ty "<<" x y
+dartOp (ShiftR Bits8Type) [x, y] = boundedShiftOp 8 ">>" x y
+dartOp (ShiftR Bits16Type) [x, y] = boundedShiftOp 16 ">>" x y
+dartOp (ShiftR Bits32Type) [x, y] = boundedShiftOp 32 ">>" x y
+dartOp (ShiftR Bits64Type) [x, y] = boundedShiftOp 64 ">>" x y
+dartOp (ShiftR ty) [x, y] = binOpOf ty ">>" x y
+dartOp (BAnd ty) [x, y] = binOpOf ty "&" x y
+dartOp (BOr ty) [x, y] = binOpOf ty "|" x y
+dartOp (BXOr ty) [x, y] = binOpOf ty "^" x y
 dartOp (Add ty) [x, y] = binOpOf ty "+" x y
 dartOp (Sub ty) [x, y] = binOpOf ty "-" x y
 dartOp (Mul ty) [x, y] = binOpOf ty "*" x y
@@ -449,11 +508,30 @@ dartOp (Cast StringType DoubleType) [x] = paren (doubleTy <+> ".tryParse" <+> ca
 dartOp (Cast StringType IntType) [x] = paren (intTy <+> ".tryParse" <+> castTo stringTy x <+> " ?? 0")
 dartOp (Cast DoubleType IntType) [x] = doubleOp x "toInt()"
 dartOp (Cast IntegerType IntType) [x] = bigIntToInt x
+dartOp (Cast IntegerType Bits8Type) [x] = bigIntToBits 8 x
+dartOp (Cast IntegerType Bits16Type) [x] = bigIntToBits 16 x
+dartOp (Cast IntegerType Bits32Type) [x] = bigIntToBits 32 x
+dartOp (Cast IntegerType Bits64Type) [x] = bigIntToBits 64 x
+dartOp (Cast Bits8Type Bits16Type) [x] = x
+dartOp (Cast Bits8Type Bits32Type) [x] = x
+dartOp (Cast Bits8Type IntType) [x] = x
+dartOp (Cast Bits16Type IntType) [x] = x
+dartOp (Cast Bits16Type Bits32Type) [x] = x
+dartOp (Cast Bits32Type IntType) [x] = x
+dartOp (Cast Bits64Type IntegerType) [x] = x
+dartOp (Cast Bits64Type IntType) [x] = bigIntToInt x
+dartOp (Cast Bits64Type Bits8Type) [x] = bigIntToBits 8 x
+dartOp (Cast Bits64Type Bits16Type) [x] = bigIntToBits 16 x
+dartOp (Cast Bits64Type Bits32Type) [x] = bigIntToBits 32 x
 dartOp (Cast CharType IntType) [x] = x
 dartOp (Cast IntType CharType) [x] = x
-dartOp (Cast ty StringType) [x] = x <+> ".toString()"
-dartOp (Cast ty IntegerType) [x] = "$.BigInt.from" <+> paren x
+dartOp (Cast ty Bits8Type) [x] = intToBits 8 x
+dartOp (Cast ty Bits16Type) [x] = intToBits 16 x
+dartOp (Cast ty Bits32Type) [x] = intToBits 32 x
+dartOp (Cast ty Bits64Type) [x] = intToBits 64 x
+dartOp (Cast ty IntegerType) [x] = bigIntFrom x
 dartOp (Cast ty DoubleType) [x] = runtimeCastOf ty x <+> ".toDouble()"
+dartOp (Cast ty StringType) [x] = x <+> ".toString()"
 dartOp DoubleFloor [x] = doubleOp x "floorToDouble()"
 dartOp DoubleCeiling [x] = doubleOp x "ceilToDouble()"
 dartOp BelieveMe [_, _, x] = x
