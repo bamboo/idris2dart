@@ -80,6 +80,9 @@ flutter = defModule "Flutter.FFI" [
     ],
     defClass "Icons" [
       defConst "IconData" "add",
+      defConst "IconData" "add_circle_outline",
+      defConst "IconData" "remove",
+      defConst "IconData" "remove_circle_outline",
       defConst "IconData" "play_arrow",
       defConst "IconData" "stop",
       defConst "IconData" "stop_circle",
@@ -88,6 +91,14 @@ flutter = defModule "Flutter.FFI" [
       defConst "IconData" "stop_circle_sharp",
       defConst "IconData" "stop_outlined",
       defConst "IconData" "stop_rounded"
+    ],
+    defClass "IconButton" [
+      extends "Widget",
+      defConstructor "" [
+        named (function [] void) "onPressed",
+        named string "tooltip",
+        named "Widget" "icon"
+      ]
     ],
     defClass "FloatingActionButton" [
       extends "Widget",
@@ -147,6 +158,12 @@ flutter = defModule "Flutter.FFI" [
       defConstructor "" [
         named (listOf "Widget") "children",
         named "MainAxisAlignment" "mainAxisAlignment"
+      ]
+    ],
+    defClass "Expanded" [
+      extends "Widget",
+      defConstructor "" [
+        named "Widget" "child"
       ]
     ],
     defClass "Row" [

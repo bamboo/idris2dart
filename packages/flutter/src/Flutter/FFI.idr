@@ -71,6 +71,11 @@ mutual
 
   %inline
   public export
+  IconButton : Type
+  IconButton = Struct "IconButton,package:flutter/material.dart" []
+
+  %inline
+  public export
   FloatingActionButton : Type
   FloatingActionButton = Struct "FloatingActionButton,package:flutter/material.dart" []
 
@@ -118,6 +123,11 @@ mutual
   public export
   Column : Type
   Column = Struct "Column,package:flutter/widgets.dart" []
+
+  %inline
+  public export
+  Expanded : Type
+  Expanded = Struct "Expanded,package:flutter/widgets.dart" []
 
   %inline
   public export
@@ -422,6 +432,18 @@ namespace Icons
   add : IconData
 
   export
+  %foreign "Dart:const Icons.add_circle_outline,package:flutter/material.dart"
+  add_circle_outline : IconData
+
+  export
+  %foreign "Dart:const Icons.remov,package:flutter/material.dart"
+  remov : IconData
+
+  export
+  %foreign "Dart:const Icons.remove_circle_outline,package:flutter/material.dart"
+  remove_circle_outline : IconData
+
+  export
   %foreign "Dart:const Icons.play_arrow,package:flutter/material.dart"
   play_arrow : IconData
 
@@ -452,6 +474,39 @@ namespace Icons
   export
   %foreign "Dart:const Icons.stop_rounded,package:flutter/material.dart"
   stop_rounded : IconData
+
+
+namespace IconButton
+  export
+  IsAssignableFrom Widget IconButton where
+
+  namespace New
+    data Tag : Type where
+
+    %inline
+    public export
+    onPressed : Parameter IconButton.New.Tag
+    onPressed = mkParameter "onPressed" (IO ())
+
+    %inline
+    public export
+    tooltip : Parameter IconButton.New.Tag
+    tooltip = mkParameter "tooltip" String
+
+    %inline
+    public export
+    icon : Parameter IconButton.New.Tag
+    icon = mkParameter "icon" Widget
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [IconButton.New.onPressed, IconButton.New.tooltip, IconButton.New.icon]
+
+
+  %inline
+  public export
+  new : HasIO io => IconButton.New.NamedParameters -> io IconButton
+  new  ps = primIO $ prim__dart_new IconButton [] ps
 
 
 namespace FloatingActionButton
@@ -680,6 +735,29 @@ namespace Column
   public export
   new : HasIO io => Column.New.NamedParameters -> io Column
   new  ps = primIO $ prim__dart_new Column [] ps
+
+
+namespace Expanded
+  export
+  IsAssignableFrom Widget Expanded where
+
+  namespace New
+    data Tag : Type where
+
+    %inline
+    public export
+    child : Parameter Expanded.New.Tag
+    child = mkParameter "child" Widget
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [Expanded.New.child]
+
+
+  %inline
+  public export
+  new : HasIO io => Expanded.New.NamedParameters -> io Expanded
+  new  ps = primIO $ prim__dart_new Expanded [] ps
 
 
 namespace Row
