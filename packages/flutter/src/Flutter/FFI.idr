@@ -436,8 +436,8 @@ namespace Icons
   add_circle_outline : IconData
 
   export
-  %foreign "Dart:const Icons.remov,package:flutter/material.dart"
-  remov : IconData
+  %foreign "Dart:const Icons.remove,package:flutter/material.dart"
+  remove : IconData
 
   export
   %foreign "Dart:const Icons.remove_circle_outline,package:flutter/material.dart"
