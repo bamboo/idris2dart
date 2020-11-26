@@ -1,7 +1,7 @@
 module Flutter.Widgets.Functions
 
 import Dart.FFI
-import Dart.Core
+import public Dart.Core -- for DartList
 import public Dart.FFI.Upcast
 import public Dart.FFI.UpcastList
 import Flutter.FFI
