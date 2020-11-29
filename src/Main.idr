@@ -617,6 +617,14 @@ mutual
     ] = do
       fTy <- foreignTypeName ty
       pure (text "$.List<" <+> fTy <+> text ">()")
+  dartPrimFnExt (NS _ (UN "prim__dart_true")) _ =
+    pure (text "true")
+  dartPrimFnExt (NS _ (UN "prim__dart_false")) _ =
+    pure (text "false")
+  dartPrimFnExt (NS _ (UN "prim__dart_if")) [ IENull, condition, thenValue, elseValue ] =
+    pure (!(dartExp condition) <+> " ? " <+> !(dartExp thenValue) <+> " : " <+> !(dartExp elseValue))
+  dartPrimFnExt (NS _ (UN "prim__dart_eq")) [ IENull, x, y ] =
+    pure (!(dartExp x) <+> " == " <+> !(dartExp y))
   dartPrimFnExt n args = pure (debug (n, args))
 
   dartNamedParam : {auto ctx : Ref Dart DartT} -> (Expression, String, Expression) -> Core Doc

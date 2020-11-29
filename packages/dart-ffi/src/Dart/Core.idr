@@ -39,6 +39,59 @@ namespace Object
   toString o = primIO $ prim__toString (believe_me o)
 
 public export
+DartBool : Type
+DartBool = Struct "bool,dart:core" [("hashCode", Int)]
+
+export
+%extern prim__dart_true : DartBool
+
+export
+%extern prim__dart_false : DartBool
+
+export
+%extern prim__dart_eq : a -> a -> DartBool
+
+export
+%extern prim__dart_if : DartBool -> a -> a -> a
+
+namespace DartBool
+  %inline
+  public export
+  true : DartBool
+  true = prim__dart_true
+
+  %inline
+  public export
+  false : DartBool
+  false = prim__dart_false
+
+  %inline
+  public export
+  fromBool : Bool -> DartBool
+  fromBool b = prim__dart_eq b True
+
+  %inline
+  public export
+  toBool : DartBool -> Bool
+  toBool b = prim__dart_if b True False
+
+export
+Cast Bool DartBool where
+  cast = fromBool
+
+export
+Cast DartBool Bool where
+  cast = toBool
+
+export
+Eq DartBool where
+  (==) x y = toBool (prim__dart_eq x y)
+
+export
+Show DartBool where
+  show b = show (toBool b)
+
+public export
 %extern prim__dart_list_new : (elTy : Type) -> (1 x : %World) -> IORes (DartList elTy)
 
 namespace List

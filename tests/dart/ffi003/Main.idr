@@ -1,5 +1,6 @@
 module Main
 
+import Dart.Core
 import Dart.FFI
 
 %inline
@@ -50,10 +51,13 @@ Callbacks = Struct "Callbacks,
 class Callbacks {
   $.Object Function($.Object) x;
   $.Object Function($.Object) y;
-  Callbacks({this.x, this.y});
+  $.bool enabled;
+  Callbacks({this.x, this.y, this.enabled});
   $.Object callX($.Object arg) => x(arg);
   $.Object callY($.Object arg) => y(arg);
-}" []
+}" [
+  ("enabled", DartBool)
+]
 
 namespace Callbacks
 
@@ -71,9 +75,14 @@ namespace Callbacks
     y : Parameter Tag
     y = MkParameter "y" (Int -> IO Int) Tag
 
+    %inline
+    public export
+    enabled : Parameter Tag
+    enabled = MkParameter "enabled" DartBool Tag
+
   %inline
   public export
-  new : Parameters [Callbacks.New.x, Callbacks.New.y] -> IO Callbacks
+  new : Parameters [Callbacks.New.x, Callbacks.New.y, Callbacks.New.enabled] -> IO Callbacks
   new ps = primIO $ prim__dart_new Callbacks [] ps
 
   export
@@ -84,13 +93,12 @@ namespace Callbacks
   %foreign "Dart:.callY"
   callY : Callbacks -> Int -> PrimIO Int
 
-%foreign "Dart:prim__dartEq,
-$.bool prim__dartEq($.Object x, $.Object y) => x == y;"
-prim__dartEq : AnyPtr -> AnyPtr -> Bool
-
-%inline
-dartEq : a -> a -> Bool
-dartEq x y = prim__dartEq (believe_me x) (believe_me y)
+||| A pure foreign function with a bool argument.
+%foreign "Dart:ifBool,
+$.Object ifBool($.bool condition, $.Object then, $.Object else_) {
+  return condition ? then : else_;
+}"
+ifBool : DartBool -> Int -> Int -> Int
 
 main : IO ()
 main = do
@@ -102,10 +110,14 @@ main = do
 
   cb <- Callbacks.new [
     x @= (\i => i * 2),
-    y @= (\i => printLn i *> pure (i * 2))
+    y @= (\i => printLn i *> pure (i * 2)),
+    enabled @= true
   ]
   printLn (callX cb 21)
   printLn !(primIO (callY cb 21))
 
-  printLn (dartEq 1 2)
-  printLn (dartEq 1 1)
+  -- Dart bool
+  printLn (the DartBool (cb `getField` "enabled"))
+  printLn (ifBool true 1 2)
+  printLn (ifBool false 1 2)
+  pure ()

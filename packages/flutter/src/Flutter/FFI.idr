@@ -969,12 +969,12 @@ namespace CustomPaint
     %inline
     public export
     isComplex : Parameter CustomPaint.New.Tag
-    isComplex = mkParameter "isComplex" Bool
+    isComplex = mkParameter "isComplex" DartBool
 
     %inline
     public export
     willChange : Parameter CustomPaint.New.Tag
-    willChange = mkParameter "willChange" Bool
+    willChange = mkParameter "willChange" DartBool
     %inline
     public export
     NamedParameters : Type
