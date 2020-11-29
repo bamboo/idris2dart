@@ -19,6 +19,16 @@ mutual
 
   %inline
   public export
+  AlignmentGeometry : Type
+  AlignmentGeometry = Struct "AlignmentGeometry,package:flutter/painting.dart" []
+
+  %inline
+  public export
+  Alignment : Type
+  Alignment = Struct "Alignment,package:flutter/painting.dart" []
+
+  %inline
+  public export
   MaterialColor : Type
   MaterialColor = Struct "MaterialColor,package:flutter/material.dart" []
 
@@ -262,6 +272,19 @@ namespace TextStyle
   textAlign this = getField this "textAlign"
 
 
+namespace Alignment
+  export
+  IsAssignableFrom AlignmentGeometry Alignment where
+
+  export
+  %foreign "Dart:const Alignment.centerLeft,package:flutter/painting.dart"
+  centerLeft : Alignment
+
+  export
+  %foreign "Dart:const Alignment.centerRight,package:flutter/painting.dart"
+  centerRight : Alignment
+
+
 namespace Colors
   export
   %foreign "Dart:const Colors.black,package:flutter/material.dart"
@@ -497,10 +520,18 @@ namespace IconButton
     public export
     icon : Parameter IconButton.New.Tag
     icon = mkParameter "icon" Widget
+
+    %inline
+    public export
+    alignment : Parameter IconButton.New.Tag
+    alignment = mkParameter "alignment" AlignmentGeometry
     %inline
     public export
     NamedParameters : Type
-    NamedParameters = Parameters [IconButton.New.onPressed, IconButton.New.tooltip, IconButton.New.icon]
+    NamedParameters = Parameters [ IconButton.New.onPressed
+    , IconButton.New.tooltip
+    , IconButton.New.icon
+    , IconButton.New.alignment ]
 
 
   %inline

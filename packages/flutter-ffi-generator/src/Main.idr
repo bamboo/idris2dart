@@ -27,6 +27,13 @@ flutter = defModule "Flutter.FFI" [
   defLib painting [
     defClass "TextStyle" [
       final "TextAlign" "textAlign"
+    ],
+    defClass "AlignmentGeometry" [
+    ],
+    defClass "Alignment" [
+      extends "AlignmentGeometry",
+      defConst "Alignment" "centerLeft",
+      defConst "Alignment" "centerRight"
     ]
   ],
   defLib material [
@@ -97,7 +104,8 @@ flutter = defModule "Flutter.FFI" [
       defConstructor "" [
         named (function [] void) "onPressed",
         named string "tooltip",
-        named "Widget" "icon"
+        named "Widget" "icon",
+        named "AlignmentGeometry" "alignment"
       ]
     ],
     defClass "FloatingActionButton" [
