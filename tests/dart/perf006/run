@@ -1,0 +1,3 @@
+$1 --exec main --cg dart Issue775.idr
+
+rm -rf build
