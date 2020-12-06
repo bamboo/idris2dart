@@ -52,6 +52,12 @@ flutter = defModule "Flutter.FFI" [
       defConst "MaterialColor" "white",
       defConst "MaterialColor" "yellow"
     ],
+    defClass "CircularProgressIndicator" [
+      extends "Widget",
+      defConstructor "" [
+        named "Key" "key"
+      ]
+    ],
     defClass "VisualDensity" [
       defConst "VisualDensity" "adaptivePlatformDensity"
     ],

@@ -39,6 +39,11 @@ mutual
 
   %inline
   public export
+  CircularProgressIndicator : Type
+  CircularProgressIndicator = Struct "CircularProgressIndicator,package:flutter/material.dart" []
+
+  %inline
+  public export
   VisualDensity : Type
   VisualDensity = Struct "VisualDensity,package:flutter/material.dart" []
 
@@ -329,6 +334,29 @@ namespace Colors
   export
   %foreign "Dart:const Colors.yellow,package:flutter/material.dart"
   yellow : MaterialColor
+
+
+namespace CircularProgressIndicator
+  export
+  IsAssignableFrom Widget CircularProgressIndicator where
+
+  namespace New
+    data Tag : Type where
+
+    %inline
+    public export
+    key : Parameter CircularProgressIndicator.New.Tag
+    key = mkParameter "key" Key
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [CircularProgressIndicator.New.key]
+
+
+  %inline
+  public export
+  new : HasIO io => CircularProgressIndicator.New.NamedParameters -> io CircularProgressIndicator
+  new  ps = primIO $ prim__dart_new CircularProgressIndicator [] ps
 
 
 namespace VisualDensity
