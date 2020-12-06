@@ -248,17 +248,17 @@ makeCallback c (args, ret) =
       CFWorld => Nothing
       _ => Just p
 
-foreignArg : (Doc, CFType) -> Maybe Doc
+foreignArg : {auto fc : FC} -> (Doc, CFType) -> Core (Maybe Doc)
 foreignArg (n, ty) = case ty of
-  CFWorld => Nothing
-  CFFun a b => Just (makeCallback n (uncurriedSignature a b))
-  CFUser (UN "Type") [] => Nothing
-  CFUser (UN "__") [] => Nothing
+  CFWorld => pure Nothing
+  CFFun a b => pure $ Just (makeCallback n (uncurriedSignature a b))
+  CFUser (UN "Type") [] => pure Nothing
+  CFUser (UN "__") [] => pure Nothing
   CFUser (NS ns (UN "Bool")) [] =>
     if ns == basicsNS
-      then Just (n <+> " == 0")
-      else Just n
-  _ => Just n
+      then throw (GenericMsg fc "'Bool' is not a valid foreign type, use 'DartBool' from 'Dart.Core` instead!")
+      else pure $ Just n
+  _ => pure $ Just n
 
 singleExpFunction : Doc -> List Doc -> Doc -> Doc
 singleExpFunction n ps e =
@@ -272,14 +272,15 @@ convertForeignReturnType retTy e = case retTy of
       else e
   _ => e
 
-foreignFunctionProxy : Doc -> Doc -> List CFType -> CFType -> Doc
-foreignFunctionProxy n ff args ret =
-  let
-    argNames = argNamesFor args "a$"
-    fArgs = mapMaybe foreignArg (zip argNames args)
-    fc = ff <+> tupled fArgs
-  in
-    singleExpFunction n argNames (convertForeignReturnType ret fc)
+traverseMaybes : (a -> Core (Maybe b)) -> List a -> Core (List b)
+traverseMaybes f as = catMaybes <$> traverse f as
+
+foreignFunctionProxy : {auto fc : FC} -> Doc -> Doc -> List CFType -> CFType -> Core Doc
+foreignFunctionProxy n ff args ret = do
+  let argNames = argNamesFor args "a$"
+  fArgs <- traverseMaybes foreignArg (zip argNames args)
+  let call = ff <+> tupled fArgs
+  pure (singleExpFunction n argNames (convertForeignReturnType ret call))
 
 foreignName : {auto ctx : Ref Dart DartT}
   -> Lib -> String -> Core Doc
@@ -334,7 +335,7 @@ foreignMethodProxy : {auto ctx : Ref Dart DartT}
   -> Doc -> Doc -> List CFType -> CFType -> Core Doc
 foreignMethodProxy n m args@(thisTy :: _) ret = do
   let argNames = argNamesFor args "a$"
-  case mapMaybe foreignArg (zip argNames args) of
+  case !(traverseMaybes foreignArg (zip argNames args)) of
     fThis :: fArgs => do
       let mc = castTo !(foreignTypeOf thisTy) fThis <+> dot <+> m <+> tupled fArgs
       pure (singleExpFunction n argNames (convertForeignReturnType ret mc))
@@ -343,12 +344,13 @@ foreignMethodProxy n m args ret =
   pure (unsupported (m, args))
 
 dartForeign : {auto ctx : Ref Dart DartT}
+  -> {auto fc : FC}
   -> Name -> ForeignDartSpec
   -> List CFType -> CFType
   -> Core Doc
 dartForeign n (ForeignFunction f lib) args ret = do
   ff <- foreignName lib f
-  pure (foreignFunctionProxy (dartName n) ff args ret)
+  foreignFunctionProxy (dartName n) ff args ret
 dartForeign n (ForeignConst c lib) _ _ = do
   fc <- foreignName lib c
   pure (singleExpFunction (dartName n) [] fc)
@@ -377,6 +379,7 @@ dartStdin : {auto ctx : Ref Dart DartT} -> Core Doc
 dartStdin = foreignName "dart:io" "stdin"
 
 foreignDecl : {auto ctx : Ref Dart DartT}
+  ->  {auto fc : FC}
   -> Name -> List String
   -> List CFType -> CFType
   -> Core Doc

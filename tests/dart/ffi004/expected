@@ -1,0 +1,5 @@
+Error: 'Bool' is not a valid foreign type, use 'DartBool' from 'Dart.Core` instead!
+
+Main.idr:3:1--4:26
+ 3 | %foreign "Dart:cantUseBool,lib.dart"
+ 4 | cantUseBool : Bool -> Int

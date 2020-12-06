@@ -99,10 +99,6 @@ namespace PaintingStyle
   index : PaintingStyle -> Int
   index ps = getField ps "index"
 
-||| A pure foreign function with a bool value.
-%foreign (libsmall "ifBool")
-ifBool : Bool -> Int -> Int -> Int
-
 main : IO ()
 main = do
   printLn (add 70 24)
@@ -126,8 +122,3 @@ main = do
 
   -- Dart enums
   printLn (index PaintingStyle.fill, index PaintingStyle.stroke)
-
-  -- Dart bool
-  printLn (ifBool True 1 2)
-  printLn (ifBool False 1 2)
-  pure ()
