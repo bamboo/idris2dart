@@ -539,6 +539,7 @@ dartOp (Cast ty StringType) [x] = x <+> ".toString()"
 dartOp DoubleFloor [x] = doubleOp x "floorToDouble()"
 dartOp DoubleCeiling [x] = doubleOp x "ceilToDouble()"
 dartOp BelieveMe [_, _, x] = x
+dartOp Crash [_, m] = assertionError m
 dartOp e args = unsupported ("dartOp", e, args)
 
 useDelay : {auto ctx : Ref Dart DartT} -> Core ()
