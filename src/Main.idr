@@ -551,6 +551,16 @@ mutual
   dartLambda : {auto ctx : Ref Dart DartT} -> List Name -> Statement -> Core Doc
   dartLambda ps s = pure (paramList ps <+> block !(dartStatement s))
 
+  dartConstructor : {auto ctx : Ref Dart DartT}
+    -> Doc
+    -> List Expression
+    -> Core Doc
+  dartConstructor tag args = case args of
+    [] => pure (text "const [" <+> tag <+> "]")
+    args => do
+      args' <- traverse dartExp args
+      pure ("[" <+> tag <+> ", " <+> commaSep args' <+> "]")
+
   dartExp : {auto ctx : Ref Dart DartT}
     -> Expression
     -> Core Doc
@@ -569,22 +579,20 @@ mutual
       pure (dartOp f !(traverseVect dartExp args))
     IEPrimFnExt n args =>
       dartPrimFnExt n args
-    IEConstructor (Left tag) [] =>
-      pure (text ("const [" ++ show tag ++ "]"))
-    IEConstructor (Left tag) args => do
-      args' <- traverse dartExp args
-      pure (text ("[" ++ show tag ++ ", ") <+> commaSep args' <+> "]")
-    IEConstructorHead e => do
-      e' <- dartExp e
-      pure (castTo "$.int" (castTo "$.List" e' <+> "[0]"))
+    IEConstructor (Left tag) args =>
+      dartConstructor (shown tag) args
+    IEConstructor (Right tag) args =>
+      dartConstructor (dartStringDoc tag) args
+    IEConstructorHead e =>
+      pure (castTo "$.List" !(dartExp e) <+> "[0]")
     IEConstructorTag (Left tag) =>
       pure (shown tag)
-    IEConstructorArg i e => do
-      e' <- dartExp e
-      pure (castTo "$.List" e' <+> "[" <+> shown i <+> "]")
-    IEDelay e => do
-      useDelay
-      pure ("$Delayed" <+> paren ("() => " <+> !(dartExp e)))
+    IEConstructorTag (Right tag) =>
+      pure (shown tag)
+    IEConstructorArg i e =>
+      pure (castTo "$.List" !(dartExp e) <+> "[" <+> shown i <+> "]")
+    IEDelay e =>
+      useDelay *> pure ("$Delayed" <+> paren ("() => " <+> !(dartExp e)))
     IEForce e =>
       pure (castTo "$Delayed" !(dartExp e) <+> ".force()")
     _ => pure (debug e)
