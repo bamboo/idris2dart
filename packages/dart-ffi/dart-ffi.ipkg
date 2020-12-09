@@ -7,6 +7,7 @@ modules
   , Dart.FFI.Enums
   , Dart.FFI.Upcast
   , Dart.FFI.UpcastList
+  , Dart.String
 
 sourcedir = "src"
 
