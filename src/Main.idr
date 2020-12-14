@@ -610,6 +610,20 @@ mutual
       fTy <- foreignTypeName ty
       pure (castTo fTy !(dartExp e) <+> dot <+> text f <+> " = " <+> !(dartExp rhs))
   dartPrimFnExt
+    (NS _ (UN "prim__dart_invoke"))
+    [ IENull, IENull, IENull, IENull, IENull -- erased type arguments
+      , IEConstant (Str fn)
+      , positional
+      , named
+      , rest
+    ] = do
+      let pos' = collectPositional positional
+      let named' = collectNamed named
+      fn' <- foreignTypeName fn
+      posArgs <- traverse dartExp pos'
+      namedArgs <- traverse dartNamedParam named'
+      pure (fn' <+> tupled (posArgs ++ namedArgs))
+  dartPrimFnExt
     (NS _ (UN "prim__dart_new"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
       , IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _)

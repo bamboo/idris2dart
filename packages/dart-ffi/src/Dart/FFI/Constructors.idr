@@ -50,3 +50,6 @@ public export
 
 public export
 %extern prim__dart_new : (ty : Type) -> HVect positional -> Parameters named -> (1 x : %World) -> IORes ty
+
+public export
+%extern prim__dart_invoke : {0 res : Type} -> (foreignName : String) -> HVect positional -> Parameters named -> (1 x : %World) -> IORes res
