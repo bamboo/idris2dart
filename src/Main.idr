@@ -11,6 +11,7 @@ import Data.String.Extra
 import Data.StringMap
 import Data.Strings
 import Idris.Driver
+import Primitives
 import Printer
 import System
 import System.File
@@ -378,6 +379,25 @@ dartStdout = foreignName "dart:io" "stdout"
 dartStdin : {auto ctx : Ref Dart DartT} -> Core Doc
 dartStdin = foreignName "dart:io" "stdin"
 
+dataStringsNS : Namespace
+dataStringsNS = mkNamespace "Data.Strings"
+
+unknownForeignDecl : {auto ctx : Ref Dart DartT}
+  -> Name -> List String
+  -> Core Doc
+unknownForeignDecl n ss =
+  pure (dartName n <+> "([a, b, c, d, e, f, g, h, i, j, k])" <+> block (unsupportedError (n, ss)))
+
+maybeForeignDartDecl : {auto ctx : Ref Dart DartT}
+  ->  {auto fc : FC}
+  -> Name -> List String
+  -> List CFType -> CFType
+  -> Core Doc
+maybeForeignDartDecl n ss args ret =
+  case mapMaybe foreignDartSpecFrom ss of
+    [s] => dartForeign n s args ret
+    _ => unknownForeignDecl n ss
+
 foreignDecl : {auto ctx : Ref Dart DartT}
   ->  {auto fc : FC}
   -> Name -> List String
@@ -390,9 +410,10 @@ foreignDecl n ss args ret = case n of
     pure (dartName n <+> "(c, w)" <+> block (!dartStdout <+> ".writeCharCode(c);" <+> line <+> "return w;"))
   NS _ (UN "prim__getStr") =>
     pure (dartName n <+> "(w)" <+> block ("return " <+> !dartStdin <+> ".readLineSync() ?? \"\";"))
-  _ => case mapMaybe foreignDartSpecFrom ss of
-    [s] => dartForeign n s args ret
-    _ => pure (dartName n <+> "([a, b, c, d, e, f, g, h, i, j, k])" <+> block (unsupportedError ss))
+  NS ns (UN "fastConcat") => if ns == dataStringsNS
+    then pure (text primDartFastConcat)
+    else maybeForeignDartDecl n ss args ret
+  _ => maybeForeignDartDecl n ss args ret
 
 binOp : Doc -> Doc -> Doc -> Doc
 binOp o lhs rhs = paren (lhs <+> o <+> rhs)
@@ -507,6 +528,7 @@ dartOp StrIndex [x, y] = stringOp x "codeUnitAt" <+> paren y
 dartOp StrTail [x] = stringOp x "substring(1)"
 dartOp StrCons [x, y] = binOp "+" ("$.String.fromCharCode" <+> paren x) (castTo stringTy y)
 dartOp StrAppend [x, y] = binOpOf' stringTy "+" x y
+dartOp StrSubstr [offset, length, str] = (castTo stringTy str) <+> ".substring" <+> tupled [offset, binOpOf IntType "+" offset length]
 dartOp (Cast StringType IntegerType) [x] = paren (bigIntTy <+> ".tryParse" <+> castTo stringTy x <+> " ?? " <+> bigIntTy <+> ".zero")
 dartOp (Cast StringType DoubleType) [x] = paren (doubleTy <+> ".tryParse" <+> castTo stringTy x <+> " ?? 0.0")
 dartOp (Cast StringType IntType) [x] = paren (intTy <+> ".tryParse" <+> castTo stringTy x <+> " ?? 0")
