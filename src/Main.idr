@@ -293,9 +293,9 @@ foreignName lib n =
     [] => pure (text n)
     _ => pure (!(addImport lib) <+> dot <+> text n)
 
-parseForeignTypeName : {auto ctx : Ref Dart DartT}
+parseForeignName : {auto ctx : Ref Dart DartT}
   -> String -> Core Doc
-parseForeignTypeName ty =
+parseForeignName ty =
   let (tyN, lib) = splitAtFirst ',' ty
   in foreignName lib tyN
 
@@ -315,7 +315,7 @@ foreignTypeName ty = do
   case !(lookupForeignType ty) of
     Just doc => pure doc
     Nothing => do
-      doc <- parseForeignTypeName ty
+      doc <- parseForeignName ty
       putForeignType ty doc
       pure doc
 
@@ -633,7 +633,7 @@ mutual
       pure (castTo fTy !(dartExp e) <+> dot <+> text f <+> " = " <+> !(dartExp rhs))
   dartPrimFnExt
     (NS _ (UN "prim__dart_invoke"))
-    [ IENull, IENull, IENull, IENull, IENull -- erased type arguments
+    [ IENull, IENull, IENull, IENull, positionalTys -- erased type arguments
       , IEConstant (Str fn)
       , positional
       , named
@@ -641,10 +641,17 @@ mutual
     ] = do
       let pos' = collectPositional positional
       let named' = collectNamed named
-      fn' <- foreignTypeName fn
       posArgs <- traverse dartExp pos'
       namedArgs <- traverse dartNamedParam named'
-      pure (fn' <+> tupled (posArgs ++ namedArgs))
+      case ("." `isPrefixOf` fn, posArgs) of
+        (True, this :: args) => do -- Method call
+          thisTy <- methodReceiverTypeFrom positionalTys
+          pure $ maybe this (flip castTo this) thisTy <+> text fn <+> tupled (args ++ namedArgs)
+        (False, args) => do -- Static / Global function call
+          fn' <- parseForeignName fn
+          pure $ fn' <+> tupled (args ++ namedArgs)
+        _ =>
+          pure $ unsupported ("prim__dart_invoke", fn, positional, named)
   dartPrimFnExt
     (NS _ (UN "prim__dart_new"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
@@ -681,6 +688,12 @@ mutual
     let fTy = parseFunctionType ty
     value' <- dartExp value
     pure (text name <+> ": " <+> maybe value' (makeCallback value') fTy)
+
+  methodReceiverTypeFrom : {auto ctx : Ref Dart DartT} -> Expression -> Core (Maybe Doc)
+  methodReceiverTypeFrom (IEConstructor (Left 1) (IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _) :: _)) =
+    Just <$> foreignTypeName ty
+  methodReceiverTypeFrom _ =
+    pure Nothing
 
   ||| Collects the parameter name and value pairs from the expression
   ||| representing a `ParamList _`.

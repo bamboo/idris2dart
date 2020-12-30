@@ -52,4 +52,4 @@ public export
 %extern prim__dart_new : (ty : Type) -> HVect positional -> Parameters named -> (1 x : %World) -> IORes ty
 
 public export
-%extern prim__dart_invoke : {0 res : Type} -> (foreignName : String) -> HVect positional -> Parameters named -> (1 x : %World) -> IORes res
+%extern prim__dart_invoke : {0 res : Type} -> {positionalTys : Vect k Type} -> (foreignName : String) -> (positional : HVect positionalTys) -> Parameters named -> (1 x : %World) -> IORes res
