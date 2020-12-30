@@ -160,6 +160,9 @@ parameterNames ps = flip mapMaybe ps $ \case
 parameters' : Doc ()
 parameters'= pretty "NamedParameters"
 
+none : Doc ()
+none = pretty "Parameters.none"
+
 namedParameterDeclarationsFor : String -> String -> List (String, DartType) -> Doc ()
 namedParameterDeclarationsFor typeName _ [] = emptyDoc
 namedParameterDeclarationsFor typeName ns ps =
@@ -200,7 +203,7 @@ ctorPrimsFor n ps =
       then (
         hsep psNames,
         positionalPs',
-        list psNames <++> parens (pretty "the (Parameters {tag = Void} [])" <++> list [])
+        list psNames <++> none
       ) else (
         hsep psNames <++> pretty "ps",
         positionalPs' ++ [ret' <+> dot <+> pretty namedParameterNS <+> dot <+> parameters'],
@@ -238,7 +241,7 @@ functionPrimsFor (Fun n ps ret) foreignName hasThis =
       then (
         hsep psNames',
         psTys',
-        list args <++> parens (pretty "the (Parameters {tag = Void} [])" <++> list [])
+        list args <++> none
       ) else (
         hsep psNames' <++> pretty "ps",
         psTys' ++ [pretty c.name <+> dot <+> pretty namedParameterNS <+> dot <+> parameters'],

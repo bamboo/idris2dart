@@ -34,6 +34,12 @@ data Parameters : Schema tag -> Type where
   (::) : {0 p : Parameter tag} -> {0 schema : Schema tag}
       -> Argument p -> Parameters schema -> {auto 0 isValid : Elem p schema} -> Parameters schema
 
+namespace Parameters
+  %inline
+  public export
+  none : Parameters {tag = Void} []
+  none = []
+
 infix 1 @=
 infix 1 @=>
 

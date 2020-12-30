@@ -398,7 +398,7 @@ namespace Theme
   %inline
   public export
   of_ : HasIO io => (context : BuildContext) -> io ThemeData
-  of_ context = primIO $ prim__dart_invoke "Theme.of,package:flutter/material.dart" [ context ] (the (Parameters {tag = Void} []) [  ])
+  of_ context = primIO $ prim__dart_invoke "Theme.of,package:flutter/material.dart" [context] Parameters.none
 
 
 namespace ThemeData
@@ -1153,9 +1153,7 @@ namespace Canvas
   %inline
   public export
   drawPath : HasIO io => (path : Path) -> (paint : Paint) -> (this : Canvas) -> io ()
-  drawPath path paint this = primIO $ prim__dart_invoke ".drawPath" [ this
-  , path
-  , paint ] (the (Parameters {tag = Void} []) [])
+  drawPath path paint this = primIO $ prim__dart_invoke ".drawPath" [this, path, paint] Parameters.none
 
 
 namespace PaintingStyle
@@ -1168,7 +1166,7 @@ namespace Paint
   %inline
   public export
   new : HasIO io => io Paint
-  new  = primIO $ prim__dart_new Paint [] (the (Parameters {tag = Void} []) [])
+  new  = primIO $ prim__dart_new Paint [] Parameters.none
 
   export
   style : Paint -> PaintingStyle
@@ -1191,7 +1189,7 @@ namespace Offset
   %inline
   public export
   new : HasIO io => (dx : Double) -> (dy : Double) -> io Offset
-  new dx dy = primIO $ prim__dart_new Offset [dx, dy] (the (Parameters {tag = Void} []) [])
+  new dx dy = primIO $ prim__dart_new Offset [dx, dy] Parameters.none
 
   export
   dx : Offset -> Double
@@ -1216,17 +1214,17 @@ namespace Path
   %inline
   public export
   new : HasIO io => io Path
-  new  = primIO $ prim__dart_new Path [] (the (Parameters {tag = Void} []) [])
+  new  = primIO $ prim__dart_new Path [] Parameters.none
 
   %inline
   public export
   moveTo : HasIO io => (x : Double) -> (y : Double) -> (this : Path) -> io ()
-  moveTo x y this = primIO $ prim__dart_invoke ".moveTo" [this, x, y] (the (Parameters {tag = Void} []) [])
+  moveTo x y this = primIO $ prim__dart_invoke ".moveTo" [this, x, y] Parameters.none
 
   %inline
   public export
   lineTo : HasIO io => (x : Double) -> (y : Double) -> (this : Path) -> io ()
-  lineTo x y this = primIO $ prim__dart_invoke ".lineTo" [this, x, y] (the (Parameters {tag = Void} []) [])
+  lineTo x y this = primIO $ prim__dart_invoke ".lineTo" [this, x, y] Parameters.none
 
 
 namespace Velocity
