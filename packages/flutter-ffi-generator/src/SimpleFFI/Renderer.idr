@@ -162,7 +162,8 @@ parameters'= pretty "NamedParameters"
 
 namedParameterDeclarationsFor : String -> String -> List (String, DartType) -> Doc ()
 namedParameterDeclarationsFor typeName _ [] = emptyDoc
-namedParameterDeclarationsFor typeName ns ps = namespaced ns (sepByLines (tag :: (decl <$> ps)) <+> hardline <+> schema)
+namedParameterDeclarationsFor typeName ns ps =
+  namespaced ns (sepByLines (tag :: (decl <$> ps)) <+> emptyLine <+> schema)
   where
     qualified : String -> Doc ()
     qualified n = pretty (typeName ++ "." ++ ns ++ "." ++ n)
@@ -224,28 +225,39 @@ isIdrisKeyword s = case s of
 functionPrimsFor : {auto c : Class} -> Function -> String -> Bool -> List (Doc ())
 functionPrimsFor (Fun n ps ret) foreignName hasThis =
   let
+    funName = if isIdrisKeyword n then n ++ "_" else n
+    (positional, named) = partitionParameters ps
+    namedParameterNS = capitalize funName
     ret' = prettyType ret
-    ps' = prettyParameter <$> ps
-    psNames = parameterNames ps
-    primName = pretty ("prim__" ++ n)
-    primRet = pretty "PrimIO" <++> ret'
-    primParamTys = ps' ++ [primRet]
-    proxyParamTys = [pretty "io" <++> ret']
-    thisTy = the (Lazy (Doc())) (parens (this <++> colon <++> pretty c.name))
-    proxyName = pretty (if isIdrisKeyword n then n ++ "_" else n)
-    prim =
-      foreign foreignName <+> hardline
-        <+> primName <++> colon <++> funType (ifHasThis (thisTy :: primParamTys) primParamTys)
-    proxy =
-      export_ <+> proxyName <++> colon <++> pretty "HasIO io =>"
-        <++> funType (ps' ++ ifHasThis (thisTy :: proxyParamTys) proxyParamTys) <+> hardline
-        <+> proxyName <++> hsep psNames <++> ifHasThis (this <++> equals) equals
-        <++> pretty "primIO $" <++> primName <++> hsep (ifHasThis (this :: psNames) psNames)
+    psTys = (\(n, ty) => parens (pretty n <++> colon <++> prettyType ty)) <$> positional
+    psNames = pretty . fst <$> positional
+    psNames' = ifHasThis (++ [this]) psNames
+    psTys' = ifHasThis (++ [parens (this <++> colon <++> pretty c.name)]) psTys
+    args = ifHasThis (this ::) psNames
+    (ps', psTys'', args') = if isNil named
+      then (
+        hsep psNames',
+        psTys',
+        list args <++> parens (pretty "the (Parameters {tag = Void} [])" <++> list [])
+      ) else (
+        hsep psNames' <++> pretty "ps",
+        psTys' ++ [pretty c.name <+> dot <+> pretty namedParameterNS <+> dot <+> parameters'],
+        list args <++> pretty "ps"
+      )
+    fun = vcat [
+      inline,
+      pubExport,
+      pretty funName <++> colon <++> pretty "HasIO io =>" <++> funType (psTys'' ++ [pretty "io" <++> ret']),
+      pretty funName <++> ps' <++> equals
+        <++> pretty "primIO $ prim__dart_invoke" <++> stringLit foreignName <++> args'
+    ]
   in
-    [prim, proxy]
+    if isNil named
+      then [fun]
+      else [namedParameterDeclarationsFor c.name namedParameterNS named, fun]
   where
-    ifHasThis : Lazy a -> Lazy a -> a
-    ifHasThis ifTrue ifFalse = if hasThis then ifTrue else ifFalse
+    ifHasThis : (a -> a) -> a -> a
+    ifHasThis f v = if hasThis then f v else v
 
 constPrim : {auto lib : Lib} -> String -> String -> DartType -> Doc ()
 constPrim owner field ty =
