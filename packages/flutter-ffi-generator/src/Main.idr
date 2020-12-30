@@ -37,6 +37,8 @@ flutter = defModule "Flutter.FFI" [
     ]
   ],
   defLib material [
+    defClass "ButtonStyle" [
+    ],
     defClass "MaterialColor" [
     ],
     defClass "Colors" [
@@ -76,6 +78,18 @@ flutter = defModule "Flutter.FFI" [
         named "VisualDensity" "visualDensity"
       ],
       final "TextTheme" "textTheme"
+    ],
+    defClass "TextButton" [
+      extends "Widget",
+      defConstructor "" [
+        named (function [] void) "onPressed",
+        named "ButtonStyle" "style",
+        named "Widget" "child"
+        ],
+      defStatic "styleFrom" [
+        named "Color" "primary",
+        named "Color" "backgroundColor"
+      ] "ButtonStyle"
     ],
     defClass "Scaffold" [
       extends "Widget",

@@ -29,6 +29,11 @@ mutual
 
   %inline
   public export
+  ButtonStyle : Type
+  ButtonStyle = Struct "ButtonStyle,package:flutter/material.dart" []
+
+  %inline
+  public export
   MaterialColor : Type
   MaterialColor = Struct "MaterialColor,package:flutter/material.dart" []
 
@@ -68,6 +73,11 @@ mutual
   ThemeData = Struct "ThemeData,package:flutter/material.dart" [
     ("textTheme", TextTheme)
   ]
+
+  %inline
+  public export
+  TextButton : Type
+  TextButton = Struct "TextButton,package:flutter/material.dart" []
 
   %inline
   public export
@@ -347,6 +357,7 @@ namespace CircularProgressIndicator
     public export
     key : Parameter CircularProgressIndicator.New.Tag
     key = mkParameter "key" Key
+
     %inline
     public export
     NamedParameters : Type
@@ -384,12 +395,10 @@ namespace TextTheme
 
 
 namespace Theme
-  %foreign "Dart:Theme.of,package:flutter/material.dart"
-  prim__of : (context : BuildContext) -> PrimIO ThemeData
-
-  export
+  %inline
+  public export
   of_ : HasIO io => (context : BuildContext) -> io ThemeData
-  of_ context = primIO $ prim__of context
+  of_ context = primIO $ prim__dart_invoke "Theme.of,package:flutter/material.dart" [ context ] (the (Parameters {tag = Void} []) [  ])
 
 
 namespace ThemeData
@@ -405,6 +414,7 @@ namespace ThemeData
     public export
     visualDensity : Parameter ThemeData.New.Tag
     visualDensity = mkParameter "visualDensity" VisualDensity
+
     %inline
     public export
     NamedParameters : Type
@@ -419,6 +429,64 @@ namespace ThemeData
   export
   textTheme : ThemeData -> TextTheme
   textTheme this = getField this "textTheme"
+
+
+namespace TextButton
+  export
+  IsAssignableFrom Widget TextButton where
+
+  namespace New
+    data Tag : Type where
+
+    %inline
+    public export
+    onPressed : Parameter TextButton.New.Tag
+    onPressed = mkParameter "onPressed" (IO ())
+
+    %inline
+    public export
+    style : Parameter TextButton.New.Tag
+    style = mkParameter "style" ButtonStyle
+
+    %inline
+    public export
+    child : Parameter TextButton.New.Tag
+    child = mkParameter "child" Widget
+
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [TextButton.New.onPressed, TextButton.New.style, TextButton.New.child]
+
+
+  %inline
+  public export
+  new : HasIO io => TextButton.New.NamedParameters -> io TextButton
+  new  ps = primIO $ prim__dart_new TextButton [] ps
+
+  namespace StyleFrom
+    data Tag : Type where
+
+    %inline
+    public export
+    primary : Parameter TextButton.StyleFrom.Tag
+    primary = mkParameter "primary" Color
+
+    %inline
+    public export
+    backgroundColor : Parameter TextButton.StyleFrom.Tag
+    backgroundColor = mkParameter "backgroundColor" Color
+
+    %inline
+    public export
+    NamedParameters : Type
+    NamedParameters = Parameters [TextButton.StyleFrom.primary, TextButton.StyleFrom.backgroundColor]
+
+
+  %inline
+  public export
+  styleFrom : HasIO io => TextButton.StyleFrom.NamedParameters -> io ButtonStyle
+  styleFrom  ps = primIO $ prim__dart_invoke "TextButton.styleFrom,package:flutter/material.dart" [] ps
 
 
 namespace Scaffold
@@ -442,6 +510,7 @@ namespace Scaffold
     public export
     floatingActionButton : Parameter Scaffold.New.Tag
     floatingActionButton = mkParameter "floatingActionButton" Widget
+
     %inline
     public export
     NamedParameters : Type
@@ -465,6 +534,7 @@ namespace AppBar
     public export
     title : Parameter AppBar.New.Tag
     title = mkParameter "title" Widget
+
     %inline
     public export
     NamedParameters : Type
@@ -553,6 +623,7 @@ namespace IconButton
     public export
     alignment : Parameter IconButton.New.Tag
     alignment = mkParameter "alignment" AlignmentGeometry
+
     %inline
     public export
     NamedParameters : Type
@@ -589,6 +660,7 @@ namespace FloatingActionButton
     public export
     child : Parameter FloatingActionButton.New.Tag
     child = mkParameter "child" Widget
+
     %inline
     public export
     NamedParameters : Type
@@ -649,6 +721,7 @@ namespace Slider
     public export
     label : Parameter Slider.New.Tag
     label = mkParameter "label" String
+
     %inline
     public export
     NamedParameters : Type
@@ -689,6 +762,7 @@ namespace MaterialApp
     public export
     theme : Parameter MaterialApp.New.Tag
     theme = mkParameter "theme" ThemeData
+
     %inline
     public export
     NamedParameters : Type
@@ -733,6 +807,7 @@ namespace Icon
     public export
     key : Parameter Icon.New.Tag
     key = mkParameter "key" Key
+
     %inline
     public export
     NamedParameters : Type
@@ -756,6 +831,7 @@ namespace Center
     public export
     child : Parameter Center.New.Tag
     child = mkParameter "child" Widget
+
     %inline
     public export
     NamedParameters : Type
@@ -784,6 +860,7 @@ namespace Column
     public export
     mainAxisAlignment : Parameter Column.New.Tag
     mainAxisAlignment = mkParameter "mainAxisAlignment" MainAxisAlignment
+
     %inline
     public export
     NamedParameters : Type
@@ -807,6 +884,7 @@ namespace Expanded
     public export
     child : Parameter Expanded.New.Tag
     child = mkParameter "child" Widget
+
     %inline
     public export
     NamedParameters : Type
@@ -835,6 +913,7 @@ namespace Row
     public export
     mainAxisAlignment : Parameter Row.New.Tag
     mainAxisAlignment = mkParameter "mainAxisAlignment" MainAxisAlignment
+
     %inline
     public export
     NamedParameters : Type
@@ -868,6 +947,7 @@ namespace Text
     public export
     textAlign : Parameter Text.New.Tag
     textAlign = mkParameter "textAlign" TextAlign
+
     %inline
     public export
     NamedParameters : Type
@@ -966,6 +1046,7 @@ namespace GestureDetector
     public export
     onLongPressEnd : Parameter GestureDetector.New.Tag
     onLongPressEnd = mkParameter "onLongPressEnd" (LongPressEndDetails -> IO ())
+
     %inline
     public export
     NamedParameters : Type
@@ -1034,6 +1115,7 @@ namespace CustomPaint
     public export
     willChange : Parameter CustomPaint.New.Tag
     willChange = mkParameter "willChange" DartBool
+
     %inline
     public export
     NamedParameters : Type
@@ -1068,12 +1150,12 @@ namespace AppLifecycleState
 
 
 namespace Canvas
-  %foreign "Dart:.drawPath"
-  prim__drawPath : (this : Canvas) -> (path : Path) -> (paint : Paint) -> PrimIO ()
-
-  export
+  %inline
+  public export
   drawPath : HasIO io => (path : Path) -> (paint : Paint) -> (this : Canvas) -> io ()
-  drawPath path paint this = primIO $ prim__drawPath this path paint
+  drawPath path paint this = primIO $ prim__dart_invoke ".drawPath" [ this
+  , path
+  , paint ] (the (Parameters {tag = Void} []) [])
 
 
 namespace PaintingStyle
@@ -1136,19 +1218,15 @@ namespace Path
   new : HasIO io => io Path
   new  = primIO $ prim__dart_new Path [] (the (Parameters {tag = Void} []) [])
 
-  %foreign "Dart:.moveTo"
-  prim__moveTo : (this : Path) -> (x : Double) -> (y : Double) -> PrimIO ()
-
-  export
+  %inline
+  public export
   moveTo : HasIO io => (x : Double) -> (y : Double) -> (this : Path) -> io ()
-  moveTo x y this = primIO $ prim__moveTo this x y
+  moveTo x y this = primIO $ prim__dart_invoke ".moveTo" [this, x, y] (the (Parameters {tag = Void} []) [])
 
-  %foreign "Dart:.lineTo"
-  prim__lineTo : (this : Path) -> (x : Double) -> (y : Double) -> PrimIO ()
-
-  export
+  %inline
+  public export
   lineTo : HasIO io => (x : Double) -> (y : Double) -> (this : Path) -> io ()
-  lineTo x y this = primIO $ prim__lineTo this x y
+  lineTo x y this = primIO $ prim__dart_invoke ".lineTo" [this, x, y] (the (Parameters {tag = Void} []) [])
 
 
 namespace Velocity
