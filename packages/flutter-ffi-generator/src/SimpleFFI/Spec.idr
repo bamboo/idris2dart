@@ -121,8 +121,8 @@ defConstructor : String -> List Parameter -> Member
 defConstructor = Constructor
 
 export
-defIO : String -> List Parameter -> DartType -> Member
-defIO n ps ret = Method $ Fun n ps ret
+defMethod : String -> List Parameter -> DartType -> Member
+defMethod n ps ret = Method $ Fun n ps ret
 
 export
 defStatic : String -> List Parameter -> DartType -> Member

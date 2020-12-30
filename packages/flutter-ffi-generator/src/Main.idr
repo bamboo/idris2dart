@@ -242,7 +242,7 @@ flutter = defModule "Flutter.FFI" [
     defClass "Color" [
     ],
     defClass "Canvas" [
-      defIO "drawPath" [
+      defMethod "drawPath" [
         positional "Path" "path",
         positional "Paint" "paint"
       ] void
@@ -266,8 +266,8 @@ flutter = defModule "Flutter.FFI" [
     ],
     defClass "Path" [
       defConstructor "" [],
-      defIO "moveTo" [positional double "x", positional double "y"] void,
-      defIO "lineTo" [positional double "x", positional double "y"] void
+      defMethod "moveTo" [positional double "x", positional double "y"] void,
+      defMethod "lineTo" [positional double "x", positional double "y"] void
     ],
     defClass "Velocity" [
       final "Offset" "pixelsPerSecond"
