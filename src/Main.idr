@@ -619,6 +619,23 @@ mutual
       pure (castTo "$Delayed" !(dartExp e) <+> ".force()")
     _ => pure (debug e)
 
+  dartPrimInvoke : {auto ctx : Ref Dart DartT}
+    -> String -> Expression -> Expression -> Expression -> Core Doc
+  dartPrimInvoke fn positionalTys positional named = do
+    let pos' = collectPositional positional
+    let named' = collectNamed named
+    posArgs <- traverse dartExp pos'
+    namedArgs <- traverse dartNamedParam named'
+    case ("." `isPrefixOf` fn, posArgs) of
+      (True, this :: args) => do -- Method call
+        thisTy <- methodReceiverTypeFrom positionalTys
+        pure $ maybe this (flip castTo this) thisTy <+> text fn <+> tupled (args ++ namedArgs)
+      (False, args) => do -- Static / Global function call
+        fn' <- parseForeignName fn
+        pure $ fn' <+> tupled (args ++ namedArgs)
+      _ =>
+        pure $ unsupported ("prim__dart_invoke", fn, positional, named)
+
   dartPrimFnExt : {auto ctx : Ref Dart DartT}
     -> Name -> List Expression -> Core Doc
   dartPrimFnExt
@@ -633,25 +650,22 @@ mutual
       pure (castTo fTy !(dartExp e) <+> dot <+> text f <+> " = " <+> !(dartExp rhs))
   dartPrimFnExt
     (NS _ (UN "prim__dart_invoke"))
-    [ IENull, IENull, IENull, IENull, positionalTys -- erased type arguments
+    [ IENull, IENull, IENull, IENull -- erased type arguments
+      , positionalTys
       , IEConstant (Str fn)
       , positional
       , named
       , rest
-    ] = do
-      let pos' = collectPositional positional
-      let named' = collectNamed named
-      posArgs <- traverse dartExp pos'
-      namedArgs <- traverse dartNamedParam named'
-      case ("." `isPrefixOf` fn, posArgs) of
-        (True, this :: args) => do -- Method call
-          thisTy <- methodReceiverTypeFrom positionalTys
-          pure $ maybe this (flip castTo this) thisTy <+> text fn <+> tupled (args ++ namedArgs)
-        (False, args) => do -- Static / Global function call
-          fn' <- parseForeignName fn
-          pure $ fn' <+> tupled (args ++ namedArgs)
-        _ =>
-          pure $ unsupported ("prim__dart_invoke", fn, positional, named)
+    ] = dartPrimInvoke fn positionalTys positional named
+  dartPrimFnExt
+    (NS _ (UN "prim__dart_invoke_pure"))
+    [ IENull, IENull, IENull, IENull -- erased type arguments
+      , positionalTys
+      , IEConstant (Str fn)
+      , positional
+      , named
+    ] = dartPrimInvoke fn positionalTys positional named
+
   dartPrimFnExt
     (NS _ (UN "prim__dart_new"))
     [ IENull, IENull, IENull, IENull -- erased type arguments

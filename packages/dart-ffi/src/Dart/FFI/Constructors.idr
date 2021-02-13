@@ -55,7 +55,28 @@ public export
 (@=>) (MkParameter name _ _) value = Assign {tag = tag} name (upcast value)
 
 public export
-%extern prim__dart_new : (ty : Type) -> HVect positional -> Parameters named -> (1 x : %World) -> IORes ty
+%extern prim__dart_new
+  : (ty : Type)
+ -> HVect positional
+ -> Parameters named
+ -> (1 x : %World)
+ -> IORes ty
 
 public export
-%extern prim__dart_invoke : {0 res : Type} -> {positionalTys : Vect k Type} -> (foreignName : String) -> (positional : HVect positionalTys) -> Parameters named -> (1 x : %World) -> IORes res
+%extern prim__dart_invoke
+  : {0 res : Type}
+ -> {positionalTys : Vect k Type}
+ -> (foreignName : String)
+ -> (positional : HVect positionalTys)
+ -> Parameters named
+ -> (1 x : %World)
+ -> IORes res
+
+public export
+%extern prim__dart_invoke_pure
+  : {0 res : Type}
+ -> {positionalTys : Vect k Type}
+ -> (foreignName : String)
+ -> (positional : HVect positionalTys)
+ -> Parameters named
+ -> res
