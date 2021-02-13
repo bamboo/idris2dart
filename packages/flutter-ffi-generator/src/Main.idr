@@ -64,6 +64,8 @@ flutter = defModule "Flutter.FFI" [
       defConst "VisualDensity" "adaptivePlatformDensity"
     ],
     defClass "TextTheme" [
+      final "TextStyle" "subtitle1",
+      final "TextStyle" "subtitle2",
       final "TextStyle" "headline1",
       final "TextStyle" "headline2",
       final "TextStyle" "headline3",

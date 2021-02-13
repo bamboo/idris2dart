@@ -56,6 +56,8 @@ mutual
   public export
   TextTheme : Type
   TextTheme = Struct "TextTheme,package:flutter/material.dart" [
+    ("subtitle1", TextStyle),
+    ("subtitle2", TextStyle),
     ("headline1", TextStyle),
     ("headline2", TextStyle),
     ("headline3", TextStyle),
@@ -377,6 +379,14 @@ namespace VisualDensity
 
 
 namespace TextTheme
+  export
+  subtitle1 : TextTheme -> TextStyle
+  subtitle1 this = getField this "subtitle1"
+
+  export
+  subtitle2 : TextTheme -> TextStyle
+  subtitle2 this = getField this "subtitle2"
+
   export
   headline1 : TextTheme -> TextStyle
   headline1 this = getField this "headline1"
