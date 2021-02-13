@@ -130,10 +130,15 @@ public export
 Duration : Type
 Duration = Struct "Duration,dart:core" [
   ("inMilliseconds", Int),
-  ("inMicroseconds", Int)
+  ("inMicroseconds", Int),
+  ("inSeconds", Int)
 ]
 
 namespace Duration
+
+  public export
+  %foreign "Dart:const Duration.zero,dart:core"
+  zero : Duration
 
   %foreign "Dart:const Duration.microsecondsPerMinute,dart:core"
   public export
@@ -149,6 +154,11 @@ namespace Duration
 
   %inline
   public export
+  inSeconds : Duration -> Int
+  inSeconds = (`getField` "inSeconds")
+
+  %inline
+  public export
   inMilliseconds : Duration -> Int
   inMilliseconds = (`getField` "inMilliseconds")
 
@@ -156,3 +166,19 @@ namespace Duration
   public export
   inMicroseconds : Duration -> Int
   inMicroseconds = (`getField` "inMicroseconds")
+
+  %foreign "Dart:Duration_minus,
+Duration_minus($.Duration x, $.Duration y) => x - y;"
+  prim__Duration_minus : Duration -> Duration -> Duration
+
+  %foreign "Dart:Duration_plus,
+Duration_plus($.Duration x, $.Duration y) => x + y;"
+  prim__Duration_plus : Duration -> Duration -> Duration
+
+  public export
+  (-) : Duration -> Duration -> Duration
+  (-) = prim__Duration_minus
+
+  public export
+  (+) : Duration -> Duration -> Duration
+  (+) = prim__Duration_plus
