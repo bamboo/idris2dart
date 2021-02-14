@@ -844,14 +844,14 @@ compileToDart defs term = do
   let mainDecl = "void main()" <+> block dartMain
   let footer = if finalState.usesDelay then delayClass else empty
   pure $
-    header' <+>
-      emptyLine <+>
-      mainDecl <+>
-      line <+>
-      dartDefs <+>
-      line <+>
-      delayClass <+>
-      includes'
+    header'
+      <+> emptyLine
+      <+> mainDecl
+      <+> line
+      <+> dartDefs
+      <+> line
+      <+> delayClass
+      <+> includes'
 
 compileToDartFile : String -> Ref Ctxt Defs -> ClosedTerm -> Core ()
 compileToDartFile file defs term = do
