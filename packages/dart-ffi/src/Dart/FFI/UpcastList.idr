@@ -5,9 +5,10 @@ import Dart.FFI.Upcast
 
 public export
 data UpcastList : Type -> Type where
-  MkUpcastList : List elTy -> UpcastList elTy
+  MkUpcastList : List element -> UpcastList element
 
 namespace UpcastList
+
   %inline
   export
   Nil : UpcastList _
@@ -15,16 +16,16 @@ namespace UpcastList
 
   %inline
   export
-  (::) : IsAssignableFrom elTy ty => ty -> UpcastList elTy -> UpcastList elTy
+  (::) : IsAssignableFrom element ty => ty -> UpcastList element -> UpcastList element
   (::) e (MkUpcastList es) = MkUpcastList (upcast e :: es)
 
   export
-  toList : UpcastList elTy -> List elTy
+  toList : UpcastList element -> List element
   toList (MkUpcastList es) = es
 
   export
-  into : DartList elTy -> UpcastList elTy -> IO (DartList elTy)
+  into : HasIO io => DartList element -> UpcastList element -> io (DartList element)
   into result es = do
-    traverse (`add` result) (toList es)
+    traverse_ (`add` result) (toList es)
     pure result
 
