@@ -75,9 +75,9 @@ normalize str =
 
 runTest : Options -> String -> IO Bool
 runTest opts testPath
-    = do changeDir testPath
+    = do ignore $ changeDir testPath
          isSuccess <- runTest'
-         changeDir "../.."
+         ignore $ changeDir "../.."
          pure isSuccess
     where
         getAnswer : IO Bool
@@ -116,7 +116,7 @@ runTest opts testPath
         runTest' : IO Bool
         runTest'
             = do putStr $ testPath ++ ": "
-                 system $ "sh ./run " ++ idris2 opts ++ " | tr -d '\\r' > output"
+                 ignore $ system $ "sh ./run " ++ idris2 opts ++ " | tr -d '\\r' > output"
                  Right out <- readFile "output"
                      | Left err => do print err
                                       pure False

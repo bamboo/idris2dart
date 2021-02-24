@@ -886,7 +886,7 @@ execute : Ref Ctxt Defs -> (tmpDir : String) -> ClosedTerm -> Core ()
 execute defs tmpDir term = do
   let tempDartFile = tmpDir ++ "/temp.dart"
   compileToDartFile tempDartFile defs term
-  coreLift (system ("dart" ++ " " ++ tempDartFile))
+  ignore $ coreLift $ system ("dart" ++ " " ++ tempDartFile)
   pure ()
 
 dartCodegen : Codegen

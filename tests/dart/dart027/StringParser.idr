@@ -30,13 +30,13 @@ pureParsing str = parse (many (satisfy isDigit)) str
 -- test option
 optParser : ParseT IO String
 optParser = do res <- option "" (takeWhile isDigit)
-               string "def"
+               _ <- string "def"
                pure $ res
 
 -- test optional
 maybeParser : ParseT IO Bool
 maybeParser = do res <- optional (string "abc")
-                 string "def"
+                 _ <- string "def"
                  pure $ isJust res
 
 main : IO ()
