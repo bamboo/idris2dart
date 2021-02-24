@@ -690,11 +690,11 @@ mutual
       pure (fTy <+> tupled (posArgs ++ namedArgs))
   dartPrimFnExt
     (NS _ (UN "prim__dart_list_new"))
-    [ IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _)
+    [ elementTy
     , _
     ] = do
-      fTy <- foreignTypeName ty
-      pure (text "$.List<" <+> fTy <+> text ">()")
+      elementTy' <- dartTypeFromExpression elementTy
+      pure (text "<" <+> elementTy' <+> text ">[]")
   dartPrimFnExt (NS _ (UN "prim__dart_true")) _ =
     pure (text "true")
   dartPrimFnExt (NS _ (UN "prim__dart_false")) _ =
