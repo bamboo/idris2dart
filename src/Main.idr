@@ -32,6 +32,11 @@ Statement = ImperativeStatement
 Expression : Type
 Expression = ImperativeExp
 
+splitAtFirst : Char -> String -> (String, String)
+splitAtFirst ch s =
+  let (before, rest) = break (== ch) s
+  in (before, drop 1 rest)
+
 dartIdent : String -> String
 dartIdent s = concatMap okChar (unpack s)
   where
@@ -176,11 +181,6 @@ runtimeTypeOf ty = case ty of
   Bits64Type => bigIntTy
   DoubleType => doubleTy
   _ => "$.int"
-
-splitAtFirst : Char -> String -> (String, String)
-splitAtFirst ch s =
-  let (before, rest) = break (== ch) s
-  in (before, drop 1 rest)
 
 ---- Dart FFI -------------------------------------
 Lib : Type
@@ -569,6 +569,13 @@ useDelay = do
   s <- get Dart
   put Dart (record { usesDelay = True } s)
 
+dartTypeFromExpression : {auto ctx : Ref Dart DartT} -> Expression -> Core Doc
+dartTypeFromExpression ty = case ty of
+  IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _) => foreignTypeName ty
+  IEConstructor (Right "String") _ => pure stringTy
+  IEConstructor (Right "Int") _ => pure intTy
+  _ => pure dynamic'
+
 mutual
   dartLambda : {auto ctx : Ref Dart DartT} -> List Name -> Statement -> Core Doc
   dartLambda ps s = pure (paramList ps <+> block !(dartStatement s))
@@ -622,10 +629,12 @@ mutual
   dartPrimInvoke : {auto ctx : Ref Dart DartT}
     -> String -> Expression -> Expression -> Expression -> Core Doc
   dartPrimInvoke fn positionalTys positional named = do
+    let posTys = collectPositional positionalTys
     let pos' = collectPositional positional
     let named' = collectNamed named
-    posArgs <- traverse dartExp pos'
-    namedArgs <- traverse dartNamedParam named'
+    let typedPos = zip posTys pos'
+    posArgs <- traverse (uncurry dartForeignArg) typedPos
+    namedArgs <- traverse dartNamedArg named'
     case ("." `isPrefixOf` fn, posArgs) of
       (True, this :: args) => do -- Method call
         thisTy <- methodReceiverTypeFrom positionalTys
@@ -665,7 +674,6 @@ mutual
       , positional
       , named
     ] = dartPrimInvoke fn positionalTys positional named
-
   dartPrimFnExt
     (NS _ (UN "prim__dart_new"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
@@ -678,7 +686,7 @@ mutual
       let named' = collectNamed named
       fTy <- foreignTypeName ty
       posArgs <- traverse dartExp pos'
-      namedArgs <- traverse dartNamedParam named'
+      namedArgs <- traverse dartNamedArg named'
       pure (fTy <+> tupled (posArgs ++ namedArgs))
   dartPrimFnExt
     (NS _ (UN "prim__dart_list_new"))
@@ -697,15 +705,19 @@ mutual
     pure (!(dartExp x) <+> " == " <+> !(dartExp y))
   dartPrimFnExt n args = pure (debug (n, args))
 
-  dartNamedParam : {auto ctx : Ref Dart DartT} -> (Expression, String, Expression) -> Core Doc
-  dartNamedParam (ty, name, value) = do
+  dartForeignArg : {auto ctx : Ref Dart DartT} -> Expression -> Expression -> Core Doc
+  dartForeignArg ty value = do
     let fTy = parseFunctionType ty
     value' <- dartExp value
-    pure (text name <+> ": " <+> maybe value' (makeCallback value') fTy)
+    pure (maybe value' (makeCallback value') fTy)
+
+  dartNamedArg : {auto ctx : Ref Dart DartT} -> (Expression, String, Expression) -> Core Doc
+  dartNamedArg (ty, name, value) =
+    pure (text name <+> ": " <+> !(dartForeignArg ty value))
 
   methodReceiverTypeFrom : {auto ctx : Ref Dart DartT} -> Expression -> Core (Maybe Doc)
-  methodReceiverTypeFrom (IEConstructor (Left 1) (IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _) :: _)) =
-    Just <$> foreignTypeName ty
+  methodReceiverTypeFrom (IEConstructor (Left 1) (ty :: _)) =
+    Just <$> dartTypeFromExpression ty
   methodReceiverTypeFrom _ =
     pure Nothing
 

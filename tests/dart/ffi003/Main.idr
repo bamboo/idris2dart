@@ -55,6 +55,7 @@ class Callbacks {
   Callbacks({this.x, this.y, this.enabled});
   $.Object callX($.Object arg) => x(arg);
   $.Object callY($.Object arg) => y(arg);
+  $.Object callWith($.Object arg, $.Object Function($.Object) f) => f(arg);
 }" [
   ("enabled", DartBool)
 ]
@@ -93,6 +94,11 @@ namespace Callbacks
   %foreign "Dart:.callY"
   callY : Callbacks -> Int -> PrimIO Int
 
+  %inline
+  export
+  callWith : HasIO io => {a : Type} -> a -> (a -> IO b) -> Callbacks -> io b
+  callWith x f this = primIO $ prim__dart_invoke ".callWith" [this, x, f] Parameters.none
+
 ||| A pure foreign function with a bool argument.
 %foreign "Dart:ifBool,
 $.Object ifBool($.bool condition, $.Object then, $.Object else_) {
@@ -115,6 +121,7 @@ main = do
   ]
   printLn (callX cb 21)
   printLn !(primIO (callY cb 21))
+  callWith "method with positional IO callback argument" putStrLn cb
 
   -- Dart bool
   printLn (the DartBool (cb `getField` "enabled"))
