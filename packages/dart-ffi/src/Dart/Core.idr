@@ -1,43 +1,49 @@
 module Dart.Core
 
-import System.FFI
+import Dart.FFI.Constructors
+import Dart.FFI.Upcast
+import public System.FFI
 
-%foreign "Dart:print,dart:core"
-prim__print : AnyPtr -> PrimIO ()
-
+%inline
 export
-print : HasIO io => a -> io ()
-print a = primIO $ prim__print (believe_me a)
+print : HasIO io => {a : Type} -> a -> io ()
+print value = primIO $ prim__dart_invoke "print,dart:core" [value] Parameters.none
 
-mutual
-  public export
-  Object : Type
-  Object = Struct "Object,dart:core" [("hashCode", Int)]
+%inline
+public export
+Object : Type
+Object = Struct "Object,dart:core" [("hashCode", Int)]
 
-  public export
-  Symbol : Type
-  Symbol = Struct "Symbol,dart:core" [("hashCode", Int)]
+public export
+IsAssignableFrom Object _ where
 
-  public export
-  Iterable : Type -> Type
-  Iterable ty = Struct "Iterable,dart:core" [("first", ty), ("last", ty)]
+%inline
+public export
+Symbol : Type
+Symbol = Struct "Symbol,dart:core" [("hashCode", Int)]
 
-  public export
-  DartList : Type -> Type
-  DartList ty = Struct "List,dart:core" [("length", Int), ("first", ty), ("last", ty)]
+%inline
+public export
+Iterable : Type -> Type
+Iterable element = Struct "Iterable,dart:core" [("first", element), ("last", element)]
 
-  public export
-  DartMap : Type -> Type -> Type
-  DartMap key val = Struct "Map,dart:core" [("keys", Iterable key), ("values", Iterable val)]
+%inline
+public export
+DartList : Type -> Type
+DartList element = Struct "List,dart:core" [("length", Int), ("first", element), ("last", element)]
+
+%inline
+public export
+DartMap : Type -> Type -> Type
+DartMap key val = Struct "Map,dart:core" [("keys", Iterable key), ("values", Iterable val)]
 
 namespace Object
-  %foreign "Dart:.toString"
-  prim__toString : Object -> PrimIO String
 
   public export
-  toString : HasIO io => a -> io String
-  toString o = primIO $ prim__toString (believe_me o)
+  toString : HasIO io => {a : Type} -> a -> io String
+  toString this = primIO $ prim__dart_invoke ".toString" [this] Parameters.none
 
+%inline
 public export
 DartBool : Type
 DartBool = Struct "bool,dart:core" [("hashCode", Int)]
