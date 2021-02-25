@@ -574,11 +574,20 @@ dartTypeFromExpression ty = case ty of
   IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _) => foreignTypeName ty
   IEConstructor (Right "String") _ => pure stringTy
   IEConstructor (Right "Int") _ => pure intTy
+  IEConstructor (Right "Integer") _ => pure bigIntTy
+  IEConstructor (Right "Double") _ => pure doubleTy
   _ => pure dynamic'
 
 mutual
   dartLambda : {auto ctx : Ref Dart DartT} -> List Name -> Statement -> Core Doc
   dartLambda ps s = pure (paramList ps <+> block !(dartStatement s))
+
+  commaSepExps :  {auto ctx : Ref Dart DartT}
+    -> List Expression
+    -> Core Doc
+  commaSepExps es = do
+    es' <- traverse dartExp es
+    pure (commaSep es')
 
   dartConstructor : {auto ctx : Ref Dart DartT}
     -> Doc
@@ -586,9 +595,7 @@ mutual
     -> Core Doc
   dartConstructor tag args = case args of
     [] => pure (text "const [" <+> tag <+> "]")
-    args => do
-      args' <- traverse dartExp args
-      pure ("[" <+> tag <+> ", " <+> commaSep args' <+> "]")
+    args => pure ("[" <+> tag <+> ", " <+> !(commaSepExps args) <+> "]")
 
   dartExp : {auto ctx : Ref Dart DartT}
     -> Expression
@@ -689,12 +696,32 @@ mutual
       namedArgs <- traverse dartNamedArg named'
       pure (fTy <+> tupled (posArgs ++ namedArgs))
   dartPrimFnExt
-    (NS _ (UN "prim__dart_list_new"))
+    (NS _ (UN "prim__DartList_new"))
     [ elementTy
     , _
     ] = do
       elementTy' <- dartTypeFromExpression elementTy
       pure (text "<" <+> elementTy' <+> text ">[]")
+  dartPrimFnExt
+    (NS _ (UN "prim__DartList_empty"))
+    [ elementTy
+    ] = do
+      elementTy' <- dartTypeFromExpression elementTy
+      pure (text "$.List<" <+> elementTy' <+> text ">.empty()")
+  dartPrimFnExt
+    (NS _ (UN "prim__DartList_fromList"))
+    [ elementTy
+    , elements
+    ] = do
+      elementTy' <- dartTypeFromExpression elementTy
+      case parseList elements of
+        Just es => pure ("<" <+> elementTy' <+> ">" <+> bracket !(commaSepExps es))
+        Nothing => do
+          include primDartIterableFromList
+          pure $
+            text "$.List<" <+> elementTy' <+> ">.unmodifiable" <+> paren (
+              "Dart_Iterable_fromList" <+> paren !(dartExp elements)
+            )
   dartPrimFnExt (NS _ (UN "prim__dart_true")) _ =
     pure (text "true")
   dartPrimFnExt (NS _ (UN "prim__dart_false")) _ =
@@ -736,6 +763,11 @@ mutual
       go : List Expression -> Expression -> List Expression
       go acc ({- HVect.:: -} IEConstructor (Left 1) (e :: es :: _)) = go (e :: acc) es
       go acc _ = reverse acc
+
+  parseList : Expression -> Maybe (List Expression)
+  parseList e = case e of
+    IEConstructor _ _ => Just (collectPositional e)
+    _ => Nothing
 
   dartCase : {auto ctx : Ref Dart DartT}
     -> (Expression, Statement)

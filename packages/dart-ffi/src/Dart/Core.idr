@@ -97,25 +97,39 @@ export
 Show DartBool where
   show b = show (toBool b)
 
-public export
-%extern prim__dart_list_new : (elTy : Type) -> (1 x : %World) -> IORes (DartList elTy)
+%extern prim__DartList_new : (element : Type) -> (1 x : %World) -> IORes (DartList element)
 
-namespace List
+%extern prim__DartList_empty : (element : Type) -> DartList element
+
+%extern prim__DartList_fromList : (element : Type) -> List element -> DartList element
+
+namespace DartList
+
   %inline
   export
-  new : HasIO io => {elTy : Type} -> io (DartList elTy)
-  new = primIO $ prim__dart_list_new elTy
+  empty : {element : Type} -> DartList element
+  empty = prim__DartList_empty element
 
+  %inline
   export
+  new : HasIO io => {element : Type} -> io (DartList element)
+  new = primIO $ prim__DartList_new element
+
+  %inline
+  export
+  fromList : {element : Type} -> List element -> DartList element
+  fromList l = prim__DartList_fromList element l
+
   %foreign "Dart:.add"
   prim__list_add : DartList AnyPtr -> AnyPtr -> PrimIO ()
 
   %inline
   export
-  add : HasIO io => {0 elTy : Type} -> elTy -> DartList elTy -> io ()
+  add : HasIO io => {0 element : Type} -> element -> DartList element -> io ()
   add e list = primIO $ prim__list_add (believe_me list) (believe_me e)
 
 namespace Map
+
   %foreign "Dart:Map,dart:core"
   prim__new : PrimIO (DartMap _ _)
 

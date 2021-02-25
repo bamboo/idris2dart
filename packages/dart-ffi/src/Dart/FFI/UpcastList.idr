@@ -19,6 +19,7 @@ namespace UpcastList
   (::) : IsAssignableFrom element ty => ty -> UpcastList element -> UpcastList element
   (::) e (MkUpcastList es) = MkUpcastList (upcast e :: es)
 
+  %inline
   export
   toList : UpcastList element -> List element
   toList (MkUpcastList es) = es

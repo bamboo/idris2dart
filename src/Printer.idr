@@ -87,6 +87,14 @@ paren : Doc -> Doc
 paren d = "(" <+> d <+> ")"
 
 export
+bracket : Doc -> Doc
+bracket d = "[" <+> d <+> "]"
+
+export
+listOf : List Doc -> Doc
+listOf = bracket . commaSep
+
+export
 tupled : List Doc -> Doc
 tupled = paren . commaSep
 
