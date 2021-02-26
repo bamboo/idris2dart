@@ -35,7 +35,7 @@ app : IO Stateless
 app = Stateless.new [onBuild @= build]
   where
     build : BuildContext -> IO Widget
-    build _ = upcast <$> MaterialApp.new [
+    build _ = upcastM $ MaterialApp.new [
       title @= appTitle,
       home @=> !appHome,
       theme @= !(ThemeData.new [

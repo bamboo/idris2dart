@@ -51,7 +51,7 @@ public export
 ||| Upcast assignment.
 %inline
 public export
-(@=>) : {tag : Type} -> (p : Parameter tag) -> ty -> {auto isAssignable : typeOf p `IsAssignableFrom` ty} -> Argument p
+(@=>) : {tag : Type} -> {ty : Type} -> (p : Parameter tag) -> ty -> {auto isAssignable : typeOf p `IsAssignableFrom` ty} -> Argument p
 (@=>) (MkParameter name _ _) value = Assign {tag = tag} name (upcast value)
 
 public export

@@ -38,7 +38,7 @@ drawLines _ [] = pure ()
 drawLines c (o :: os) = do
   path <- Path.new
   path // moveTo (dx o) (dy o)
-  traverse (\o => path // lineTo (dx o) (dy o)) os
+  os // traverse_ (\o => path // lineTo (dx o) (dy o))
   paint <- Paint.new
   paint // setStyle PaintingStyle.stroke
   c // drawPath path paint
@@ -55,7 +55,7 @@ appHome : IO Stateful
 appHome = Stateful.new [initialState @= Idle [], onBuild @= build]
   where
     build : StatefulWidgetState State -> BuildContext -> IO Widget
-    build state context = upcast <$> Scaffold.new [
+    build state context = upcastM $ Scaffold.new [
       appBar @=> !(AppBar.new [
         title @=> !(Text.new appTitle [])
       ]),

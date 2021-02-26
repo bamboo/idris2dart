@@ -6,12 +6,10 @@ import public Dart.FFI.Upcast
 import public Dart.FFI.UpcastList
 import Flutter.FFI
 
-%foreign "Dart:runApp,package:flutter/widgets.dart"
-prim__runApp : Widget -> PrimIO ()
-
+%inline
 export
-runApp : IsAssignableFrom Widget widget => widget -> IO ()
-runApp w = primIO (prim__runApp (upcast w))
+runApp : {widget : Type} -> IsAssignableFrom Widget widget => widget -> IO ()
+runApp w = primIO (prim__dart_invoke "runApp,package:flutter/widgets.dart" [w] none)
 
 export
 widgets : UpcastList Widget -> IO (DartList Widget)
