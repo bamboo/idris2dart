@@ -49,24 +49,19 @@ DartBool : Type
 DartBool = Struct "bool,dart:core" [("hashCode", Int)]
 
 export
-%extern prim__dart_true : DartBool
-
-export
-%extern prim__dart_false : DartBool
-
-export
 %extern prim__dart_if : DartBool -> a -> a -> a
 
 namespace DartBool
+
   %inline
   public export
   true : DartBool
-  true = prim__dart_true
+  true = prim__dart_get_pure "true" Void
 
   %inline
   public export
   false : DartBool
-  false = prim__dart_false
+  false = prim__dart_get_pure "false" Void
 
   %inline
   public export

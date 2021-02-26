@@ -710,6 +710,12 @@ mutual
       fTy <- foreignTypeName ty
       pure (castTo fTy !(dartExp e) <+> dot <+> text f <+> " = " <+> !(dartExp rhs))
   dartPrimFnExt
+    (NS _ (UN "prim__dart_get_pure"))
+    [ IENull, _
+      , IEConstant (Str propertyName)
+      , this
+    ] = foreignTypeName propertyName
+  dartPrimFnExt
     (NS _ (UN "prim__dart_invoke"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
       , positionalTys
@@ -767,10 +773,6 @@ mutual
             text "$.List<" <+> elementTy' <+> ">.unmodifiable" <+> paren (
               "Dart_Iterable_fromList" <+> paren !(dartExp elements)
             )
-  dartPrimFnExt (NS _ (UN "prim__dart_true")) _ =
-    pure (text "true")
-  dartPrimFnExt (NS _ (UN "prim__dart_false")) _ =
-    pure (text "false")
   dartPrimFnExt (NS _ (UN "prim__dart_if")) [ IENull, condition, thenValue, elseValue ] =
     pure (!(dartExp condition) <+> " ? " <+> !(dartExp thenValue) <+> " : " <+> !(dartExp elseValue))
   dartPrimFnExt n args = pure (debug (n, args))

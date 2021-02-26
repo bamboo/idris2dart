@@ -63,6 +63,14 @@ public export
  -> IORes ty
 
 public export
+%extern prim__dart_get_pure
+  : {0 res : Type}
+ -> {thisTy : Type}
+ -> (foreignName : String)
+ -> (this : thisTy)
+ -> res
+
+public export
 %extern prim__dart_invoke
   : {0 res : Type}
  -> {positionalTys : Vect k Type}
