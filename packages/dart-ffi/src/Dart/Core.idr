@@ -198,3 +198,40 @@ namespace Duration
   public export
   (+) : Duration -> Duration -> Duration
   (+) x y = prim__dart_invoke_pure "+" [x, y] Parameters.none
+
+export
+data Nullable : a -> Type where [external]
+
+namespace Nullable
+
+  %inline
+  export
+  null : Nullable a
+  null = prim__dart_get_pure "null" Void
+
+  %inline
+  export
+  isNull : Nullable a -> Bool
+  isNull a =
+    let
+      a' = the AnyPtr (believe_me a)
+      null' = the AnyPtr (believe_me a)
+    in toBool (prim__dart_invoke_pure "==" [a', null'] none)
+
+  %inline
+  export
+  nullable : Lazy b -> (a -> b) -> Nullable a -> b
+  nullable nullValue f a = if isNull a then nullValue else f (believe_me a)
+
+  %inline
+  export
+  toMaybe : Nullable a -> Maybe a
+  toMaybe = nullable Nothing Just
+
+  %inline
+  export
+  traverse : Applicative f => (a -> f b) -> Nullable a -> f (Nullable b)
+  traverse f a =
+    if isNull a
+      then pure (believe_me a)
+      else believe_me (f (believe_me a))
