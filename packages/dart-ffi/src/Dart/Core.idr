@@ -55,9 +55,6 @@ export
 %extern prim__dart_false : DartBool
 
 export
-%extern prim__dart_eq : a -> a -> DartBool
-
-export
 %extern prim__dart_if : DartBool -> a -> a -> a
 
 namespace DartBool
@@ -74,12 +71,21 @@ namespace DartBool
   %inline
   public export
   fromBool : Bool -> DartBool
-  fromBool b = prim__dart_eq b True
+  fromBool b = prim__dart_invoke_pure "==" [b, True] none
 
   %inline
   public export
   toBool : DartBool -> Bool
   toBool b = prim__dart_if b True False
+
+%inline
+export
+prim__dart_eq : a -> a -> Bool
+prim__dart_eq x y =
+  let
+    x' = the AnyPtr (believe_me x)
+    y' = the AnyPtr (believe_me y)
+  in toBool (prim__dart_invoke_pure "==" [x', y'] none)
 
 export
 Cast Bool DartBool where
@@ -91,7 +97,7 @@ Cast DartBool Bool where
 
 export
 Eq DartBool where
-  (==) x y = toBool (prim__dart_eq x y)
+  (==) x y = toBool (prim__dart_invoke_pure "==" [x, y] none)
 
 export
 Show DartBool where
@@ -187,18 +193,12 @@ namespace Duration
   inMicroseconds : Duration -> Int
   inMicroseconds = (`getField` "inMicroseconds")
 
-  %foreign "Dart:Duration_minus,
-Duration_minus($.Duration x, $.Duration y) => x - y;"
-  prim__Duration_minus : Duration -> Duration -> Duration
-
-  %foreign "Dart:Duration_plus,
-Duration_plus($.Duration x, $.Duration y) => x + y;"
-  prim__Duration_plus : Duration -> Duration -> Duration
-
+  %inline
   public export
   (-) : Duration -> Duration -> Duration
-  (-) = prim__Duration_minus
+  (-) x y = prim__dart_invoke_pure "-" [x, y] Parameters.none
 
+  %inline
   public export
   (+) : Duration -> Duration -> Duration
-  (+) = prim__Duration_plus
+  (+) x y = prim__dart_invoke_pure "+" [x, y] Parameters.none

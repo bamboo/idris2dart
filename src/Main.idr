@@ -67,6 +67,45 @@ keywordSafe s = case s of
   "var" => "var_"
   _ => s
 
+data DartNameKind
+  = TopLevelName
+  | MemberName
+  | InfixOperator
+  | PrefixOperator
+  | GetAtOperator
+  | PutAtOperator
+
+dartOperators : List (String, DartNameKind)
+dartOperators = [
+  ("==", InfixOperator),
+  ("<", InfixOperator),
+  (">", InfixOperator),
+  ("<=", InfixOperator),
+  (">=", InfixOperator),
+  ("+", InfixOperator),
+  ("-", InfixOperator),
+  ("*", InfixOperator),
+  ("/", InfixOperator),
+  ("~/", InfixOperator),
+  ("|", InfixOperator),
+  ("&", InfixOperator),
+  ("^", InfixOperator),
+  (">>", InfixOperator),
+  ("<<", InfixOperator),
+  ("~", PrefixOperator),
+  ("[]", GetAtOperator),
+  ("[]=", PutAtOperator)
+]
+
+parseDartOperator : String -> Maybe DartNameKind
+parseDartOperator s = lookup s dartOperators
+
+dartNameKindOf : String -> DartNameKind
+dartNameKindOf s =
+  if "." `isPrefixOf` s
+    then MemberName
+    else fromMaybe TopLevelName (parseDartOperator s)
+
 dartNameString : Name -> String
 dartNameString n = case n of
   NS ns n => showNSWithSep "_" ns ++ "_" ++ dartNameString n
@@ -633,6 +672,9 @@ mutual
       pure (castTo "$Delayed" !(dartExp e) <+> ".force()")
     _ => pure (debug e)
 
+  maybeCastTo : Maybe Doc -> Doc -> Doc
+  maybeCastTo ty e = maybe e (flip castTo e) ty
+
   dartPrimInvoke : {auto ctx : Ref Dart DartT}
     -> String -> Expression -> Expression -> Expression -> Core Doc
   dartPrimInvoke fn positionalTys positional named = do
@@ -642,13 +684,16 @@ mutual
     let typedPos = zip posTys pos'
     posArgs <- traverse (uncurry dartForeignArg) typedPos
     namedArgs <- traverse dartNamedArg named'
-    case ("." `isPrefixOf` fn, posArgs) of
-      (True, this :: args) => do -- Method call
+    case (dartNameKindOf fn, posArgs) of
+      (MemberName, this :: args) => do -- Method call
         thisTy <- methodReceiverTypeFrom positionalTys
-        pure $ maybe this (flip castTo this) thisTy <+> text fn <+> tupled (args ++ namedArgs)
-      (False, args) => do -- Static / Global function call
+        pure $ maybeCastTo thisTy this <+> text fn <+> tupled (args ++ namedArgs)
+      (TopLevelName, args) => do -- Static / Global function call
         fn' <- parseForeignName fn
         pure $ fn' <+> tupled (args ++ namedArgs)
+      (InfixOperator, [x, y]) => do
+        xTy <- methodReceiverTypeFrom positionalTys
+        pure $ binOp (text fn) (maybeCastTo xTy x) y
       _ =>
         pure $ unsupported ("prim__dart_invoke", fn, positional, named)
 
@@ -728,8 +773,6 @@ mutual
     pure (text "false")
   dartPrimFnExt (NS _ (UN "prim__dart_if")) [ IENull, condition, thenValue, elseValue ] =
     pure (!(dartExp condition) <+> " ? " <+> !(dartExp thenValue) <+> " : " <+> !(dartExp elseValue))
-  dartPrimFnExt (NS _ (UN "prim__dart_eq")) [ IENull, x, y ] =
-    pure (!(dartExp x) <+> " == " <+> !(dartExp y))
   dartPrimFnExt n args = pure (debug (n, args))
 
   dartForeignArg : {auto ctx : Ref Dart DartT} -> Expression -> Expression -> Core Doc
