@@ -747,20 +747,20 @@ mutual
       namedArgs <- traverse dartNamedArg named'
       pure (fTy <+> tupled (posArgs ++ namedArgs))
   dartPrimFnExt
-    (NS _ (UN "prim__DartList_new"))
+    (NS _ (UN "prim__dart_List_new"))
     [ elementTy
     , _
     ] = do
       elementTy' <- dartTypeFromExpression elementTy
       pure (text "<" <+> elementTy' <+> text ">[]")
   dartPrimFnExt
-    (NS _ (UN "prim__DartList_empty"))
+    (NS _ (UN "prim__dart_List_empty"))
     [ elementTy
     ] = do
       elementTy' <- dartTypeFromExpression elementTy
       pure (text "$.List<" <+> elementTy' <+> text ">.empty()")
   dartPrimFnExt
-    (NS _ (UN "prim__DartList_fromList"))
+    (NS _ (UN "prim__dart_List_fromList"))
     [ elementTy
     , elements
     ] = do
