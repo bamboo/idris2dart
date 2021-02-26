@@ -615,6 +615,7 @@ dartTypeFromExpression ty = case ty of
   IEConstructor (Right "Int") _ => pure intTy
   IEConstructor (Right "Integer") _ => pure bigIntTy
   IEConstructor (Right "Double") _ => pure doubleTy
+  IEConstructor (Right "Prelude.Basics.Bool") _ => pure intTy -- Idris Bool is represented as int at runtime
   _ => pure dynamic'
 
 mutual
