@@ -11,6 +11,7 @@ export
 runApp : {widget : Type} -> IsAssignableFrom Widget widget => widget -> IO ()
 runApp w = primIO (prim__dart_invoke "runApp,package:flutter/widgets.dart" [w] none)
 
+%inline
 export
-widgets : UpcastList Widget -> IO (DartList Widget)
-widgets ws = into !List.new ws
+widgets : UpcastList Widget -> DartList Widget
+widgets = fromList . toList

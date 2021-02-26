@@ -9,19 +9,19 @@ appHome : IO Stateful
 appHome = Stateful.new [initialState @= 0, onBuild @= build]
   where
     build : StatefulWidgetState Int -> BuildContext -> IO Widget
-    build state context = upcast <$> Scaffold.new [
+    build state context = upcastM $ Scaffold.new [
       appBar @=> !(AppBar.new [
         title @=> !(Text.new appTitle [])
       ]),
       body @=> !(Center.new [
         child @=> !(Column.new [
           mainAxisAlignment @= MainAxisAlignment.center,
-          children @= !(widgets [
+          children @= widgets [
             !(Text.new "You have pushed the button this many times:" []),
             !(Text.new (show (get state)) [
               style @= headline4 (textTheme !(Theme.of_ context))
             ])
-          ])
+          ]
         ])
       ]),
       floatingActionButton @=> !(FloatingActionButton.new [
