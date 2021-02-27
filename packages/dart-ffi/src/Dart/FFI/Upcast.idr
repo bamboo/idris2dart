@@ -23,8 +23,13 @@ upcastM : Monad m
   -> m superType
 upcastM action = pure (upcast !action)
 
-||| Every type is assignable from itself.
+%inline
 public export
+IsAssignableFrom superType subType => Cast subType superType where
+  cast sub = upcast sub
+
+||| Every type is assignable from itself.
+export
 IsAssignableFrom a a where
 
 -- public export
