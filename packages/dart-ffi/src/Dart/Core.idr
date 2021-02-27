@@ -235,3 +235,7 @@ namespace Nullable
     if isNull a
       then pure (believe_me a)
       else believe_me (f (believe_me a))
+
+export
+Cast a (Nullable a) where
+  cast a = believe_me a
