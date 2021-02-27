@@ -82,14 +82,17 @@ prim__dart_eq x y =
     y' = the AnyPtr (believe_me y)
   in toBool (prim__dart_invoke_pure "==" [x', y'] none)
 
+%inline
 export
 Cast Bool DartBool where
   cast = fromBool
 
+%inline
 export
 Cast DartBool Bool where
   cast = toBool
 
+%inline
 export
 Eq DartBool where
   (==) x y = toBool (prim__dart_invoke_pure "==" [x, y] none)
