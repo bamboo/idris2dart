@@ -100,9 +100,12 @@ dartOperators = [
 parseDartOperator : String -> Maybe DartNameKind
 parseDartOperator s = lookup s dartOperators
 
+isMemberName : String -> Bool
+isMemberName = isPrefixOf "."
+
 dartNameKindOf : String -> DartNameKind
 dartNameKindOf s =
-  if "." `isPrefixOf` s
+  if isMemberName s
     then MemberName
     else fromMaybe TopLevelName (parseDartOperator s)
 
@@ -701,21 +704,45 @@ mutual
   dartPrimFnExt : {auto ctx : Ref Dart DartT}
     -> Name -> List Expression -> Core Doc
   dartPrimFnExt
-    (NS _ (UN "prim__getField"))
-    (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _) = do
-      fTy <- foreignTypeName ty
-      pure (castTo fTy !(dartExp e) <+> dot <+> text f)
-  dartPrimFnExt
     (NS _ (UN "prim__setField"))
     (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _ :: rhs :: _) = do
       fTy <- foreignTypeName ty
       pure (castTo fTy !(dartExp e) <+> dot <+> text f <+> " = " <+> !(dartExp rhs))
   dartPrimFnExt
-    (NS _ (UN "prim__dart_get_pure"))
-    [ IENull, _
+    (NS _ (UN "prim__getField"))
+    (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _) = do
+      fTy <- foreignTypeName ty
+      pure (castTo fTy !(dartExp e) <+> dot <+> text f)
+  dartPrimFnExt
+    (NS _ (UN "prim__dart_set"))
+    [ thisTy
+      , valueTy
+      , IEConstant (Str propertyName)
+      , value
+      , this
+      , _
+    ] = case isMemberName propertyName of
+      True => pure (castTo !(dartTypeFromExpression thisTy) !(dartExp this) <+> text propertyName <+> " = " <+> !(dartExp value))
+      False => pure (!(foreignTypeName propertyName) <+> " = " <+> !(dartExp value))
+  dartPrimFnExt
+    (NS _ (UN "prim__dart_get"))
+    [ IENull
+      , thisTy
       , IEConstant (Str propertyName)
       , this
-    ] = foreignTypeName propertyName
+      , _
+    ] = case isMemberName propertyName of
+      True => pure (castTo !(dartTypeFromExpression thisTy) !(dartExp this) <+> text propertyName)
+      False => foreignTypeName propertyName
+  dartPrimFnExt
+    (NS _ (UN "prim__dart_get_pure"))
+    [ IENull
+      , thisTy
+      , IEConstant (Str propertyName)
+      , this
+    ] = case isMemberName propertyName of
+      True => pure (castTo !(dartTypeFromExpression thisTy) !(dartExp this) <+> text propertyName)
+      False => foreignTypeName propertyName
   dartPrimFnExt
     (NS _ (UN "prim__dart_invoke"))
     [ IENull, IENull, IENull, IENull -- erased type arguments

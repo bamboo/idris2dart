@@ -72,6 +72,25 @@ public export
  -> res
 
 public export
+%extern prim__dart_get
+  : {0 res : Type}
+ -> {thisTy : Type}
+ -> (foreignName : String)
+ -> (this : thisTy)
+ -> (1 x : %World)
+ -> IORes res
+
+public export
+%extern prim__dart_set
+  : {thisTy : Type}
+ -> {ty : Type}
+ -> (foreignName : String)
+ -> (value : ty)
+ -> (this : thisTy)
+ -> (1 x : %World)
+ -> IORes ty
+
+public export
 %extern prim__dart_invoke
   : {0 res : Type}
  -> {positionalTys : Vect k Type}
