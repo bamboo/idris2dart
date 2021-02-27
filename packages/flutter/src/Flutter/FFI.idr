@@ -293,59 +293,72 @@ namespace Alignment
   export
   IsAssignableFrom AlignmentGeometry Alignment where
 
-  export
-  %foreign "Dart:const Alignment.centerLeft,package:flutter/painting.dart"
+  %inline
+  public export
   centerLeft : Alignment
+  centerLeft = prim__dart_get_pure "Alignment.centerLeft,package:flutter/painting.dart" Void
 
-  export
-  %foreign "Dart:const Alignment.centerRight,package:flutter/painting.dart"
+  %inline
+  public export
   centerRight : Alignment
+  centerRight = prim__dart_get_pure "Alignment.centerRight,package:flutter/painting.dart" Void
 
 
 namespace Colors
-  export
-  %foreign "Dart:const Colors.black,package:flutter/material.dart"
+  %inline
+  public export
   black : MaterialColor
+  black = prim__dart_get_pure "Colors.black,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.blue,package:flutter/material.dart"
+  %inline
+  public export
   blue : MaterialColor
+  blue = prim__dart_get_pure "Colors.blue,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.brown,package:flutter/material.dart"
+  %inline
+  public export
   brown : MaterialColor
+  brown = prim__dart_get_pure "Colors.brown,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.cyan,package:flutter/material.dart"
+  %inline
+  public export
   cyan : MaterialColor
+  cyan = prim__dart_get_pure "Colors.cyan,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.green,package:flutter/material.dart"
+  %inline
+  public export
   green : MaterialColor
+  green = prim__dart_get_pure "Colors.green,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.grey,package:flutter/material.dart"
+  %inline
+  public export
   grey : MaterialColor
+  grey = prim__dart_get_pure "Colors.grey,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.purple,package:flutter/material.dart"
+  %inline
+  public export
   purple : MaterialColor
+  purple = prim__dart_get_pure "Colors.purple,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.red,package:flutter/material.dart"
+  %inline
+  public export
   red : MaterialColor
+  red = prim__dart_get_pure "Colors.red,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.transparent,package:flutter/material.dart"
+  %inline
+  public export
   transparent : MaterialColor
+  transparent = prim__dart_get_pure "Colors.transparent,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.white,package:flutter/material.dart"
+  %inline
+  public export
   white : MaterialColor
+  white = prim__dart_get_pure "Colors.white,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Colors.yellow,package:flutter/material.dart"
+  %inline
+  public export
   yellow : MaterialColor
+  yellow = prim__dart_get_pure "Colors.yellow,package:flutter/material.dart" Void
 
 
 namespace CircularProgressIndicator
@@ -373,9 +386,10 @@ namespace CircularProgressIndicator
 
 
 namespace VisualDensity
-  export
-  %foreign "Dart:const VisualDensity.adaptivePlatformDensity,package:flutter/material.dart"
+  %inline
+  public export
   adaptivePlatformDensity : VisualDensity
+  adaptivePlatformDensity = prim__dart_get_pure "VisualDensity.adaptivePlatformDensity,package:flutter/material.dart" Void
 
 
 namespace TextTheme
@@ -558,53 +572,65 @@ namespace AppBar
 
 
 namespace Icons
-  export
-  %foreign "Dart:const Icons.add,package:flutter/material.dart"
+  %inline
+  public export
   add : IconData
+  add = prim__dart_get_pure "Icons.add,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.add_circle_outline,package:flutter/material.dart"
+  %inline
+  public export
   add_circle_outline : IconData
+  add_circle_outline = prim__dart_get_pure "Icons.add_circle_outline,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.remove,package:flutter/material.dart"
+  %inline
+  public export
   remove : IconData
+  remove = prim__dart_get_pure "Icons.remove,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.remove_circle_outline,package:flutter/material.dart"
+  %inline
+  public export
   remove_circle_outline : IconData
+  remove_circle_outline = prim__dart_get_pure "Icons.remove_circle_outline,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.play_arrow,package:flutter/material.dart"
+  %inline
+  public export
   play_arrow : IconData
+  play_arrow = prim__dart_get_pure "Icons.play_arrow,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.stop,package:flutter/material.dart"
+  %inline
+  public export
   stop : IconData
+  stop = prim__dart_get_pure "Icons.stop,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.stop_circle,package:flutter/material.dart"
+  %inline
+  public export
   stop_circle : IconData
+  stop_circle = prim__dart_get_pure "Icons.stop_circle,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.stop_circle_outlined,package:flutter/material.dart"
+  %inline
+  public export
   stop_circle_outlined : IconData
+  stop_circle_outlined = prim__dart_get_pure "Icons.stop_circle_outlined,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.stop_circle_rounded,package:flutter/material.dart"
+  %inline
+  public export
   stop_circle_rounded : IconData
+  stop_circle_rounded = prim__dart_get_pure "Icons.stop_circle_rounded,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.stop_circle_sharp,package:flutter/material.dart"
+  %inline
+  public export
   stop_circle_sharp : IconData
+  stop_circle_sharp = prim__dart_get_pure "Icons.stop_circle_sharp,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.stop_outlined,package:flutter/material.dart"
+  %inline
+  public export
   stop_outlined : IconData
+  stop_outlined = prim__dart_get_pure "Icons.stop_outlined,package:flutter/material.dart" Void
 
-  export
-  %foreign "Dart:const Icons.stop_rounded,package:flutter/material.dart"
+  %inline
+  public export
   stop_rounded : IconData
+  stop_rounded = prim__dart_get_pure "Icons.stop_rounded,package:flutter/material.dart" Void
 
 
 namespace IconButton
@@ -786,24 +812,30 @@ namespace MaterialApp
 
 
 namespace MainAxisAlignment
-  export
-  %foreign "Dart:const MainAxisAlignment.start,package:flutter/widgets.dart"
+  %inline
+  public export
   start : MainAxisAlignment
-  export
-  %foreign "Dart:const MainAxisAlignment.end,package:flutter/widgets.dart"
+  start = prim__dart_get_pure "MainAxisAlignment.start,package:flutter/widgets.dart" Void
+  %inline
+  public export
   end : MainAxisAlignment
-  export
-  %foreign "Dart:const MainAxisAlignment.center,package:flutter/widgets.dart"
+  end = prim__dart_get_pure "MainAxisAlignment.end,package:flutter/widgets.dart" Void
+  %inline
+  public export
   center : MainAxisAlignment
-  export
-  %foreign "Dart:const MainAxisAlignment.spaceBetween,package:flutter/widgets.dart"
+  center = prim__dart_get_pure "MainAxisAlignment.center,package:flutter/widgets.dart" Void
+  %inline
+  public export
   spaceBetween : MainAxisAlignment
-  export
-  %foreign "Dart:const MainAxisAlignment.spaceAround,package:flutter/widgets.dart"
+  spaceBetween = prim__dart_get_pure "MainAxisAlignment.spaceBetween,package:flutter/widgets.dart" Void
+  %inline
+  public export
   spaceAround : MainAxisAlignment
-  export
-  %foreign "Dart:const MainAxisAlignment.spaceEvenly,package:flutter/widgets.dart"
+  spaceAround = prim__dart_get_pure "MainAxisAlignment.spaceAround,package:flutter/widgets.dart" Void
+  %inline
+  public export
   spaceEvenly : MainAxisAlignment
+  spaceEvenly = prim__dart_get_pure "MainAxisAlignment.spaceEvenly,package:flutter/widgets.dart" Void
 
 
 namespace Icon
@@ -1145,18 +1177,22 @@ namespace CustomPaint
 
 
 namespace AppLifecycleState
-  export
-  %foreign "Dart:const AppLifecycleState.detached,dart:ui"
+  %inline
+  public export
   detached : AppLifecycleState
-  export
-  %foreign "Dart:const AppLifecycleState.inactive,dart:ui"
+  detached = prim__dart_get_pure "AppLifecycleState.detached,dart:ui" Void
+  %inline
+  public export
   inactive : AppLifecycleState
-  export
-  %foreign "Dart:const AppLifecycleState.paused,dart:ui"
+  inactive = prim__dart_get_pure "AppLifecycleState.inactive,dart:ui" Void
+  %inline
+  public export
   paused : AppLifecycleState
-  export
-  %foreign "Dart:const AppLifecycleState.resumed,dart:ui"
+  paused = prim__dart_get_pure "AppLifecycleState.paused,dart:ui" Void
+  %inline
+  public export
   resumed : AppLifecycleState
+  resumed = prim__dart_get_pure "AppLifecycleState.resumed,dart:ui" Void
 
 
 namespace Canvas
@@ -1167,9 +1203,10 @@ namespace Canvas
 
 
 namespace PaintingStyle
-  export
-  %foreign "Dart:const PaintingStyle.stroke,dart:ui"
+  %inline
+  public export
   stroke : PaintingStyle
+  stroke = prim__dart_get_pure "PaintingStyle.stroke,dart:ui" Void
 
 
 namespace Paint
@@ -1244,24 +1281,30 @@ namespace Velocity
 
 
 namespace TextAlign
-  export
-  %foreign "Dart:const TextAlign.left,dart:ui"
+  %inline
+  public export
   left : TextAlign
-  export
-  %foreign "Dart:const TextAlign.right,dart:ui"
+  left = prim__dart_get_pure "TextAlign.left,dart:ui" Void
+  %inline
+  public export
   right : TextAlign
-  export
-  %foreign "Dart:const TextAlign.center,dart:ui"
+  right = prim__dart_get_pure "TextAlign.right,dart:ui" Void
+  %inline
+  public export
   center : TextAlign
-  export
-  %foreign "Dart:const TextAlign.start,dart:ui"
+  center = prim__dart_get_pure "TextAlign.center,dart:ui" Void
+  %inline
+  public export
   start : TextAlign
-  export
-  %foreign "Dart:const TextAlign.end,dart:ui"
+  start = prim__dart_get_pure "TextAlign.start,dart:ui" Void
+  %inline
+  public export
   end : TextAlign
-  export
-  %foreign "Dart:const TextAlign.justify,dart:ui"
+  end = prim__dart_get_pure "TextAlign.end,dart:ui" Void
+  %inline
+  public export
   justify : TextAlign
+  justify = prim__dart_get_pure "TextAlign.justify,dart:ui" Void
 
 
 namespace TapDownDetails

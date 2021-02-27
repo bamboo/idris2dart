@@ -263,9 +263,15 @@ functionPrimsFor (Fun n ps ret) foreignName hasThis =
     ifHasThis f v = if hasThis then f v else v
 
 constPrim : {auto lib : Lib} -> String -> String -> DartType -> Doc ()
-constPrim owner field ty =
-  export_ <+> foreign ("const " ++ owner ++ "." ++ field ++ "," ++ lib.package) <+> hardline
-    <+> pretty field <++> colon <++> prettyType ty
+constPrim owner field ty = vcat [
+  inline,
+  pubExport,
+  pretty field <++> colon <++> prettyType ty,
+  pretty field <++> equals
+    <++> pretty "prim__dart_get_pure"
+    <++> stringLit (owner ++ "." ++ field ++ "," ++ lib.package)
+    <++> pretty "Void"
+]
 
 enumPrim : {auto lib : Lib} -> String -> String -> Doc ()
 enumPrim n f = constPrim n f (NamedType n)
