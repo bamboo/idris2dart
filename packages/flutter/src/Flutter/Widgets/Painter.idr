@@ -47,4 +47,4 @@ namespace Painter
   %inline
   export
   new : Painter.New.NamedParameters -> IO Painter
-  new ps = primIO (prim__dart_new Painter [] ps)
+  new ps = primIO (prim__dart_new Painter "" [] ps)

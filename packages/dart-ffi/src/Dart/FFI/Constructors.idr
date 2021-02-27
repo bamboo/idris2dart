@@ -57,6 +57,7 @@ public export
 public export
 %extern prim__dart_new
   : (ty : Type)
+ -> (constructorName : String)
  -> HVect positional
  -> Parameters named
  -> (1 x : %World)

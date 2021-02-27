@@ -42,7 +42,7 @@ namespace Point
   %inline
   public export
   new : Parameters [New.x, New.y] -> IO Point
-  new ps = primIO $ prim__dart_new Point [] ps
+  new ps = primIO $ prim__dart_new Point "" [] ps
 
 %inline
 export
@@ -84,7 +84,7 @@ namespace Callbacks
   %inline
   public export
   new : Parameters [Callbacks.New.x, Callbacks.New.y, Callbacks.New.enabled] -> IO Callbacks
-  new ps = primIO $ prim__dart_new Callbacks [] ps
+  new ps = primIO $ prim__dart_new Callbacks "" [] ps
 
   export
   %foreign "Dart:.callX"

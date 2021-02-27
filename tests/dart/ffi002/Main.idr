@@ -32,7 +32,12 @@ namespace Point
   %inline
   public export
   new : Parameters [New.x, New.y] -> IO Point
-  new ps = primIO $ prim__dart_new Point [] ps
+  new ps = primIO $ prim__dart_new Point "" [] ps
+
+  %inline
+  public export
+  of' : Int -> Int -> IO Point
+  of' x y = primIO $ prim__dart_new Point "of" [x, y] none
 
 %inline
 export
@@ -58,7 +63,7 @@ namespace Callbacks
   %inline
   public export
   new : Parameters [Callbacks.New.x, Callbacks.New.y] -> IO Callbacks
-  new ps = primIO $ prim__dart_new Callbacks [] ps
+  new ps = primIO $ prim__dart_new Callbacks "" [] ps
 
   export
   %foreign "Dart:.callX"
@@ -75,6 +80,8 @@ main = do
     y @= 37
   ]
   printLn pt
+
+  printLn !(Point.of' 11 31)
 
   cb <- Callbacks.new [
     x @= (\i => i * 2),

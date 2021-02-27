@@ -50,4 +50,4 @@ namespace Stateless
   %inline
   public export
   new : Stateless.New.NamedParameters -> IO Stateless
-  new ps = primIO (prim__dart_new Stateless [] ps)
+  new ps = primIO (prim__dart_new Stateless "" [] ps)

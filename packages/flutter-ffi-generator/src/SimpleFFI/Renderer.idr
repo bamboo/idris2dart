@@ -213,7 +213,7 @@ ctorPrimsFor n ps =
       inline,
       pubExport,
       pretty funName <++> colon <++> pretty "HasIO io =>" <++> funType (pTys' ++ [pretty "io" <++> ret']),
-      pretty funName <++> ps' <++> equals <++> pretty "primIO $ prim__dart_new" <++> ret' <++> args'
+      pretty funName <++> ps' <++> equals <++> pretty "primIO $ prim__dart_new" <++> ret' <++> stringLit "" <++> args'
     ]
   in
     if isNil namedPs

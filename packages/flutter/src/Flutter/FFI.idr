@@ -369,7 +369,7 @@ namespace CircularProgressIndicator
   %inline
   public export
   new : HasIO io => CircularProgressIndicator.New.NamedParameters -> io CircularProgressIndicator
-  new  ps = primIO $ prim__dart_new CircularProgressIndicator [] ps
+  new  ps = primIO $ prim__dart_new CircularProgressIndicator "" [] ps
 
 
 namespace VisualDensity
@@ -434,7 +434,7 @@ namespace ThemeData
   %inline
   public export
   new : HasIO io => ThemeData.New.NamedParameters -> io ThemeData
-  new  ps = primIO $ prim__dart_new ThemeData [] ps
+  new  ps = primIO $ prim__dart_new ThemeData "" [] ps
 
   export
   textTheme : ThemeData -> TextTheme
@@ -472,7 +472,7 @@ namespace TextButton
   %inline
   public export
   new : HasIO io => TextButton.New.NamedParameters -> io TextButton
-  new  ps = primIO $ prim__dart_new TextButton [] ps
+  new  ps = primIO $ prim__dart_new TextButton "" [] ps
 
   namespace StyleFrom
     data Tag : Type where
@@ -530,7 +530,7 @@ namespace Scaffold
   %inline
   public export
   new : HasIO io => Scaffold.New.NamedParameters -> io Scaffold
-  new  ps = primIO $ prim__dart_new Scaffold [] ps
+  new  ps = primIO $ prim__dart_new Scaffold "" [] ps
 
 
 namespace AppBar
@@ -554,7 +554,7 @@ namespace AppBar
   %inline
   public export
   new : HasIO io => AppBar.New.NamedParameters -> io AppBar
-  new  ps = primIO $ prim__dart_new AppBar [] ps
+  new  ps = primIO $ prim__dart_new AppBar "" [] ps
 
 
 namespace Icons
@@ -646,7 +646,7 @@ namespace IconButton
   %inline
   public export
   new : HasIO io => IconButton.New.NamedParameters -> io IconButton
-  new  ps = primIO $ prim__dart_new IconButton [] ps
+  new  ps = primIO $ prim__dart_new IconButton "" [] ps
 
 
 namespace FloatingActionButton
@@ -682,7 +682,7 @@ namespace FloatingActionButton
   %inline
   public export
   new : HasIO io => FloatingActionButton.New.NamedParameters -> io FloatingActionButton
-  new  ps = primIO $ prim__dart_new FloatingActionButton [] ps
+  new  ps = primIO $ prim__dart_new FloatingActionButton "" [] ps
 
 
 namespace Slider
@@ -748,7 +748,7 @@ namespace Slider
   %inline
   public export
   new : HasIO io => Slider.New.NamedParameters -> io Slider
-  new  ps = primIO $ prim__dart_new Slider [] ps
+  new  ps = primIO $ prim__dart_new Slider "" [] ps
 
 
 namespace MaterialApp
@@ -782,7 +782,7 @@ namespace MaterialApp
   %inline
   public export
   new : HasIO io => MaterialApp.New.NamedParameters -> io MaterialApp
-  new  ps = primIO $ prim__dart_new MaterialApp [] ps
+  new  ps = primIO $ prim__dart_new MaterialApp "" [] ps
 
 
 namespace MainAxisAlignment
@@ -827,7 +827,7 @@ namespace Icon
   %inline
   public export
   new : HasIO io => (icon : IconData) -> Icon.New.NamedParameters -> io Icon
-  new icon ps = primIO $ prim__dart_new Icon [icon] ps
+  new icon ps = primIO $ prim__dart_new Icon "" [icon] ps
 
 
 namespace Center
@@ -851,7 +851,7 @@ namespace Center
   %inline
   public export
   new : HasIO io => Center.New.NamedParameters -> io Center
-  new  ps = primIO $ prim__dart_new Center [] ps
+  new  ps = primIO $ prim__dart_new Center "" [] ps
 
 
 namespace Column
@@ -880,7 +880,7 @@ namespace Column
   %inline
   public export
   new : HasIO io => Column.New.NamedParameters -> io Column
-  new  ps = primIO $ prim__dart_new Column [] ps
+  new  ps = primIO $ prim__dart_new Column "" [] ps
 
 
 namespace Expanded
@@ -904,7 +904,7 @@ namespace Expanded
   %inline
   public export
   new : HasIO io => Expanded.New.NamedParameters -> io Expanded
-  new  ps = primIO $ prim__dart_new Expanded [] ps
+  new  ps = primIO $ prim__dart_new Expanded "" [] ps
 
 
 namespace Row
@@ -933,7 +933,7 @@ namespace Row
   %inline
   public export
   new : HasIO io => Row.New.NamedParameters -> io Row
-  new  ps = primIO $ prim__dart_new Row [] ps
+  new  ps = primIO $ prim__dart_new Row "" [] ps
 
 
 namespace Text
@@ -967,7 +967,7 @@ namespace Text
   %inline
   public export
   new : HasIO io => (text : String) -> Text.New.NamedParameters -> io Text
-  new text ps = primIO $ prim__dart_new Text [text] ps
+  new text ps = primIO $ prim__dart_new Text "" [text] ps
 
 
 namespace GestureDetector
@@ -1081,7 +1081,7 @@ namespace GestureDetector
   %inline
   public export
   new : HasIO io => GestureDetector.New.NamedParameters -> io GestureDetector
-  new  ps = primIO $ prim__dart_new GestureDetector [] ps
+  new  ps = primIO $ prim__dart_new GestureDetector "" [] ps
 
 
 namespace CustomPaint
@@ -1141,7 +1141,7 @@ namespace CustomPaint
   %inline
   public export
   new : HasIO io => CustomPaint.New.NamedParameters -> io CustomPaint
-  new  ps = primIO $ prim__dart_new CustomPaint [] ps
+  new  ps = primIO $ prim__dart_new CustomPaint "" [] ps
 
 
 namespace AppLifecycleState
@@ -1176,7 +1176,7 @@ namespace Paint
   %inline
   public export
   new : HasIO io => io Paint
-  new  = primIO $ prim__dart_new Paint [] Parameters.none
+  new  = primIO $ prim__dart_new Paint "" [] Parameters.none
 
   export
   style : Paint -> PaintingStyle
@@ -1199,7 +1199,7 @@ namespace Offset
   %inline
   public export
   new : HasIO io => (dx : Double) -> (dy : Double) -> io Offset
-  new dx dy = primIO $ prim__dart_new Offset [dx, dy] Parameters.none
+  new dx dy = primIO $ prim__dart_new Offset "" [dx, dy] Parameters.none
 
   export
   dx : Offset -> Double
@@ -1224,7 +1224,7 @@ namespace Path
   %inline
   public export
   new : HasIO io => io Path
-  new  = primIO $ prim__dart_new Path [] Parameters.none
+  new  = primIO $ prim__dart_new Path "" [] Parameters.none
 
   %inline
   public export

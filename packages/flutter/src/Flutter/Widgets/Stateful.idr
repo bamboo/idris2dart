@@ -96,7 +96,7 @@ namespace Stateful
   %inline
   public export
   new : {stateType : Type} -> Stateful.New.NamedParameters {stateType = stateType} -> IO Stateful
-  new ps = primIO (prim__dart_new Stateful [] ps)
+  new ps = primIO (prim__dart_new Stateful "" [] ps)
 
   %foreign "Dart:.modify"
   prim__modify : StatefulWidgetState stateType -> (stateType -> stateType) -> PrimIO ()

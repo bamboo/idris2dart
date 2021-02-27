@@ -737,6 +737,7 @@ mutual
     (NS _ (UN "prim__dart_new"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
       , IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _)
+      , IEConstant (Str ctorName)
       , positional
       , named
       , rest
@@ -746,7 +747,8 @@ mutual
       fTy <- foreignTypeName ty
       posArgs <- traverse dartExp pos'
       namedArgs <- traverse dartNamedArg named'
-      pure (fTy <+> tupled (posArgs ++ namedArgs))
+      let ctorName' = if length ctorName > 0 then text ("." ++ ctorName) else empty
+      pure (fTy <+> ctorName' <+> tupled (posArgs ++ namedArgs))
   dartPrimFnExt
     (NS _ (UN "prim__dart_List_new"))
     [ elementTy
