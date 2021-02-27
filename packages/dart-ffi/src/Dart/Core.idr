@@ -242,3 +242,13 @@ namespace Nullable
 export
 Cast a (Nullable a) where
   cast a = believe_me a
+
+public export
+IsAssignableFrom (Iterable element) (DartList element) where
+
+namespace Iterable
+
+  %inline
+  public export
+  forEach : HasIO io => {0 element : Type} -> {iterable : Type} -> IsAssignableFrom (Iterable element) iterable => (element -> IO ()) -> iterable -> io ()
+  forEach action iterable = primIO $ prim__dart_invoke ".forEach" [iterable, action] Parameters.none
