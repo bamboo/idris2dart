@@ -2,9 +2,11 @@ module Main
 
 import Flutter
 
+%hide Dart.Core.List
+
 data State
-  = Idle (Prelude.List Offset)
-  | Pressing Offset (Prelude.List Offset)
+  = Idle (List Offset)
+  | Pressing Offset (List Offset)
 
 onTapUp : TapUpDetails -> State -> State
 onTapUp d s = case s of
@@ -26,7 +28,7 @@ onLongPressEnd d s = case s of
   Pressing _ os => Idle (localPosition d :: os)
   s => s
 
-drawLines : Canvas -> Prelude.List Offset -> IO ()
+drawLines : Canvas -> List Offset -> IO ()
 drawLines _ [] = pure ()
 drawLines c (o :: os) = do
   path <- Path.new
