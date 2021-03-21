@@ -1,5 +1,7 @@
 package dart-ffi
 
+version = 0.1.0
+
 modules
   = Dart.Core
   , Dart.FFI
