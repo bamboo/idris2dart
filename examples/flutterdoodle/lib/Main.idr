@@ -2,16 +2,9 @@ module Main
 
 import Flutter
 
-infixr 1 //
-
-||| In search of a convenient "OO style" method invocation syntax.
-||| `obj // method arg1 arg2`
-(//) : a -> (a -> b) -> b
-(//) a f = f a
-
 data State
-  = Idle (List Offset)
-  | Pressing Offset (List Offset)
+  = Idle (Prelude.List Offset)
+  | Pressing Offset (Prelude.List Offset)
 
 onTapUp : TapUpDetails -> State -> State
 onTapUp d s = case s of
@@ -33,15 +26,15 @@ onLongPressEnd d s = case s of
   Pressing _ os => Idle (localPosition d :: os)
   s => s
 
-drawLines : Canvas -> List Offset -> IO ()
+drawLines : Canvas -> Prelude.List Offset -> IO ()
 drawLines _ [] = pure ()
 drawLines c (o :: os) = do
   path <- Path.new
-  path // moveTo (dx o) (dy o)
-  os // traverse_ (\o => path // lineTo (dx o) (dy o))
+  path @. moveTo (dx o) (dy o)
+  os @. traverse_ (\o => path @. lineTo (dx o) (dy o))
   paint <- Paint.new
-  paint // setStyle PaintingStyle.stroke
-  c // drawPath path paint
+  paint @. setStyle PaintingStyle.stroke
+  c @. drawPath path paint
 
 onPaint : State -> Canvas -> Size -> IO ()
 onPaint s c _ = case s of
