@@ -24,8 +24,9 @@ namespace UpcastList
   toList : UpcastList element -> List element
   toList (MkUpcastList es) = es
 
+  %inline
   export
-  into : HasIO io => DartList element -> UpcastList element -> io (DartList element)
+  into : HasIO io => {element : Type} -> DartList element -> UpcastList element -> io (DartList element)
   into result es = do
     traverse_ (`add` result) (toList es)
     pure result

@@ -2,6 +2,7 @@ module Dart.Core
 
 import Dart.FFI.Constructors
 import Dart.FFI.Upcast
+import public Dart.FFI.Types
 import public System.FFI
 
 %inline
@@ -30,12 +31,12 @@ Iterable element = Struct "Iterable,dart:core" [("first", element), ("last", ele
 %inline
 public export
 DartList : Type -> Type
-DartList element = Struct "List,dart:core" [("length", Int), ("first", element), ("last", element)]
+DartList element = GenericType "List,dart:core" [element]
 
 %inline
 public export
 DartMap : Type -> Type -> Type
-DartMap key val = Struct "Map,dart:core" [("keys", Iterable key), ("values", Iterable val)]
+DartMap key val = GenericType "Map,dart:core" [key, val]
 
 namespace Object
 
@@ -126,29 +127,20 @@ namespace DartList
 
   %inline
   export
-  add : HasIO io => {0 element : Type} -> element -> DartList element -> io ()
-  add e list =
-    let
-      e' = the AnyPtr (believe_me e)
-      list' = the (DartList AnyPtr) (believe_me list)
-    in primIO $ prim__dart_invoke ".add" [] [list', e'] none
+  add : HasIO io => {element : Type} -> element -> DartList element -> io ()
+  add e list = primIO $ prim__dart_invoke ".add" [] [list, e] none
 
 namespace Map
 
-  %foreign "Dart:Map,dart:core"
-  prim__new : PrimIO (DartMap _ _)
+  %inline
+  export
+  new : HasIO io => {key : Type} -> {val : Type} -> io (DartMap key val)
+  new = primIO $ prim__dart_new (DartMap key val) "" [] none
 
   %inline
   export
-  new : HasIO io => io (DartMap _ _)
-  new = primIO prim__new
-
-  %foreign "Dart:[]"
-  prim__put : DartMap key val -> key -> val -> PrimIO ()
-
-  export
-  put : HasIO io => {0 key : Type} -> key -> {0 val : Type} -> val -> DartMap key val -> io ()
-  put k v m = primIO $ prim__put m k v
+  put : HasIO io => {key : Type} -> key -> {val : Type} -> val -> DartMap key val -> io ()
+  put k v m = primIO $ prim__dart_invoke "[]" [] [m, k, v] none
 
 %inline
 public export

@@ -29,7 +29,8 @@ printInts = printListVia "printInts"
 printIntegers : DartList Integer -> IO ()
 printIntegers = printListVia "printIntegers"
 
-into : DartList element -> List element -> IO (DartList element)
+%inline
+into : {element : Type} -> DartList element -> List element -> IO (DartList element)
 into list es = do
   traverse_ (flip add list) es
   pure list
