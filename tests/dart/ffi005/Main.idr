@@ -6,7 +6,8 @@ import Dart.FFI
 %inline
 export
 Point : Type
-Point = Struct "Point,
+Point = Struct """
+Point,
 // All foreign names must be fully qualified and
 // the following import can always be assumed to exist:
 // import 'dart:core' as $;
@@ -16,7 +17,8 @@ class Point {
   Point({this.x, this.y});
   void moveTo($.int x, $.int y) { this.x = x; this.y = y; }
   static Point from({$.int x, $.int y}) => Point(x: x, y: y);
-}" [
+}
+""" [
   ("x", Int),
   ("y", Int)
 ]

@@ -6,7 +6,8 @@ import Dart.FFI
 %inline
 export
 Point : Type
-Point = Struct "Point,
+Point = Struct """
+Point,
 // All foreign names must be fully qualified and
 // the following import can always be assumed to exist:
 // import 'dart:core' as $;
@@ -15,7 +16,8 @@ class Point {
   final $.int y;
   Point({this.x, this.y});
   Point.of(this.x, this.y);
-}" [
+}
+""" [
   ("x", Int),
   ("y", Int)
 ]
@@ -47,7 +49,8 @@ namespace Point
 %inline
 export
 Callbacks : Type
-Callbacks = Struct "Callbacks,
+Callbacks = Struct """
+Callbacks,
 class Callbacks {
   $.Object Function($.Object) x;
   $.Object Function($.Object) y;
@@ -56,7 +59,8 @@ class Callbacks {
   $.Object callX($.Object arg) => x(arg);
   $.Object callY($.Object arg) => y(arg);
   $.Object callWith($.Object arg, $.Object Function($.Object) f) => f(arg);
-}" [
+}
+""" [
   ("enabled", DartBool)
 ]
 
@@ -100,10 +104,12 @@ namespace Callbacks
   callWith x f this = primIO $ prim__dart_invoke ".callWith" [this, x, f] Parameters.none
 
 ||| A pure foreign function with a bool argument.
-%foreign "Dart:ifBool,
+%foreign """
+Dart:ifBool,
 $.Object ifBool($.bool condition, $.Object then, $.Object else_) {
   return condition ? then : else_;
-}"
+}
+"""
 ifBool : DartBool -> Int -> Int -> Int
 
 main : IO ()

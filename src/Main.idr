@@ -6,6 +6,7 @@ import Core.CompileExpr
 import Core.Context
 import Core.Name.Namespace
 import Data.List
+import Data.List1
 import Data.SortedSet as SortedSet
 import Data.String.Extra
 import Data.Strings
@@ -928,7 +929,7 @@ header = [
 ]
 
 delayClass : Doc
-delayClass = text "
+delayClass = text """
 class $Delayed {
   $.dynamic Function() e;
   $.dynamic value;
@@ -942,7 +943,7 @@ class $Delayed {
     return this.value;
   }
 }
-"
+"""
 
 nubSort : Ord a => List a -> List a
 nubSort = SortedSet.toList . SortedSet.fromList
@@ -954,7 +955,7 @@ compileToDart defs term = do
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
   finalState <- get Dart
-  let includeLines = concatMap lines (SortedSet.toList finalState.includes)
+  let includeLines = concatMap (toList . lines) (SortedSet.toList finalState.includes)
   let (importLines, nonImportLines) = partition ("import " `isPrefixOf`) includeLines
   let includeImports' = text <$> nubSort importLines
   let includes' = text (unlines nonImportLines)

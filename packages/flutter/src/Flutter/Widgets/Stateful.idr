@@ -6,7 +6,8 @@ import Flutter.FFI
 %inline
 public export
 Stateful : Type
-Stateful = Struct "_Stateful,
+Stateful = Struct """
+_Stateful,
 import 'package:flutter/material.dart' as material;
 
 class _Stateful extends material.StatefulWidget {
@@ -45,7 +46,7 @@ class _StatefulWidgetState {
     _state.modify(f);
   }
 }
-" []
+""" []
 
 %inline
 public export

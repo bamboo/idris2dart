@@ -14,16 +14,6 @@ upcast : {0 subType : Type}
 upcast sub = believe_me sub
 
 %inline
-export
-upcastM : Monad m
-  => {0 superType : Type}
-  -> {0 subType : Type}
-  -> IsAssignableFrom superType subType
-  => m subType
-  -> m superType
-upcastM action = pure (upcast !action)
-
-%inline
 public export
 IsAssignableFrom superType subType => Cast subType superType where
   cast sub = upcast sub

@@ -6,7 +6,8 @@ import Flutter.FFI
 %inline
 public export
 Painter : Type
-Painter = Struct "_Painter,
+Painter = Struct """
+_Painter,
 
 import 'package:flutter/material.dart' as material;
 
@@ -25,7 +26,8 @@ class _Painter extends material.CustomPainter {
   $.bool shouldRepaint(covariant material.CustomPainter oldDelegate) {
     return oldDelegate != this;
   }
-}" []
+}
+""" []
 
 public export
 IsAssignableFrom CustomPainter Painter where

@@ -6,7 +6,8 @@ import Flutter.FFI
 %inline
 public export
 Stateless : Type
-Stateless = Struct "_Stateless,
+Stateless = Struct """
+_Stateless,
 import 'package:flutter/material.dart' as material;
 
 class _Stateless extends material.StatelessWidget {
@@ -17,7 +18,7 @@ class _Stateless extends material.StatelessWidget {
     return onBuild(context);
   }
 }
-" []
+""" []
 
 public export
 IsAssignableFrom Widget Stateless where

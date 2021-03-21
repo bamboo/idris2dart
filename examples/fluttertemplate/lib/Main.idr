@@ -9,7 +9,7 @@ appHome : IO Stateful
 appHome = Stateful.new [initialState @= 0, onBuild @= build]
   where
     build : StatefulWidgetState Int -> BuildContext -> IO Widget
-    build state context = upcastM $ Scaffold.new [
+    build state context = cast <$> Scaffold.new [
       appBar @=> !(AppBar.new [
         title @=> !(Text.new appTitle [])
       ]),
@@ -35,7 +35,7 @@ app : IO Stateless
 app = Stateless.new [onBuild @= build]
   where
     build : BuildContext -> IO Widget
-    build _ = upcastM $ MaterialApp.new [
+    build _ = cast <$> MaterialApp.new [
       title @= appTitle,
       home @=> !appHome,
       theme @= !(ThemeData.new [

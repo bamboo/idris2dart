@@ -4,12 +4,13 @@ module Main
 import Dart.Core
 import Dart.FFI
 
-%foreign "Dart:code,
+%foreign """
+Dart:code,
 code() {}
 printStrings($.List<$.String> list) => $.print(list);
 printInts($.List<$.int> list) => $.print(list);
 printIntegers($.List<$.BigInt> list) => $.print(list);
-"
+"""
 prim__code : PrimIO ()
 
 importForeignCode : IO ()

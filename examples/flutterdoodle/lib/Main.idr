@@ -55,7 +55,7 @@ appHome : IO Stateful
 appHome = Stateful.new [initialState @= Idle [], onBuild @= build]
   where
     build : StatefulWidgetState State -> BuildContext -> IO Widget
-    build state context = upcastM $ Scaffold.new [
+    build state context = cast <$> Scaffold.new [
       appBar @=> !(AppBar.new [
         title @=> !(Text.new appTitle [])
       ]),
