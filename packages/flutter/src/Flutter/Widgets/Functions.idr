@@ -1,7 +1,7 @@
 module Flutter.Widgets.Functions
 
 import Dart.FFI
-import public Dart.Core -- for DartList
+import public Dart.Core
 import public Dart.FFI.Upcast
 import public Dart.FFI.UpcastList
 import Flutter.FFI
@@ -13,5 +13,5 @@ runApp w = primIO (prim__dart_invoke "runApp,package:flutter/widgets.dart" [] [w
 
 %inline
 export
-widgets : UpcastList Widget -> DartList Widget
+widgets : UpcastList Widget -> Core.List Widget
 widgets = fromList . toList

@@ -5,7 +5,7 @@ import Dart.FFI.Upcast
 
 public export
 data UpcastList : Type -> Type where
-  MkUpcastList : List element -> UpcastList element
+  MkUpcastList : Prelude.List element -> UpcastList element
 
 namespace UpcastList
 
@@ -21,12 +21,12 @@ namespace UpcastList
 
   %inline
   export
-  toList : UpcastList element -> List element
+  toList : UpcastList element -> Prelude.List element
   toList (MkUpcastList es) = es
 
   %inline
   export
-  into : HasIO io => {element : Type} -> DartList element -> UpcastList element -> io (DartList element)
+  into : HasIO io => {element : Type} -> Core.List element -> UpcastList element -> io (Core.List element)
   into result es = do
     traverse_ (`add` result) (toList es)
     pure result

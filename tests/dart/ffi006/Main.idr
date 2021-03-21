@@ -17,20 +17,20 @@ importForeignCode : IO ()
 importForeignCode = primIO prim__code
 
 %inline
-printListVia : String -> {a : Type} -> DartList a -> IO ()
+printListVia : String -> {a : Type} -> Core.List a -> IO ()
 printListVia f es = primIO $ prim__dart_invoke f [] [es] none
 
-printStrings : DartList String -> IO ()
+printStrings : Core.List String -> IO ()
 printStrings = printListVia "printStrings"
 
-printInts : DartList Int -> IO ()
+printInts : Core.List Int -> IO ()
 printInts = printListVia "printInts"
 
-printIntegers : DartList Integer -> IO ()
+printIntegers : Core.List Integer -> IO ()
 printIntegers = printListVia "printIntegers"
 
 %inline
-into : {element : Type} -> DartList element -> List element -> IO (DartList element)
+into : {element : Type} -> Core.List element -> Prelude.List element -> IO (Core.List element)
 into list es = do
   traverse_ (flip add list) es
   pure list

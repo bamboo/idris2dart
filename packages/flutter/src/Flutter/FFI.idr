@@ -896,7 +896,7 @@ namespace Column
     %inline
     public export
     children : Parameter Column.New.Tag
-    children = mkParameter "children" (DartList Widget)
+    children = mkParameter "children" (Core.List Widget)
 
     %inline
     public export
@@ -949,7 +949,7 @@ namespace Row
     %inline
     public export
     children : Parameter Row.New.Tag
-    children = mkParameter "children" (DartList Widget)
+    children = mkParameter "children" (Core.List Widget)
 
     %inline
     public export

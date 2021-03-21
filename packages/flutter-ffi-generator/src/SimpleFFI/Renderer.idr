@@ -53,7 +53,7 @@ prettyType ty = case ty of
   DoubleType => pretty "Double"
   VoidType => pretty "()"
   NamedType n => pretty n
-  ListType a => parens (pretty "DartList" <++> prettyType a)
+  ListType a => parens (pretty "Core.List" <++> prettyType a)
   FunctionType ps ret =>
     let sig = (prettyType <$> ps) ++ [pretty "IO" <++> prettyType ret]
     in parens (funType sig)

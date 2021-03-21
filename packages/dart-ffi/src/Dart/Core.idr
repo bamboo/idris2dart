@@ -30,8 +30,8 @@ Iterable element = Struct "Iterable,dart:core" [("first", element), ("last", ele
 
 %inline
 public export
-DartList : Type -> Type
-DartList element = GenericType "List,dart:core" [element]
+List : Type -> Type
+List element = GenericType "List,dart:core" [element]
 
 %inline
 public export
@@ -102,32 +102,32 @@ export
 Show DartBool where
   show b = show (toBool b)
 
-%extern prim__dart_List_new : (element : Type) -> (1 x : %World) -> IORes (DartList element)
+%extern prim__dart_List_new : (element : Type) -> (1 x : %World) -> IORes (Dart.Core.List element)
 
-%extern prim__dart_List_empty : (element : Type) -> DartList element
+%extern prim__dart_List_empty : (element : Type) -> Dart.Core.List element
 
-%extern prim__dart_List_fromList : (element : Type) -> List element -> DartList element
+%extern prim__dart_List_fromList : (element : Type) -> Prelude.List element -> Dart.Core.List element
 
-namespace DartList
+namespace List
 
   %inline
   export
-  empty : {element : Type} -> DartList element
+  empty : {element : Type} -> Dart.Core.List element
   empty = prim__dart_List_empty element
 
   %inline
   export
-  new : HasIO io => {element : Type} -> io (DartList element)
+  new : HasIO io => {element : Type} -> io (Dart.Core.List element)
   new = primIO $ prim__dart_List_new element
 
   %inline
   export
-  fromList : {element : Type} -> List element -> DartList element
+  fromList : {element : Type} -> Prelude.List element -> Dart.Core.List element
   fromList l = prim__dart_List_fromList element l
 
   %inline
   export
-  add : HasIO io => {element : Type} -> element -> DartList element -> io ()
+  add : HasIO io => {element : Type} -> element -> Dart.Core.List element -> io ()
   add e list = primIO $ prim__dart_invoke ".add" [] [list, e] none
 
 namespace Map
@@ -236,7 +236,7 @@ Cast a (Nullable a) where
   cast a = believe_me a
 
 public export
-IsAssignableFrom (Iterable element) (DartList element) where
+IsAssignableFrom (Iterable element) (Dart.Core.List element) where
 
 namespace Iterable
 
