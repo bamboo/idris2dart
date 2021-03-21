@@ -26,7 +26,7 @@ Symbol = Struct "Symbol,dart:core" [("hashCode", Int)]
 %inline
 public export
 Iterable : Type -> Type
-Iterable element = Struct "Iterable,dart:core" [("first", element), ("last", element)]
+Iterable element = GenericType "Iterable,dart:core" [element]
 
 %inline
 public export
