@@ -18,7 +18,7 @@ importForeignCode = primIO prim__code
 
 %inline
 printListVia : String -> {a : Type} -> DartList a -> IO ()
-printListVia f es = primIO $ prim__dart_invoke f [es] none
+printListVia f es = primIO $ prim__dart_invoke f [] [es] none
 
 printStrings : DartList String -> IO ()
 printStrings = printListVia "printStrings"

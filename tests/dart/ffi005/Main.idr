@@ -45,12 +45,12 @@ namespace Point
   %inline
   public export
   from : Parameters [From.x, From.y] -> IO Point
-  from ps = primIO $ prim__dart_invoke "Point.from" [] ps
+  from ps = primIO $ prim__dart_invoke "Point.from" [] [] ps
 
   %inline
   public export
   moveTo : Int -> Int -> Point -> IO ()
-  moveTo x y this = primIO $ prim__dart_invoke ".moveTo" [this, x, y] none
+  moveTo x y this = primIO $ prim__dart_invoke ".moveTo" [] [this, x, y] none
 
 main : IO ()
 main = do

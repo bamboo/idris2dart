@@ -58,8 +58,8 @@ public export
 %extern prim__dart_new
   : (ty : Type)
  -> (constructorName : String)
- -> HVect positional
- -> Parameters named
+ -> (positionalArguments : HVect positionalArgumentTys)
+ -> (namedArguments : Parameters schema)
  -> (1 x : %World)
  -> IORes ty
 
@@ -73,38 +73,40 @@ public export
 
 public export
 %extern prim__dart_get
-  : {0 res : Type}
+  : {0 propertyTy : Type}
  -> {thisTy : Type}
  -> (foreignName : String)
  -> (this : thisTy)
  -> (1 x : %World)
- -> IORes res
+ -> IORes propertyTy
 
 public export
 %extern prim__dart_set
   : {thisTy : Type}
- -> {ty : Type}
+ -> {propertyTy : Type}
  -> (foreignName : String)
- -> (value : ty)
+ -> (value : propertyTy)
  -> (this : thisTy)
  -> (1 x : %World)
- -> IORes ty
+ -> IORes propertyTy
 
 public export
 %extern prim__dart_invoke
   : {0 res : Type}
- -> {positionalTys : Vect k Type}
+ -> {positionalArgumentTys : Vect k Type}
  -> (foreignName : String)
- -> (positional : HVect positionalTys)
- -> Parameters named
+ -> (typeArguments : List Type)
+ -> (positionalArguments : HVect positionalArgumentTys)
+ -> (namedArguments : Parameters schema)
  -> (1 x : %World)
  -> IORes res
 
 public export
 %extern prim__dart_invoke_pure
   : {0 res : Type}
- -> {positionalTys : Vect k Type}
+ -> {positionalArgumentTys : Vect k Type}
  -> (foreignName : String)
- -> (positional : HVect positionalTys)
- -> Parameters named
+ -> (typeArguments : List Type)
+ -> (positionalArguments : HVect positionalArgumentTys)
+ -> (namedArguments : Parameters schema)
  -> res

@@ -9,7 +9,7 @@ import Flutter.FFI
 %inline
 export
 runApp : {widget : Type} -> IsAssignableFrom Widget widget => widget -> IO ()
-runApp w = primIO (prim__dart_invoke "runApp,package:flutter/widgets.dart" [w] none)
+runApp w = primIO (prim__dart_invoke "runApp,package:flutter/widgets.dart" [] [w] none)
 
 %inline
 export

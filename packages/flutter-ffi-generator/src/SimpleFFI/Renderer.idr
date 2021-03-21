@@ -252,7 +252,7 @@ functionPrimsFor (Fun n ps ret) foreignName hasThis =
       pubExport,
       pretty funName <++> colon <++> pretty "HasIO io =>" <++> funType (psTys'' ++ [pretty "io" <++> ret']),
       pretty funName <++> ps' <++> equals
-        <++> pretty "primIO $ prim__dart_invoke" <++> stringLit foreignName <++> args'
+        <++> pretty "primIO $ prim__dart_invoke" <++> stringLit foreignName <++> "[]" <++> args'
     ]
   in
     if isNil named

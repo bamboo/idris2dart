@@ -7,7 +7,7 @@ import public System.FFI
 %inline
 export
 print : HasIO io => {a : Type} -> a -> io ()
-print value = primIO $ prim__dart_invoke "print,dart:core" [value] Parameters.none
+print value = primIO $ prim__dart_invoke "print,dart:core" [] [value] Parameters.none
 
 %inline
 public export
@@ -41,7 +41,7 @@ namespace Object
 
   public export
   toString : HasIO io => {a : Type} -> a -> io String
-  toString this = primIO $ prim__dart_invoke ".toString" [this] Parameters.none
+  toString this = primIO $ prim__dart_invoke ".toString" [] [this] Parameters.none
 
 %inline
 public export
@@ -66,7 +66,7 @@ namespace DartBool
   %inline
   public export
   fromBool : Bool -> DartBool
-  fromBool b = prim__dart_invoke_pure "==" [b, True] none
+  fromBool b = prim__dart_invoke_pure "==" [] [b, True] none
 
   %inline
   public export
@@ -80,7 +80,7 @@ prim__dart_eq x y =
   let
     x' = the AnyPtr (believe_me x)
     y' = the AnyPtr (believe_me y)
-  in toBool (prim__dart_invoke_pure "==" [x', y'] none)
+  in toBool (prim__dart_invoke_pure "==" [] [x', y'] none)
 
 %inline
 export
@@ -95,7 +95,7 @@ Cast DartBool Bool where
 %inline
 export
 Eq DartBool where
-  (==) x y = toBool (prim__dart_invoke_pure "==" [x, y] none)
+  (==) x y = toBool (prim__dart_invoke_pure "==" [] [x, y] none)
 
 export
 Show DartBool where
@@ -131,7 +131,7 @@ namespace DartList
     let
       e' = the AnyPtr (believe_me e)
       list' = the (DartList AnyPtr) (believe_me list)
-    in primIO $ prim__dart_invoke ".add" [list', e'] none
+    in primIO $ prim__dart_invoke ".add" [] [list', e'] none
 
 namespace Map
 
@@ -195,12 +195,12 @@ namespace Duration
   %inline
   public export
   (-) : Duration -> Duration -> Duration
-  (-) x y = prim__dart_invoke_pure "-" [x, y] Parameters.none
+  (-) x y = prim__dart_invoke_pure "-" [] [x, y] Parameters.none
 
   %inline
   public export
   (+) : Duration -> Duration -> Duration
-  (+) x y = prim__dart_invoke_pure "+" [x, y] Parameters.none
+  (+) x y = prim__dart_invoke_pure "+" [] [x, y] Parameters.none
 
 export
 data Nullable : a -> Type where [external]
@@ -219,7 +219,7 @@ namespace Nullable
     let
       a' = the AnyPtr (believe_me a)
       null' = the AnyPtr (believe_me a)
-    in toBool (prim__dart_invoke_pure "==" [a', null'] none)
+    in toBool (prim__dart_invoke_pure "==" [] [a', null'] none)
 
   %inline
   export
@@ -250,5 +250,5 @@ namespace Iterable
 
   %inline
   public export
-  forEach : HasIO io => {0 element : Type} -> {iterable : Type} -> IsAssignableFrom (Iterable element) iterable => (element -> IO ()) -> iterable -> io ()
-  forEach action iterable = primIO $ prim__dart_invoke ".forEach" [iterable, action] Parameters.none
+  forEach : HasIO io => {element : Type} -> {iterable : Type} -> IsAssignableFrom (Iterable element) iterable => (element -> IO ()) -> iterable -> io ()
+  forEach action iterable = primIO $ prim__dart_invoke ".forEach" [] [iterable, action] Parameters.none

@@ -100,8 +100,8 @@ namespace Callbacks
 
   %inline
   export
-  callWith : HasIO io => {a : Type} -> a -> (a -> IO b) -> Callbacks -> io b
-  callWith x f this = primIO $ prim__dart_invoke ".callWith" [this, x, f] Parameters.none
+  callWith : HasIO io => {a : Type} -> {b : Type} -> a -> (a -> IO b) -> Callbacks -> io b
+  callWith x f this = primIO $ prim__dart_invoke ".callWith" [] [this, x, f] Parameters.none
 
 ||| A pure foreign function with a bool argument.
 %foreign """

@@ -422,7 +422,7 @@ namespace Theme
   %inline
   public export
   of_ : HasIO io => (context : BuildContext) -> io ThemeData
-  of_ context = primIO $ prim__dart_invoke "Theme.of,package:flutter/material.dart" [context] Parameters.none
+  of_ context = primIO $ prim__dart_invoke "Theme.of,package:flutter/material.dart" [] [context] Parameters.none
 
 
 namespace ThemeData
@@ -510,7 +510,7 @@ namespace TextButton
   %inline
   public export
   styleFrom : HasIO io => TextButton.StyleFrom.NamedParameters -> io ButtonStyle
-  styleFrom  ps = primIO $ prim__dart_invoke "TextButton.styleFrom,package:flutter/material.dart" [] ps
+  styleFrom  ps = primIO $ prim__dart_invoke "TextButton.styleFrom,package:flutter/material.dart" [] [] ps
 
 
 namespace Scaffold
@@ -1199,7 +1199,7 @@ namespace Canvas
   %inline
   public export
   drawPath : HasIO io => (path : Path) -> (paint : Paint) -> (this : Canvas) -> io ()
-  drawPath path paint this = primIO $ prim__dart_invoke ".drawPath" [this, path, paint] Parameters.none
+  drawPath path paint this = primIO $ prim__dart_invoke ".drawPath" [] [this, path, paint] Parameters.none
 
 
 namespace PaintingStyle
@@ -1266,12 +1266,12 @@ namespace Path
   %inline
   public export
   moveTo : HasIO io => (x : Double) -> (y : Double) -> (this : Path) -> io ()
-  moveTo x y this = primIO $ prim__dart_invoke ".moveTo" [this, x, y] Parameters.none
+  moveTo x y this = primIO $ prim__dart_invoke ".moveTo" [] [this, x, y] Parameters.none
 
   %inline
   public export
   lineTo : HasIO io => (x : Double) -> (y : Double) -> (this : Path) -> io ()
-  lineTo x y this = primIO $ prim__dart_invoke ".lineTo" [this, x, y] Parameters.none
+  lineTo x y this = primIO $ prim__dart_invoke ".lineTo" [] [this, x, y] Parameters.none
 
 
 namespace Velocity

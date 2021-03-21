@@ -159,6 +159,9 @@ unsupportedError e = "throw $.UnsupportedError" <+> paren (debug e) <+> semi
 unsupported : Show a => a -> Doc
 unsupported e = "(() {" <+> unsupportedError e <+> "})()"
 
+genericTypeArgs : List Doc -> Doc
+genericTypeArgs args = "<" <+> commaSep args <+> ">"
+
 null' : Doc
 null' = text "null"
 
@@ -318,6 +321,18 @@ convertForeignReturnType retTy e = case retTy of
 
 traverseMaybes : (a -> Core (Maybe b)) -> List a -> Core (List b)
 traverseMaybes f as = catMaybes <$> traverse f as
+
+collectPositional : Expression -> List Expression
+collectPositional e = go [] e
+  where
+    go : List Expression -> Expression -> List Expression
+    go acc ({- HVect.:: -} IEConstructor (Left 1) (e :: es :: _)) = go (e :: acc) es
+    go acc _ = reverse acc
+
+parseList : Expression -> Maybe (List Expression)
+parseList e = case e of
+  IEConstructor _ _ => Just (collectPositional e)
+  _ => Nothing
 
 foreignFunctionProxy : {auto fc : FC} -> Doc -> Doc -> List CFType -> CFType -> Core Doc
 foreignFunctionProxy n ff args ret = do
@@ -614,12 +629,19 @@ useDelay = do
 
 dartTypeFromExpression : {auto ctx : Ref Dart DartT} -> Expression -> Core Doc
 dartTypeFromExpression ty = case ty of
-  IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _) => foreignTypeName ty
   IEConstructor (Right "String") _ => pure stringTy
   IEConstructor (Right "Int") _ => pure intTy
   IEConstructor (Right "Integer") _ => pure bigIntTy
   IEConstructor (Right "Double") _ => pure doubleTy
   IEConstructor (Right "Prelude.Basics.Bool") _ => pure intTy -- Idris Bool is represented as int at runtime
+  IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _) =>
+    foreignTypeName ty
+  IEConstructor (Right "Dart.FFI.Types.GenericType") [IEConstant (Str baseType), args] => do
+    baseType' <- foreignTypeName baseType
+    let Just argList = parseList args
+      | _ => pure baseType'
+    argList' <- traverse dartTypeFromExpression argList
+    pure (baseType' <+> genericTypeArgs argList')
   _ => pure dynamic'
 
 mutual
@@ -681,21 +703,23 @@ mutual
   maybeCastTo ty e = maybe e (flip castTo e) ty
 
   dartPrimInvoke : {auto ctx : Ref Dart DartT}
-    -> String -> Expression -> Expression -> Expression -> Core Doc
-  dartPrimInvoke fn positionalTys positional named = do
+    -> String -> Expression -> Expression -> Expression -> Expression -> Core Doc
+  dartPrimInvoke fn typeArgs positionalTys positional named = do
     let posTys = collectPositional positionalTys
     let pos' = collectPositional positional
     let named' = collectNamed named
     let typedPos = zip posTys pos'
     posArgs <- traverse (uncurry dartForeignArg) typedPos
     namedArgs <- traverse dartNamedArg named'
+    typeArgs' <- traverse dartTypeFromExpression (collectPositional typeArgs)
+    let typeArgs'' = if null typeArgs' then empty else genericTypeArgs typeArgs'
     case (dartNameKindOf fn, posArgs) of
       (MemberName, this :: args) => do -- Method call
         thisTy <- methodReceiverTypeFrom positionalTys
-        pure $ maybeCastTo thisTy this <+> text fn <+> tupled (args ++ namedArgs)
+        pure $ maybeCastTo thisTy this <+> text fn <+> typeArgs'' <+> tupled (args ++ namedArgs)
       (TopLevelName, args) => do -- Static / Global function call
         fn' <- parseForeignName fn
-        pure $ fn' <+> tupled (args ++ namedArgs)
+        pure $ fn' <+> typeArgs'' <+> tupled (args ++ namedArgs)
       (InfixOperator, [x, y]) => do
         xTy <- methodReceiverTypeFrom positionalTys
         pure $ binOp (text fn) (maybeCastTo xTy x) y
@@ -749,22 +773,25 @@ mutual
     [ IENull, IENull, IENull, IENull -- erased type arguments
       , positionalTys
       , IEConstant (Str fn)
+      , typeArguments
       , positional
       , named
       , rest
-    ] = dartPrimInvoke fn positionalTys positional named
+    ] = dartPrimInvoke fn typeArguments positionalTys positional named
   dartPrimFnExt
     (NS _ (UN "prim__dart_invoke_pure"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
       , positionalTys
       , IEConstant (Str fn)
+      , typeArguments
       , positional
       , named
-    ] = dartPrimInvoke fn positionalTys positional named
+    ] = dartPrimInvoke fn typeArguments positionalTys positional named
+
   dartPrimFnExt
     (NS _ (UN "prim__dart_new"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
-      , IEConstructor (Right "System.FFI.Struct") (IEConstant (Str ty) :: _)
+      , ty
       , IEConstant (Str ctorName)
       , positional
       , named
@@ -772,7 +799,7 @@ mutual
     ] = do
       let pos' = collectPositional positional
       let named' = collectNamed named
-      fTy <- foreignTypeName ty
+      fTy <- dartTypeFromExpression ty
       posArgs <- traverse dartExp pos'
       namedArgs <- traverse dartNamedArg named'
       let ctorName' = if length ctorName > 0 then text ("." ++ ctorName) else empty
@@ -832,18 +859,6 @@ mutual
       go : List (Expression, String, Expression) -> Expression -> List (Expression, String, Expression)
       go acc ({- ParamList.:: -} IEConstructor (Left 1) [{- Assign key value -} IEConstructor (Left 0) [ty, IEConstant (Str key), value],  es]) = go ((ty, key, value) :: acc) es
       go acc _ = reverse acc
-
-  collectPositional : Expression -> List Expression
-  collectPositional e = go [] e
-    where
-      go : List Expression -> Expression -> List Expression
-      go acc ({- HVect.:: -} IEConstructor (Left 1) (e :: es :: _)) = go (e :: acc) es
-      go acc _ = reverse acc
-
-  parseList : Expression -> Maybe (List Expression)
-  parseList e = case e of
-    IEConstructor _ _ => Just (collectPositional e)
-    _ => Nothing
 
   dartCase : {auto ctx : Ref Dart DartT}
     -> (Expression, Statement)

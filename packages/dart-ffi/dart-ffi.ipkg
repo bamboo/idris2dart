@@ -5,6 +5,7 @@ modules
   , Dart.FFI
   , Dart.FFI.Constructors
   , Dart.FFI.Enums
+  , Dart.FFI.Types
   , Dart.FFI.Upcast
   , Dart.FFI.UpcastList
   , Dart.String
