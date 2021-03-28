@@ -5,7 +5,7 @@ public export
 data GenericType : String -> List Type -> Type where [external]
 
 
-infixl 5 @.
+infixl 9 @.
 
 ||| Object-oriented method invocation syntax.
 %inline

@@ -130,6 +130,13 @@ namespace List
   add : HasIO io => {element : Type} -> element -> Dart.Core.List element -> io ()
   add e list = primIO $ prim__dart_invoke ".add" [] [list, e] none
 
+  %inline
+  export
+  into : HasIO io => {element : Type} -> Dart.Core.List element -> UpcastList element -> io (Dart.Core.List element)
+  into result es = do
+    traverse_ (`add` result) (toList es)
+    pure result
+
 namespace Map
 
   %inline

@@ -24,3 +24,25 @@ IsAssignableFrom a a where
 
 -- public export
 -- (IsAssignableFrom a b, IsAssignableFrom b c) => IsAssignableFrom a c where
+
+public export
+data UpcastList : Type -> Type where
+  MkUpcastList : List element -> UpcastList element
+
+namespace UpcastList
+
+  %inline
+  export
+  Nil : UpcastList _
+  Nil = MkUpcastList []
+
+  %inline
+  export
+  (::) : IsAssignableFrom element ty => ty -> UpcastList element -> UpcastList element
+  (::) e (MkUpcastList es) = MkUpcastList (upcast e :: es)
+
+  %inline
+  export
+  toList : UpcastList element -> List element
+  toList (MkUpcastList es) = es
+

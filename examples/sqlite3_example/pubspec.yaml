@@ -1,0 +1,20 @@
+name: sqlite3_example
+description: An idris2dart FFI example.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  sqlite3: 1.0.0
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.0
+
+dev_dependencies:
+
+flutter:
+  uses-material-design: true

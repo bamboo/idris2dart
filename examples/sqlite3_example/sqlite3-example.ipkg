@@ -1,0 +1,8 @@
+package sqlite3-example
+
+main = Main
+modules
+  = Main
+depends = contrib, dart-ffi
+sourcedir = "lib"
+executable = "lib/main.dart"

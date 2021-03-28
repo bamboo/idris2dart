@@ -6,10 +6,13 @@ modules
   = Dart.Core
   , Dart.FFI
   , Dart.FFI.Constructors
+  , Dart.FFI.Elab
+  , Dart.FFI.Elab.Dsl
+  , Dart.FFI.Elab.Implementation
+  , Dart.FFI.Elab.Types
   , Dart.FFI.Enums
   , Dart.FFI.Types
   , Dart.FFI.Upcast
-  , Dart.FFI.UpcastList
   , Dart.String
 
 sourcedir = "src"

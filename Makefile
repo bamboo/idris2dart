@@ -50,15 +50,24 @@ $(flutter-ffi-generator): $(flutter-ffi-sources)
 runtests = ./tests/build/exec/runtests
 
 .PHONY: check
-check: $(idris2dart) $(runtests)
+check: $(idris2dart) $(runtests) examples
 	cd tests && $(realpath $(runtests)) $(realpath $(idris2dart))
 
 $(runtests): ./tests/*.idr ./tests/tests.ipkg $(dart-ffi-install-cookie)
 	cd tests && idris2 --build ./tests.ipkg
 
+.PHONY: examples
+examples: $(idris2dart)
+	cd examples/sqlite3_example && $(realpath $(idris2dart)) --build sqlite3-example.ipkg
+	cd examples/fluttertemplate && $(realpath $(idris2dart)) --build fluttertemplate.ipkg
+	cd examples/flutterdoodle && $(realpath $(idris2dart)) --build flutterdoodle.ipkg
+
 .PHONY: clean
 clean:
 	rm -fr ./build/
+	rm -fr ./examples/sqlite3_example/build/
+	rm -fr ./examples/fluttertemplate/build/
+	rm -fr ./examples/flutterdoodle/build/
 	rm -fr ./tests/build/
 	rm -fr $(dart-ffi-dir)/build/
 	rm -fr $(flutter-dir)/build/
