@@ -57,7 +57,7 @@ $(runtests): ./tests/*.idr ./tests/tests.ipkg $(dart-ffi-install-cookie)
 	cd tests && idris2 --build ./tests.ipkg
 
 .PHONY: examples
-examples: $(idris2dart)
+examples: $(idris2dart) flutter
 	cd examples/sqlite3_example && $(realpath $(idris2dart)) --build sqlite3-example.ipkg
 	cd examples/fluttertemplate && $(realpath $(idris2dart)) --build fluttertemplate.ipkg
 	cd examples/flutterdoodle && $(realpath $(idris2dart)) --build flutterdoodle.ipkg
