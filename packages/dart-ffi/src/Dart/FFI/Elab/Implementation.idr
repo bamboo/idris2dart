@@ -160,15 +160,13 @@ parameterDeclarationsFor ns named =
 TypeParameters : Type
 TypeParameters = List (String, TTImp)
 
-functionType' : TTImp -> TypeParameters -> TypeParameters -> TTImp
-functionType' ty implicitPs ps =
-  foldr
-    (\(imp, (pn, pty)), acc => if imp then implicitPi (UN pn) pty acc else pi (UN pn) pty acc)
-    ty
-    (((True,) <$> implicitPs) ++ ((False,) <$> ps))
-
 functionType : TTImp -> TypeParameters -> TTImp
 functionType ty ps = foldr (\(pn, pty), acc => pi (UN pn) pty acc) ty ps
+
+functionType' : TTImp -> TypeParameters -> TypeParameters -> TTImp
+functionType' ty implicitPs ps =
+  let signature = functionType ty ps
+  in foldr (\(pn, pty), acc => implicitPi (UN pn) pty acc) signature implicitPs
 
 elabFunctionWithNamedParameters
   : Invocation
@@ -353,7 +351,7 @@ elabClass n ps members = do
     declare [
       inNamespace (MkNS [n])
         let
-          typeParams = (,`(Type)) <$> ps
+          typeParams = elabTypeParams ps
           thisTy = foldl (\ps, p => `(~ps ~(var (UN p)))) (var (UN n)) ps
         in concatMap (elabClassMember qName typeParams thisTy) members
     ]
