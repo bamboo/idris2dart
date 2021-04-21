@@ -278,8 +278,8 @@ argNamesFor args p = text . (p ++) . show <$> [1..length args]
 
 ||| Adapts the foreign callback [c] so that it can be
 ||| invoked from Dart with the expected signature.
-makeCallback : Doc -> FunctionType -> Doc
-makeCallback c (args, ret) =
+makeCallback : FunctionType -> Doc -> Doc
+makeCallback (args, ret) c =
   let
     argNames = argNamesFor args "c$"
     params = mapMaybe callbackParam (zip argNames args)
@@ -298,7 +298,7 @@ makeCallback c (args, ret) =
 foreignArg : {auto fc : FC} -> (Doc, CFType) -> Core (Maybe Doc)
 foreignArg (n, ty) = case ty of
   CFWorld => pure Nothing
-  CFFun a b => pure $ Just (makeCallback n (uncurriedSignature a b))
+  CFFun a b => pure $ Just (makeCallback (uncurriedSignature a b) n)
   CFUser (UN "Type") [] => pure Nothing
   CFUser (UN "__") [] => pure Nothing
   CFUser (NS ns (UN "Bool")) [] =>
@@ -838,16 +838,35 @@ mutual
     pure (!(dartExp condition) <+> " ? " <+> !(dartExp thenValue) <+> " : " <+> !(dartExp elseValue))
   dartPrimFnExt n args = pure (debug (n, args))
 
+  uncurryCallback : (hasIO : Bool) -> (args : List CFType) -> Expression -> Maybe (List Name, Statement)
+  uncurryCallback = go []
+    where
+      go : List Name -> Bool -> List CFType -> Expression -> Maybe (List Name, Statement)
+      go acc hasIO (_ :: as) (IELambda [n] (ReturnStatement e)) = go (n :: acc) hasIO as e
+      go acc True  []        (IELambda [n] e) = Just (n :: acc, e)
+      go acc False (_ :: as) (IELambda [n] e) = Just (n :: acc, e)
+      go acc False []        e = Just (acc, ReturnStatement e)
+      go _   _     _         _ = Nothing
+
   dartForeignArg : {auto ctx : Ref Dart DartT} -> Expression -> Expression -> Core Doc
-  dartForeignArg ty value = do
-    let fTy = parseFunctionType ty
-    case (fTy, value) of
-      (Just ([], CFIORes _), IELambda _ e) =>
-        -- Optimize `IO ()` callbacks
-        dartLambda [] e
-      _ => do
-        value' <- dartExp value
-        pure (maybe value' (makeCallback value') fTy)
+  dartForeignArg ty value =
+    case parseFunctionType ty of
+      -- Optimize curried IO callbacks
+      Just fTy@(args, CFIORes _) =>
+        case uncurryCallback True args value of
+          -- TODO: Optimize partial applications
+          Just (worldP :: ps, e) => do
+            e' <- dartStatement e
+            let ignoreWarning = "// ignore: unused_local_variable"
+            let world = "const " <+> dartName worldP <+> " = " <+> world' <+> semi
+            pure $ tupled (dartName <$> reverse ps) <+> block (vcat [ignoreWarning, world, e'])
+          _ => makeCallback fTy <$> dartExp value
+      -- Optimize curried pure callbacks
+      Just (args, _) =>
+        case uncurryCallback False args value of
+          Just (ps, e) => pure $ tupled (dartName <$> reverse ps) <+> !(dartBlock e)
+          _ => dartExp value
+      _ => dartExp value
 
   dartNamedArg : {auto ctx : Ref Dart DartT} -> (Expression, String, Expression) -> Core Doc
   dartNamedArg (ty, name, value) =
