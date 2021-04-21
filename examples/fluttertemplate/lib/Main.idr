@@ -19,7 +19,7 @@ appHome = Stateful.new [initialState @= 0, onBuild @= build]
           children @= widgets [
             !(Text.new "You have pushed the button this many times:" []),
             !(Text.new (show (get state)) [
-              style @= headline4 (textTheme !(Theme.of_ context))
+              style @= headline4 (textTheme !(Theme.of context))
             ])
           ]
         ])

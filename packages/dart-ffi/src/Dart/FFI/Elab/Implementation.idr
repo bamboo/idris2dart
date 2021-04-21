@@ -116,6 +116,7 @@ elabType' ts = \case
     "bool" => `(DartBool)
     "Bool" => `(DartBool)
     "double" => `(Double)
+    "Double" => `(Double)
     _ => case lookup n ts of
       Nothing => varOf n
       Just _ => bindVar n
@@ -152,9 +153,9 @@ functionType' ty implicitPs ps =
   in foldr (\(pn, pty), acc => implicitPi (UN pn) pty acc) signature implicitPs
 
 defParameter : TypeParameters -> Namespace -> (DartName, DartType) -> List Decl
-defParameter tps ns (name, ty) =
+defParameter tps tagNS (name, ty) =
   let
-    tag = var (NS ns (UN "Tag"))
+    tag = var (NS tagNS (UN "Tag"))
     tag' = foldl app tag (var . UN . fst <$> tps)
   in
     defExport (UN name) []
@@ -176,26 +177,27 @@ consParameter tps ns acc n =
   let name = qualifiedNamedApp tps ns n
   in `(~name :: ~acc)
 
-parameterDeclarationsFor : TypeParameters -> Namespace -> List (DartName, DartType) -> List Decl
-parameterDeclarationsFor tps ns named =
+parameterDeclarationsFor : TypeParameters -> Namespace -> Namespace -> List (DartName, DartType) -> List Decl
+parameterDeclarationsFor tps ns tagNS named =
   let
     namedNames = fst <$> named
-    namedParameters = foldl (consParameter tps ns) `(Nil) namedNames
+    namedParameters = foldl (consParameter tps tagNS) `(Nil) namedNames
   in [
     inNamespace ns $
       tagDataType tps
-        ++ concatMap (defParameter tps ns) named
-        ++ `[
-          %inline
-          public export
-          NamedParameters : ~(functionType' `(Type) tps [])
-          NamedParameters = Parameters ~(namedParameters)
-        ]
+      ++ concatMap (defParameter tps tagNS) named
+      ++ `[
+        %inline
+        public export
+        NamedParameters : ~(functionType' `(Type) tps [])
+        NamedParameters = Parameters ~(namedParameters)
+      ]
   ]
 
 elabFunctionWithNamedParameters
-  : Invocation
-  -> TypeParameters
+  : List String
+ -> Invocation
+ -> TypeParameters
  -> (thisTy : Maybe TTImp)
  -> TTImp
  -> String
@@ -203,10 +205,12 @@ elabFunctionWithNamedParameters
  -> List (DartName, DartType)
  -> List (DartName, DartType)
  -> List Decl
-elabFunctionWithNamedParameters invocation typeParams thisTy ty idrisName ps positional named =
+elabFunctionWithNamedParameters parentNS invocation typeParams thisTy ty idrisName ps positional named =
   let
-    ns = MkNS [titleCase idrisName]
-    namedParametersTy = qualifiedNamedApp typeParams ns "NamedParameters"
+    topNS = titleCase idrisName
+    ns = MkNS [topNS]
+    tagNS = MkNS (topNS :: parentNS)
+    namedParametersTy = qualifiedNamedApp typeParams tagNS "NamedParameters"
     fn = UN idrisName
     returnType = if invocation.hasIO then `(~(bindVar "io") ~(ty)) else ty
     thisParam = ("this",) <$> thisTy
@@ -214,7 +218,7 @@ elabFunctionWithNamedParameters invocation typeParams thisTy ty idrisName ps pos
     paramNames = fst <$> params
     posArgs = listWithVars (toList (fst <$> thisParam) ++ (fst <$> positional))
     sig = functionType' returnType typeParams params
-  in parameterDeclarationsFor typeParams ns named ++
+  in parameterDeclarationsFor typeParams ns tagNS named ++
     if invocation.hasIO
       then defExport fn paramNames `(HasIO ~(bindVar "io") => ~sig) `(primIO $ ~(invocation.invoke posArgs `(ps)))
       else defExport fn paramNames sig (invocation.invoke posArgs `(ps))
@@ -241,18 +245,19 @@ elabFunctionWithPositionalParameters invocation typeParams thisTy ty idrisName p
     else defExport fn paramNames sig (invocation.invoke posArgs none)
 
 elabFunction'
-  : Invocation
+  : List String
+ -> Invocation
  -> TypeParameters
  -> (thisTy : Maybe TTImp)
  -> TTImp
  -> (idrisName : String)
  -> List DartParameter
  -> List Decl
-elabFunction' invocation typeParams thisTy ty n ps =
+elabFunction' ns invocation typeParams thisTy ty n ps =
   let (positional, named) = partitionEithers (positionalOrNamed <$> ps)
   in if null named
     then elabFunctionWithPositionalParameters invocation typeParams thisTy ty n ps positional
-    else elabFunctionWithNamedParameters invocation typeParams thisTy ty n ps positional named
+    else elabFunctionWithNamedParameters ns invocation typeParams thisTy ty n ps positional named
 
 ioInvocationOf : String -> List String -> Invocation
 ioInvocationOf fn typeArgs = MkInvocation {
@@ -277,11 +282,12 @@ elabFunction hasIO ty n ps =
   let
     fn = packageQualifiedName n
     invocation = if hasIO then ioInvocationOf fn [] else pureInvocationOf fn []
-  in elabFunction' invocation [] Nothing (elabType ty) n ps
+  in elabFunction' [] invocation [] Nothing (elabType ty) n ps
 
-elabConstructorOf : TTImp -> TypeParameters -> String -> List DartParameter -> List Decl
-elabConstructorOf ty typeParams n ps =
+elabConstructorOf : List String -> TTImp -> TypeParameters -> String -> List DartParameter -> List Decl
+elabConstructorOf ns ty typeParams n ps =
   elabFunction'
+    ns
     (MkInvocation {hasIO = True, invoke = dartNew ty n})
     typeParams
     Nothing
@@ -334,24 +340,24 @@ simpleNameOf = \case
 elabTypeParams : List String -> List (String, TTImp)
 elabTypeParams tps = (,`(Type)) <$> tps
 
-elabClassMember : String -> List (String, TTImp) -> TTImp -> DartDecl -> List (Decl)
-elabClassMember qName typeParams thisTy d = case d of
+elabClassMember : List String -> String -> List (String, TTImp) -> TTImp -> DartDecl -> List (Decl)
+elabClassMember ns qName typeParams thisTy d = case d of
   Static (Effectful (Function ty n ps)) =>
-    elabFunction' (ioInvocationOf (withMemberName qName n) []) typeParams Nothing (elabType ty) n ps
+    elabFunction' ns (ioInvocationOf (withMemberName qName n) []) typeParams Nothing (elabType ty) n ps
   Generic funTypeParams (Static (Effectful (Function ty n ps))) =>
-    elabFunction' (ioInvocationOf (withMemberName qName n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
+    elabFunction' ns (ioInvocationOf (withMemberName qName n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
   Effectful (Function ty n ps) =>
-    elabFunction' (ioInvocationOf ("." ++ n) []) typeParams (Just thisTy) (elabType ty) n ps
+    elabFunction' ns (ioInvocationOf ("." ++ n) []) typeParams (Just thisTy) (elabType ty) n ps
   Generic funTypeParams (Effectful (Function ty n ps)) =>
-    elabFunction' (ioInvocationOf ("." ++ n) funTypeParams) (typeParams ++ elabTypeParams funTypeParams) (Just thisTy) (elabType ty) n ps
+    elabFunction' ns (ioInvocationOf ("." ++ n) funTypeParams) (typeParams ++ elabTypeParams funTypeParams) (Just thisTy) (elabType ty) n ps
   Function ty n ps =>
-    elabFunction' (pureInvocationOf ("." ++ n) []) typeParams (Just thisTy) (elabType ty) n ps
+    elabFunction' ns (pureInvocationOf ("." ++ n) []) typeParams (Just thisTy) (elabType ty) n ps
   Generic funTypeParams (Function ty n ps) =>
-    elabFunction' (pureInvocationOf ("." ++ n) funTypeParams) (typeParams ++ elabTypeParams funTypeParams) (Just thisTy) (elabType ty) n ps
+    elabFunction' ns (pureInvocationOf ("." ++ n) funTypeParams) (typeParams ++ elabTypeParams funTypeParams) (Just thisTy) (elabType ty) n ps
   Static (Function ty n ps) =>
-    elabFunction' (pureInvocationOf (withMemberName qName n) []) typeParams Nothing (elabType ty) n ps
+    elabFunction' ns (pureInvocationOf (withMemberName qName n) []) typeParams Nothing (elabType ty) n ps
   Generic funTypeParams $ Static (Function ty n ps) =>
-    elabFunction' (pureInvocationOf (withMemberName qName n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
+    elabFunction' ns (pureInvocationOf (withMemberName qName n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
   Static (Val ty n) =>
     elabVal ty n (withMemberName qName n)
   Val ty n =>
@@ -361,7 +367,7 @@ elabClassMember qName typeParams thisTy d = case d of
   Var ty n =>
     elabVar typeParams (Just thisTy) ty n ("." ++ n)
   Constructor n ps =>
-    elabConstructorOf thisTy typeParams n ps
+    elabConstructorOf ns thisTy typeParams n ps
   _ => []
 
 elabEnumMember : {auto p : DartPackage} -> TTImp -> String -> String -> List (Decl)
@@ -378,13 +384,13 @@ elabClass n ps members = do
         let
           typeParams = elabTypeParams ps
           thisTy = foldl (\ps, p => `(~ps ~(var (UN p)))) (var (UN n)) ps
-        in concatMap (elabClassMember qName typeParams thisTy) members
+        in concatMap (elabClassMember [n] qName typeParams thisTy) members
     ]
 
 elabPackageDecl : {auto p : DartPackage} -> DartDecl -> Elab ()
 elabPackageDecl = \case
   Generic funTypeParams (Effectful (Function ty n ps)) =>
-    declare $ elabFunction' (ioInvocationOf (packageQualifiedName n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
+    declare $ elabFunction' [] (ioInvocationOf (packageQualifiedName n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
   Effectful (Function ty fn ps) =>
     declare $ elabFunction True ty fn ps
   Function ty fn ps =>
@@ -433,12 +439,17 @@ defGeneric n ps =
   in defExport (UN n) ps (functionType ty ((,ty) <$> ps))
     `(GenericType ~(primVal (Str (packageQualifiedName n))) ~(listWithVars ps))
 
-elabTypeDecl : {auto p : DartPackage} -> DartDecl -> (List Decl, List ExtendsInfo)
+elabTypeDecl : {auto p : DartPackage} -> DartDecl -> List Decl
 elabTypeDecl = \case
-  Class n members => (defStruct n, mapMaybe (extendsInfo n) members)
-  Enum n members => (defStruct n, [{- TODO: IsEnum -}])
-  Generic ps (Class n _) => (defGeneric n ps, [])
-  _ => ([], [])
+  Class n members => defStruct n
+  Enum n members => defStruct n
+  Generic ps (Class n _) => defGeneric n ps
+  _ => []
+
+elabTypeDeclExtends : {auto p : DartPackage} -> DartDecl -> List ExtendsInfo
+elabTypeDeclExtends = \case
+  Class n members => mapMaybe (extendsInfo n) members -- TODO: Enum => IsEnum
+  _ => []
 
 elabExtends : Name -> ExtendsInfo -> List Decl
 elabExtends isAssignableFromCtor e =
@@ -450,20 +461,19 @@ elabExtends isAssignableFromCtor e =
 
 elabPackage : DartPackage -> Elab ()
 elabPackage p = do
-  -- TODO: decomplect type declarations from extensions
-  -- Declare all foreign types first
-  let (decls, extensions) = unzip $ map elabTypeDecl p.declarations
-  traverse_ declare decls
-
-  -- Then all `IsAssignableFrom` / `IsEnum` constraints
-  let extensions' = concat extensions
-  when (not (null extensions')) $ do
+  -- Declare all `IsAssignableFrom` / `IsEnum` constraints
+  let extensions = concatMap elabTypeDeclExtends p.declarations
+  when (not (null extensions)) $ do
     isAssignableFromCtor <- lookupIsAssignableFromConstructor
-    traverse_ (declare . elabExtends isAssignableFromCtor) extensions'
+    for_ extensions (declare . elabExtends isAssignableFromCtor)
 
   -- Only then, the actual functions
-  traverse_ elabPackageDecl p.declarations
+  for_ p.declarations elabPackageDecl
 
 export
 importDart : List DartPackage -> Elab ()
-importDart = traverse_ elabPackage
+importDart packages = do
+  -- Declare all foreign types first
+  for_ packages $ \p =>
+    for_ p.declarations (declare . elabTypeDecl)
+  for_ packages elabPackage

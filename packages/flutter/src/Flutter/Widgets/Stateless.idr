@@ -32,12 +32,12 @@ namespace Stateless
 
     %inline
     public export
-    key : Parameter Tag
+    key : Parameter Stateless.New.Tag
     key = mkParameter "key" Key
 
     %inline
     public export
-    onBuild : Parameter Tag
+    onBuild : Parameter Stateless.New.Tag
     onBuild = mkParameter "onBuild" (BuildContext -> IO Widget)
 
     %inline
