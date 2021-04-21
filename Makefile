@@ -50,7 +50,10 @@ $(flutter-ffi-generator): $(flutter-ffi-sources)
 runtests = ./tests/build/exec/runtests
 
 .PHONY: check
-check: $(idris2dart) $(runtests) examples
+check: test examples
+
+.PHONY: test
+test: $(idris2dart) $(runtests)
 	cd tests && $(realpath $(runtests)) $(realpath $(idris2dart))
 
 $(runtests): ./tests/*.idr ./tests/tests.ipkg $(dart-ffi-install-cookie)
