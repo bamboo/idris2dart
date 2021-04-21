@@ -11,9 +11,9 @@ Dart:defineGenericBox,
 // A Dart generic type.
 class Box<T> {
   final T value;
-  Box(this.value);
+  Box({this.value});
   // A Dart generic member function.
-  Box<U> map<U>(U Function(T) f) => Box<U>(f(value));
+  Box<U> map<U>(U Function(T) f) => Box<U>(value: f(value));
 }
 
 defineGenericBox() {}
@@ -26,8 +26,8 @@ defineGenericBox : PrimIO ()
   package "" [
     generic ["a"] $
       class' "Box" [
-        new "" ["value" :: "a"],
         final "a" "value",
+        new "" ["value" :? "a"],
         generic ["b"] $
           fun ("Box" :<> "b") "map" ["f" :: "a" :-> "b"]
       ]
@@ -36,7 +36,7 @@ defineGenericBox : PrimIO ()
 
 main : IO ()
 main = do
-  box <- Box.new "foo"
+  box <- Box.new [Box.New.value @= "foo"]
   Core.print box
   Core.print (box @. map String.toUpper @. value)
   primIO defineGenericBox

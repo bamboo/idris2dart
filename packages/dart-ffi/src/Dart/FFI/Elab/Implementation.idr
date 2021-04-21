@@ -36,6 +36,9 @@ var = IVar EmptyFC
 app : TTImp -> TTImp -> TTImp
 app = IApp EmptyFC
 
+namedApp : TTImp -> Name -> TTImp -> TTImp
+namedApp = INamedApp EmptyFC
+
 pi : Name -> TTImp -> TTImp -> TTImp
 pi n v = IPi EmptyFC MW ExplicitArg (Just n) v
 
@@ -54,13 +57,13 @@ def = IDef EmptyFC
 bindParameter : TTImp -> String -> TTImp
 bindParameter ps p = `(~ps ~(bindVar p))
 
-parameterized : Name -> List String -> TTImp
-parameterized n ps = foldl bindParameter (var n) ps
+parameterized : TTImp -> List String -> TTImp
+parameterized n ps = foldl bindParameter n ps
 
 simpleDef : Name -> List String -> TTImp -> Decl
 simpleDef n ps val =
   def n [
-    patClause (parameterized n ps) val
+    patClause (parameterized (var n) ps) val
   ]
 
 defExport : Name -> List String -> TTImp -> TTImp -> List Decl
@@ -81,14 +84,8 @@ dartNew : TTImp -> String -> TTImp -> TTImp -> TTImp
 dartNew ty ctorName positional named =
   `(prim__dart_new ~ty ~(primVal (Str ctorName)) ~positional ~named)
 
-consVar : TTImp -> String -> TTImp
-consVar acc a = `(~(var (UN a)) :: ~acc)
-
 listWithVars : List String ->  TTImp
 listWithVars vars = foldr (\v, acc => `(~(var (UN v)) :: ~acc)) `(Nil) vars
-
-consParameter : Namespace -> TTImp -> String -> TTImp
-consParameter ns acc a = `(~(var (NS ns (UN a))) :: ~acc)
 
 positionalOrNamed : DartParameter -> Either (DartName, DartType) (DartName, DartType)
 positionalOrNamed (Positional n ty) = Left (n, ty)
@@ -97,10 +94,19 @@ positionalOrNamed (Named n ty) = Right (n, ty)
 consArrow : TTImp -> TTImp -> TTImp
 consArrow ty acc = `(~ty -> ~acc)
 
-elabType : DartType -> TTImp
-elabType = \case
-  FType ps ret => foldr (\p, acc => `(~p -> ~acc)) (elabType ret) (elabType <$> ps)
-  GType t args => foldl app (elabType t) (elabType <$> args)
+varOf : DartName -> TTImp
+varOf n = var $
+  case reverse (toList (split (=='.') n)) of
+    (n :: ns@(_ :: _)) => NS (MkNS ns) (UN n)
+    _ => UN n
+
+TypeParameters : Type
+TypeParameters = List (String, TTImp)
+
+elabType' : TypeParameters -> DartType -> TTImp
+elabType' ts = \case
+  FType ps ret => foldr (\p, acc => `(~p -> ~acc)) (elabType' ts ret) (elabType' ts <$> ps)
+  GType t args => foldl app (elabType' ts t) (elabType' ts <$> args)
   NType n => case n of
     "int" => `(Int)
     "Int" => `(Int)
@@ -110,16 +116,24 @@ elabType = \case
     "bool" => `(DartBool)
     "Bool" => `(DartBool)
     "double" => `(Double)
-    _ => var $
-      case reverse (toList (split (=='.') n)) of
-        (n :: ns@(_ :: _)) => NS (MkNS ns) (UN n)
-        _ => UN n
+    _ => case lookup n ts of
+      Nothing => varOf n
+      Just _ => bindVar n
+
+elabType : DartType -> TTImp
+elabType = elabType' []
 
 packageQualifiedName : {auto p : DartPackage} -> String -> String
 packageQualifiedName n =
   if length p.name == 0
     then n
     else n ++ "," ++ p.name
+
+withMemberName : String -> String -> String
+withMemberName qname member =
+  case split (== ',') qname of
+    q ::: p :: _ => q ++ "." ++ member ++ "," ++ p
+    _ => qname ++ "." ++ member
 
 none : TTImp
 none = `(Parameters.none)
@@ -129,37 +143,6 @@ record Invocation where
   hasIO : Bool
   invoke : (positional : TTImp) -> (named : TTImp) -> TTImp
 
-defParameter : Namespace -> (DartName, DartType) -> List Decl
-defParameter ns (name, ty) =
-  defExport (UN name) []
-    `(Parameter ~(var (NS ns (UN "Tag"))))
-    `(mkParameter ~(primVal (Str name)) ~(elabType ty))
-
-tagDataType : List Decl
-tagDataType = `[
-  public export data Tag : Type where
-]
-
-parameterDeclarationsFor : Namespace -> List (DartName, DartType) -> List Decl
-parameterDeclarationsFor ns named =
-  let
-    namedNames = fst <$> named
-    namedParameters = foldl (consParameter ns) `(Nil) namedNames
-  in [
-    inNamespace ns $
-      tagDataType
-        ++ concatMap (defParameter ns) named
-        ++ `[
-          %inline
-          public export
-          NamedParameters : Type
-          NamedParameters = Parameters ~(namedParameters)
-        ]
-  ]
-
-TypeParameters : Type
-TypeParameters = List (String, TTImp)
-
 functionType : TTImp -> TypeParameters -> TTImp
 functionType ty ps = foldr (\(pn, pty), acc => pi (UN pn) pty acc) ty ps
 
@@ -167,6 +150,48 @@ functionType' : TTImp -> TypeParameters -> TypeParameters -> TTImp
 functionType' ty implicitPs ps =
   let signature = functionType ty ps
   in foldr (\(pn, pty), acc => implicitPi (UN pn) pty acc) signature implicitPs
+
+defParameter : TypeParameters -> Namespace -> (DartName, DartType) -> List Decl
+defParameter tps ns (name, ty) =
+  let
+    tag = var (NS ns (UN "Tag"))
+    tag' = foldl app tag (var . UN . fst <$> tps)
+  in
+    defExport (UN name) []
+      (functionType' `(Parameter ~(tag')) tps [])
+      `(mkParameter ~(primVal (Str name)) ~(elabType ty))
+
+tagDataType : TypeParameters -> List Decl
+tagDataType tps = `[
+  public export data Tag : ~(functionType' `(Type) [] tps) where
+]
+
+qualifiedNamedApp : TypeParameters -> Namespace -> String -> TTImp
+qualifiedNamedApp tps ns n =
+  let qname = var (NS ns (UN n))
+  in foldl (\acc, t => let n = UN t in namedApp acc n (var n)) qname (fst <$> tps)
+
+consParameter : TypeParameters -> Namespace -> TTImp -> String -> TTImp
+consParameter tps ns acc n =
+  let name = qualifiedNamedApp tps ns n
+  in `(~name :: ~acc)
+
+parameterDeclarationsFor : TypeParameters -> Namespace -> List (DartName, DartType) -> List Decl
+parameterDeclarationsFor tps ns named =
+  let
+    namedNames = fst <$> named
+    namedParameters = foldl (consParameter tps ns) `(Nil) namedNames
+  in [
+    inNamespace ns $
+      tagDataType tps
+        ++ concatMap (defParameter tps ns) named
+        ++ `[
+          %inline
+          public export
+          NamedParameters : ~(functionType' `(Type) tps [])
+          NamedParameters = Parameters ~(namedParameters)
+        ]
+  ]
 
 elabFunctionWithNamedParameters
   : Invocation
@@ -181,15 +206,15 @@ elabFunctionWithNamedParameters
 elabFunctionWithNamedParameters invocation typeParams thisTy ty idrisName ps positional named =
   let
     ns = MkNS [titleCase idrisName]
-    namedParametersTy = var (NS ns (UN "NamedParameters"))
+    namedParametersTy = qualifiedNamedApp typeParams ns "NamedParameters"
     fn = UN idrisName
     returnType = if invocation.hasIO then `(~(bindVar "io") ~(ty)) else ty
     thisParam = ("this",) <$> thisTy
-    params = (map elabType <$> positional) ++ [("ps", namedParametersTy)] ++ toList thisParam
+    params = (map (elabType' typeParams) <$> positional) ++ [("ps", namedParametersTy)] ++ toList thisParam
     paramNames = fst <$> params
     posArgs = listWithVars (toList (fst <$> thisParam) ++ (fst <$> positional))
     sig = functionType' returnType typeParams params
-  in parameterDeclarationsFor ns named ++
+  in parameterDeclarationsFor typeParams ns named ++
     if invocation.hasIO
       then defExport fn paramNames `(HasIO ~(bindVar "io") => ~sig) `(primIO $ ~(invocation.invoke posArgs `(ps)))
       else defExport fn paramNames sig (invocation.invoke posArgs `(ps))
@@ -207,7 +232,7 @@ elabFunctionWithPositionalParameters invocation typeParams thisTy ty idrisName p
     fn = UN idrisName
     returnType = if invocation.hasIO then `(~(bindVar "io") ~(ty)) else ty
     thisParam = ("this",) <$> thisTy
-    params = (map elabType <$> positional) ++ toList thisParam
+    params = (map (elabType' typeParams) <$> positional) ++ toList thisParam
     paramNames = fst <$> params
     posArgs = listWithVars (toList (fst <$> thisParam) ++ (fst <$> positional))
     sig = functionType' returnType typeParams params
@@ -312,9 +337,9 @@ elabTypeParams tps = (,`(Type)) <$> tps
 elabClassMember : String -> List (String, TTImp) -> TTImp -> DartDecl -> List (Decl)
 elabClassMember qName typeParams thisTy d = case d of
   Static (Effectful (Function ty n ps)) =>
-    elabFunction' (ioInvocationOf (qName ++ "." ++ n) []) typeParams Nothing (elabType ty) n ps
+    elabFunction' (ioInvocationOf (withMemberName qName n) []) typeParams Nothing (elabType ty) n ps
   Generic funTypeParams (Static (Effectful (Function ty n ps))) =>
-    elabFunction' (ioInvocationOf (qName ++ "." ++ n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
+    elabFunction' (ioInvocationOf (withMemberName qName n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
   Effectful (Function ty n ps) =>
     elabFunction' (ioInvocationOf ("." ++ n) []) typeParams (Just thisTy) (elabType ty) n ps
   Generic funTypeParams (Effectful (Function ty n ps)) =>
@@ -324,15 +349,15 @@ elabClassMember qName typeParams thisTy d = case d of
   Generic funTypeParams (Function ty n ps) =>
     elabFunction' (pureInvocationOf ("." ++ n) funTypeParams) (typeParams ++ elabTypeParams funTypeParams) (Just thisTy) (elabType ty) n ps
   Static (Function ty n ps) =>
-    elabFunction' (pureInvocationOf (qName ++ "." ++ n) []) typeParams Nothing (elabType ty) n ps
+    elabFunction' (pureInvocationOf (withMemberName qName n) []) typeParams Nothing (elabType ty) n ps
   Generic funTypeParams $ Static (Function ty n ps) =>
-    elabFunction' (pureInvocationOf (qName ++ "." ++ n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
+    elabFunction' (pureInvocationOf (withMemberName qName n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
   Static (Val ty n) =>
-    elabVal ty n (qName ++ "." ++ n)
+    elabVal ty n (withMemberName qName n)
   Val ty n =>
     elabVal' typeParams (Just thisTy) ty n ("." ++ n)
   Static (Var ty n) =>
-    elabVar [] Nothing ty n (qName ++ "." ++ n)
+    elabVar [] Nothing ty n (withMemberName qName n)
   Var ty n =>
     elabVar typeParams (Just thisTy) ty n ("." ++ n)
   Constructor n ps =>
@@ -358,6 +383,8 @@ elabClass n ps members = do
 
 elabPackageDecl : {auto p : DartPackage} -> DartDecl -> Elab ()
 elabPackageDecl = \case
+  Generic funTypeParams (Effectful (Function ty n ps)) =>
+    declare $ elabFunction' (ioInvocationOf (packageQualifiedName n) funTypeParams) (elabTypeParams funTypeParams) Nothing (elabType ty) n ps
   Effectful (Function ty fn ps) =>
     declare $ elabFunction True ty fn ps
   Function ty fn ps =>
