@@ -201,8 +201,15 @@ namespace Duration
   (+) : Duration -> Duration -> Duration
   (+) x y = prim__dart_invoke_pure "+" [] [x, y] Parameters.none
 
-export
-data Nullable : a -> Type where [external]
+public export
+IsAssignableFrom (Iterable element) (Dart.Core.List element) where
+
+namespace Iterable
+
+  %inline
+  public export
+  forEach : HasIO io => {element : Type} -> {iterable : Type} -> IsAssignableFrom (Iterable element) iterable => (element -> IO ()) -> iterable -> io ()
+  forEach action iterable = primIO $ prim__dart_invoke ".forEach" [] [iterable, action] Parameters.none
 
 namespace Nullable
 
@@ -214,11 +221,11 @@ namespace Nullable
   %inline
   export
   isNull : Nullable a -> Bool
-  isNull a =
-    let
-      a' = the AnyPtr (believe_me a)
-      null' = the AnyPtr (believe_me a)
-    in toBool (prim__dart_invoke_pure "==" [] [a', null'] none)
+  isNull a = toBool $
+    prim__dart_invoke_pure "==" [] [
+      the AnyPtr (believe_me a),
+      the AnyPtr (believe_me (Nullable.null {a = Void}))
+    ] none
 
   %inline
   export
@@ -235,19 +242,5 @@ namespace Nullable
   traverse : Applicative f => (a -> f b) -> Nullable a -> f (Nullable b)
   traverse f a =
     if isNull a
-      then pure (believe_me a)
-      else believe_me (f (believe_me a))
-
-export
-Cast a (Nullable a) where
-  cast a = believe_me a
-
-public export
-IsAssignableFrom (Iterable element) (Dart.Core.List element) where
-
-namespace Iterable
-
-  %inline
-  public export
-  forEach : HasIO io => {element : Type} -> {iterable : Type} -> IsAssignableFrom (Iterable element) iterable => (element -> IO ()) -> iterable -> io ()
-  forEach action iterable = primIO $ prim__dart_invoke ".forEach" [] [iterable, action] Parameters.none
+      then pure Nullable.null
+      else cast <$> f (believe_me a)
