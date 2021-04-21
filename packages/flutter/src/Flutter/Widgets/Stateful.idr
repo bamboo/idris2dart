@@ -99,9 +99,11 @@ namespace Stateful
   new : {stateType : Type} -> Stateful.New.NamedParameters {stateType = stateType} -> IO Stateful
   new ps = primIO (prim__dart_new Stateful "" [] ps)
 
-  %foreign "Dart:.modify"
-  prim__modify : StatefulWidgetState stateType -> (stateType -> stateType) -> PrimIO ()
-
-  export
+  %inline
+  public export
   modify : StatefulWidgetState stateType -> (stateType -> stateType) -> IO ()
-  modify state f = primIO (prim__modify state f)
+  modify state f = primIO
+    (prim__dart_invoke ".modify" [] [
+      the (StatefulWidgetState AnyPtr) (believe_me state),
+      the (AnyPtr -> AnyPtr) (believe_me f)
+      ] none)
