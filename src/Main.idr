@@ -645,8 +645,11 @@ dartTypeFromExpression ty = case ty of
   _ => pure dynamic'
 
 mutual
+  dartBlock : {auto ctx : Ref Dart DartT} -> Statement -> Core Doc
+  dartBlock s = block <$> dartStatement s
+
   dartLambda : {auto ctx : Ref Dart DartT} -> List Name -> Statement -> Core Doc
-  dartLambda ps s = pure (paramList ps <+> block !(dartStatement s))
+  dartLambda ps s = (paramList ps <+>) <$> dartBlock s
 
   commaSepExps :  {auto ctx : Ref Dart DartT}
     -> List Expression
@@ -838,8 +841,13 @@ mutual
   dartForeignArg : {auto ctx : Ref Dart DartT} -> Expression -> Expression -> Core Doc
   dartForeignArg ty value = do
     let fTy = parseFunctionType ty
-    value' <- dartExp value
-    pure (maybe value' (makeCallback value') fTy)
+    case (fTy, value) of
+      (Just ([], CFIORes _), IELambda _ e) =>
+        -- Optimize `IO ()` callbacks
+        dartLambda [] e
+      _ => do
+        value' <- dartExp value
+        pure (maybe value' (makeCallback value') fTy)
 
   dartNamedArg : {auto ctx : Ref Dart DartT} -> (Expression, String, Expression) -> Core Doc
   dartNamedArg (ty, name, value) =
