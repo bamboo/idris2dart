@@ -133,7 +133,7 @@ import Dart.FFI.Elab
         "onChangeEnd" :? "Double" :-> "IO" :<> "()",
         "min" :? "Double",
         "max" :? "Double",
-        "divisions" :: "int",
+        "divisions" :? "int",
         "label" :? "String"
       ]
     ],
