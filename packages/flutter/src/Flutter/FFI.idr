@@ -11,21 +11,34 @@ import Dart.FFI.Elab
     ]
   ],
   package "package:flutter/painting.dart" [
-    class' "TextStyle" [
-      final "TextAlign" "textAlign"
-    ],
-    class' "AlignmentGeometry" [
-    ],
     class' "Alignment" [
       extends "AlignmentGeometry",
       static $ final "Alignment" "centerLeft",
       static $ final "Alignment" "centerRight"
+    ],
+    class' "AlignmentGeometry" [
+    ],
+    enum "BoxFit" [
+      "contain", "cover", "fill", "fitHeight", "fitWidth", "none", "scaleDown"
+    ],
+    class' "TextStyle" [
+      final "TextAlign" "textAlign"
     ]
   ],
   package "package:flutter/material.dart" [
+    class' "AppBar" [
+      extends "Widget",
+      new "" [
+        "title" :? "Widget"
+      ]
+    ],
     class' "ButtonStyle" [
     ],
-    class' "MaterialColor" [
+    class' "CircularProgressIndicator" [
+      extends "Widget",
+      new "" [
+        "key" :? "Key"
+      ]
     ],
     class' "Colors" [
       static $ final "MaterialColor" "black",
@@ -40,57 +53,12 @@ import Dart.FFI.Elab
       static $ final "MaterialColor" "white",
       static $ final "MaterialColor" "yellow"
     ],
-    class' "CircularProgressIndicator" [
-      extends "Widget",
-      new "" [
-        "key" :? "Key"
-      ]
-    ],
-    class' "VisualDensity" [
-      static $ final "VisualDensity" "adaptivePlatformDensity"
-    ],
-    class' "TextTheme" [
-      final "TextStyle" "subtitle1",
-      final "TextStyle" "subtitle2",
-      final "TextStyle" "headline1",
-      final "TextStyle" "headline2",
-      final "TextStyle" "headline3",
-      final "TextStyle" "headline4"
-    ],
-    class' "Theme" [
-      static $ io "ThemeData" "of" ["context" :: "BuildContext"]
-    ],
-    class' "ThemeData" [
-      new "" [
-        "primarySwatch" :? "MaterialColor",
-        "visualDensity" :? "VisualDensity"
-      ],
-      final "TextTheme" "textTheme"
-    ],
-    class' "TextButton" [
+    class' "FloatingActionButton" [
       extends "Widget",
       new "" [
         "onPressed" :? "IO" :<> "()",
-        "style" :? "ButtonStyle",
+        "tooltip" :? "String",
         "child" :? "Widget"
-      ],
-      static $ fun "ButtonStyle" "styleFrom" [
-        "primary" :? "Color",
-        "backgroundColor" :? "Color"
-      ]
-    ],
-    class' "Scaffold" [
-      extends "Widget",
-      new "" [
-        "appBar" :? "Widget",
-        "body" :? "Widget",
-        "floatingActionButton" :? "Widget"
-      ]
-    ],
-    class' "AppBar" [
-      extends "Widget",
-      new "" [
-        "title" :? "Widget"
       ]
     ],
     class' "Icons" [
@@ -116,12 +84,22 @@ import Dart.FFI.Elab
         "alignment" :? "AlignmentGeometry"
       ]
     ],
-    class' "FloatingActionButton" [
+    class' "MaterialApp" [
       extends "Widget",
       new "" [
-        "onPressed" :? "IO" :<> "()",
-        "tooltip" :? "String",
-        "child" :? "Widget"
+        "title" :? "String",
+        "home" :? "Widget",
+        "theme" :? "ThemeData"
+      ]
+    ],
+    class' "MaterialColor" [
+    ],
+    class' "Scaffold" [
+      extends "Widget",
+      new "" [
+        "appBar" :? "Widget",
+        "body" :? "Widget",
+        "floatingActionButton" :? "Widget"
       ]
     ],
     class' "Slider" [
@@ -137,30 +115,41 @@ import Dart.FFI.Elab
         "label" :? "String"
       ]
     ],
-    class' "MaterialApp" [
+    class' "TextButton" [
       extends "Widget",
       new "" [
-        "title" :? "String",
-        "home" :? "Widget",
-        "theme" :? "ThemeData"
+        "onPressed" :? "IO" :<> "()",
+        "style" :? "ButtonStyle",
+        "child" :? "Widget"
+      ],
+      static $ fun "ButtonStyle" "styleFrom" [
+        "primary" :? "Color",
+        "backgroundColor" :? "Color"
       ]
+    ],
+    class' "TextTheme" [
+      final "TextStyle" "subtitle1",
+      final "TextStyle" "subtitle2",
+      final "TextStyle" "headline1",
+      final "TextStyle" "headline2",
+      final "TextStyle" "headline3",
+      final "TextStyle" "headline4"
+    ],
+    class' "Theme" [
+      static $ io "ThemeData" "of" ["context" :: "BuildContext"]
+    ],
+    class' "ThemeData" [
+      new "" [
+        "primarySwatch" :? "MaterialColor",
+        "visualDensity" :? "VisualDensity"
+      ],
+      final "TextTheme" "textTheme"
+    ],
+    class' "VisualDensity" [
+      static $ final "VisualDensity" "adaptivePlatformDensity"
     ]
   ],
   package "package:flutter/widgets.dart" [
-    enum "MainAxisAlignment" [
-      "start", "end", "center", "spaceBetween", "spaceAround", "spaceEvenly"
-    ],
-    class' "IconData" [
-    ],
-    class' "Icon" [
-      extends "Widget",
-      new "" [
-        "icon" :: "IconData",
-        "key" :? "Key"
-      ]
-    ],
-    class' "Widget" [
-    ],
     class' "BuildContext" [
     ],
     class' "Center" [
@@ -176,27 +165,34 @@ import Dart.FFI.Elab
         "mainAxisAlignment" :? "MainAxisAlignment"
       ]
     ],
+    class' "CustomPaint" [
+      extends "Widget",
+      new "" [
+        "key" :? "Key",
+        "child" :? "Widget",
+        "painter" :? "CustomPainter",
+        "foregroundPainter" :? "CustomPainter",
+        "size" :? "Size",
+        "isComplex" :? "bool",
+        "willChange" :? "bool"
+      ]
+    ],
+    class' "CustomPainter" [
+    ],
     class' "Expanded" [
       extends "Widget",
       new "" [
         "child" :? "Widget"
       ]
     ],
-    class' "Row" [
+    class' "FittedBox" [
       extends "Widget",
       new "" [
-        "children" :? "Dart.Core.List" :<> "Widget",
-        "mainAxisAlignment" :? "MainAxisAlignment"
-      ]
-    ],
-    class' "Text" [
-      extends "Widget",
-      new "" [
-        "text" :: "String",
-        "textScaleFactor" :? "Double",
-        "style" :? "TextStyle",
-        "textAlign" :? "TextAlign"
-      ]
+        "key" :? "Key",
+        "child" :? "Widget",
+        "fit" :? "BoxFit ",
+        "alignment" :? "AlignmentGeometry",
+        "clipBehavior" :? "Clip"
     ],
     class' "GestureDetector" [
       extends "Widget",
@@ -219,19 +215,35 @@ import Dart.FFI.Elab
         "onLongPressEnd" :? "LongPressEndDetails" :-> "IO" :<> "()"
       ]
     ],
-    class' "CustomPaint" [
+    class' "Icon" [
       extends "Widget",
       new "" [
-        "key" :? "Key",
-        "child" :? "Widget",
-        "painter" :? "CustomPainter",
-        "foregroundPainter" :? "CustomPainter",
-        "size" :? "Size",
-        "isComplex" :? "bool",
-        "willChange" :? "bool"
+        "icon" :: "IconData",
+        "key" :? "Key"
       ]
     ],
-    class' "CustomPainter" [
+    class' "IconData" [
+    ],
+    enum "MainAxisAlignment" [
+      "start", "end", "center", "spaceBetween", "spaceAround", "spaceEvenly"
+    ],
+    class' "Row" [
+      extends "Widget",
+      new "" [
+        "children" :? "Dart.Core.List" :<> "Widget",
+        "mainAxisAlignment" :? "MainAxisAlignment"
+      ]
+    ],
+    class' "Text" [
+      extends "Widget",
+      new "" [
+        "text" :: "String",
+        "textScaleFactor" :? "Double",
+        "style" :? "TextStyle",
+        "textAlign" :? "TextAlign"
+      ]
+    ],
+    class' "Widget" [
     ]
   ],
   package "dart:ui" [
@@ -241,38 +253,38 @@ import Dart.FFI.Elab
       "paused",
       "resumed"
     ],
-    class' "Color" [
-    ],
     class' "Canvas" [
       io "void" "drawPath" [
         "path" :: "Path",
         "paint" :: "Paint"
       ]
     ],
-    enum "PaintingStyle" [
-      "stroke"
+    enum "Clip" [
+      "antiAlias", "antiAliasWithSaveLayer", "hardEdge", "none"
     ],
-    class' "Paint" [
-      new "" [],
-      var "PaintingStyle" "style",
-      var "Double" "strokeWidth"
+    class' "Color" [
     ],
     class' "Offset" [
       new "" ["dx" :: "Double", "dy" :: "Double"],
       final "Double" "dx",
       final "Double" "dy"
     ],
-    class' "Size" [
-      final "Double" "width",
-      final "Double" "height"
+    class' "Paint" [
+      new "" [],
+      var "PaintingStyle" "style",
+      var "Double" "strokeWidth"
+    ],
+    enum "PaintingStyle" [
+      "stroke"
     ],
     class' "Path" [
       new "" [],
       io "void" "moveTo" ["x" :: "Double", "y" :: "Double"],
       io "void" "lineTo" ["x" :: "Double", "y" :: "Double"]
-    ],
-    class' "Velocity" [
-      final "Offset" "pixelsPerSecond"
+    ],   
+    class' "Size" [
+      final "Double" "width",
+      final "Double" "height"
     ],
     enum "TextAlign" [
       "left",
@@ -281,18 +293,13 @@ import Dart.FFI.Elab
       "start",
       "end",
       "justify"
+    ],
+    class' "Velocity" [
+      final "Offset" "pixelsPerSecond"
     ]
   ],
   package "package:flutter/gestures.dart" [
-    class' "TapDownDetails" [
-      final "Offset" "globalPosition",
-      final "Offset" "localPosition"
-    ],
-    class' "TapUpDetails" [
-      final "Offset" "globalPosition",
-      final "Offset" "localPosition"
-    ],
-    class' "LongPressStartDetails" [
+    class' "LongPressEndDetails" [
       final "Offset" "globalPosition",
       final "Offset" "localPosition"
     ],
@@ -300,7 +307,15 @@ import Dart.FFI.Elab
       final "Offset" "localOffsetFromOrigin",
       final "Offset" "localPosition"
     ],
-    class' "LongPressEndDetails" [
+    class' "LongPressStartDetails" [
+      final "Offset" "globalPosition",
+      final "Offset" "localPosition"
+    ],
+    class' "TapDownDetails" [
+      final "Offset" "globalPosition",
+      final "Offset" "localPosition"
+    ],
+    class' "TapUpDetails" [
       final "Offset" "globalPosition",
       final "Offset" "localPosition"
     ]
