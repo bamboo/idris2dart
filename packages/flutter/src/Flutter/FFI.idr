@@ -190,9 +190,10 @@ import Dart.FFI.Elab
       new "" [
         "key" :? "Key",
         "child" :? "Widget",
-        "fit" :? "BoxFit ",
+        "fit" :? "BoxFit",
         "alignment" :? "AlignmentGeometry",
         "clipBehavior" :? "Clip"
+      ]
     ],
     class' "GestureDetector" [
       extends "Widget",
