@@ -150,6 +150,15 @@ import Dart.FFI.Elab
     ]
   ],
   package "package:flutter/widgets.dart" [
+    class' "Align" [
+      new "" [
+        "key" :? "Key",
+        "alignment" :? "AlignmentGeometry",
+        "widthFactor" :? "double",
+        "heightFactor" :? "double",
+        "child" :? "Widget"
+      ]
+    ],
     class' "BuildContext" [
     ],
     class' "Center" [
