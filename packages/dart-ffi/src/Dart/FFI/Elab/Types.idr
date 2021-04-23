@@ -64,6 +64,7 @@ data DartDecl
   | Constructor DartName (List DartParameter)
   | Extends DartType
   | Generic (List DartName) DartDecl
+  | Partial DartDecl
 
 public export
 Show DartDecl where
@@ -77,6 +78,7 @@ Show DartDecl where
   show (Enum n _) = "enum " ++ show n
   show (Extends t) = "extends " ++ show t
   show (Generic _ d) = "generic " ++ show d
+  show (Partial d) = "partial " ++ show d
 
 public export
 record DartPackage where

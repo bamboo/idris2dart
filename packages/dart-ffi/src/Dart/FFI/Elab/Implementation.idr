@@ -409,6 +409,8 @@ elabPackageDecl = \case
         inNamespace (MkNS [n])
           (concatMap (elabEnumMember (var (UN n)) n) members)
       ]
+  Partial d =>
+    elabPackageDecl d
   d => fail $ "Unsupported Dart definition: " ++ show d
 
 lookupIsAssignableFromConstructor : Elab Name
@@ -449,6 +451,7 @@ elabTypeDecl = \case
 elabTypeDeclExtends : {auto p : DartPackage} -> DartDecl -> List ExtendsInfo
 elabTypeDeclExtends = \case
   Class n members => mapMaybe (extendsInfo n) members -- TODO: Enum => IsEnum
+  Partial d => elabTypeDeclExtends d
   _ => []
 
 elabExtends : Name -> ExtendsInfo -> List Decl

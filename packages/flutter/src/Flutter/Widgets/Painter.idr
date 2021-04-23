@@ -1,7 +1,9 @@
 module Flutter.Widgets.Painter
 
-import Dart.FFI
+import Dart.FFI.Elab
 import Flutter.FFI
+
+%language ElabReflection
 
 %inline
 public export
@@ -29,24 +31,14 @@ class _Painter extends material.CustomPainter {
 }
 """ []
 
-public export
-IsAssignableFrom CustomPainter Painter where
-
-namespace Painter
-  namespace New
-    data Tag : Type where
-
-    %inline
-    public export
-    onPaint : Parameter Painter.New.Tag
-    onPaint = mkParameter "onPaint" (Canvas -> Size -> IO ())
-
-    %inline
-    public export
-    NamedParameters : Type 
-    NamedParameters = Parameters [Painter.New.onPaint]
-
-  %inline
-  export
-  new : Painter.New.NamedParameters -> IO Painter
-  new ps = primIO (prim__dart_new Painter "" [] ps)
+%runElab importDart [
+  package "" [
+    partial' $
+      class' "Painter" [
+        extends "CustomPainter",
+        new "" [
+          "onPaint" :? "Canvas" :-> "Size" :-> "IO" :<> "()"
+        ]
+      ]
+  ]
+]

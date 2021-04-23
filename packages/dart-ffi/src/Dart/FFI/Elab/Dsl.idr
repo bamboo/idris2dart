@@ -45,3 +45,7 @@ static = Static
 public export
 io : DartType -> DartName -> List DartParameter -> DartDecl
 io ty name ps = Effectful (fun ty name ps)
+
+public export
+partial' : DartDecl -> DartDecl
+partial' = Partial
