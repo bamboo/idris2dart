@@ -33,7 +33,7 @@ drawLines _ [] = pure ()
 drawLines c (o :: os) = do
   path <- Path.new
   path @. moveTo (dx o) (dy o)
-  os @. traverse_ (\o => path @. lineTo (dx o) (dy o))
+  for_ os \o => path @. lineTo (dx o) (dy o)
   paint <- Paint.new
   paint @. setStyle PaintingStyle.stroke
   c @. drawPath path paint
