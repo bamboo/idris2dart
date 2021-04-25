@@ -10,6 +10,12 @@ import Dart.FFI.Elab
     class' "Key" [
     ]
   ],
+  package "package:flutter/rendering.dart" [
+    enum "MainAxisSize" [
+      "max",
+      "min"
+    ]
+  ],
   package "package:flutter/painting.dart" [
     class' "Alignment" [
       extends "AlignmentGeometry",
@@ -20,6 +26,16 @@ import Dart.FFI.Elab
     ],
     enum "BoxFit" [
       "contain", "cover", "fill", "fitHeight", "fitWidth", "none", "scaleDown"
+    ],
+    class' "EdgeInsets" [
+      extends "EdgeInsetsGeometry",
+      new "all" [
+        "value" :: "double"
+      ]
+    ],
+    class' "EdgeInsetsGeometry" [
+    ],
+    class' "ShapeBorder" [
     ],
     class' "TextStyle" [
       final "TextAlign" "textAlign"
@@ -33,6 +49,28 @@ import Dart.FFI.Elab
       ]
     ],
     class' "ButtonStyle" [
+      new "" [
+        "backgroundColor" :? "MaterialStateProperty" :<> "Color",
+        "foregroundColor" :? "MaterialStateProperty" :<> "Color",
+        "textStyle" :? "MaterialStateProperty" :<> "TextStyle",
+        "overlayColor" :? "MaterialStateProperty" :<> "Color",
+        "shadowColor" :? "MaterialStateProperty" :<> "Color"
+      ]
+    ],
+    class' "Card" [
+      extends "Widget",
+      new "" [
+        "key" :? "Key",
+        "color" :? "Color",
+        "shadowColor" :? "Color",
+        "elevation" :? "double",
+        "shape" :? "ShapeBorder",
+        "borderOnForeground" :? "bool",
+        "margin" :? "EdgeInsetsGeometry",
+        "clipBehavior" :? "Clip",
+        "child" :? "Widget",
+        "semanticContainer" :? "bool"
+      ]
     ],
     class' "CircularProgressIndicator" [
       extends "Widget",
@@ -84,22 +122,73 @@ import Dart.FFI.Elab
         "alignment" :? "AlignmentGeometry"
       ]
     ],
+    class' "InputDecoration" [
+      new "" [
+        "labelText" :? "String",
+        "hintText" :? "String"
+      ]
+    ],
+    class' "LinearProgressIndicator" [
+      extends "Widget",
+      new "" [
+        "key" :? "Key",
+        "value" :? "double",
+        "backgroundColor" :? "Color",
+        "minHeight" :? "double",
+        "semanticsLabel" :? "String",
+        "semanticsValue" :? "String"
+        -- Animation<Color?>? valueColor,
+      ]
+    ],
     class' "MaterialApp" [
       extends "Widget",
       new "" [
         "title" :? "String",
         "home" :? "Widget",
-        "theme" :? "ThemeData"
+        "theme" :? "ThemeData",
+        "routes" :? "Dart.Core.Map" :<> "String" :<> "WidgetBuilder"
       ]
     ],
     class' "MaterialColor" [
+      extends "Color",
+      final "int" "alpha",
+      final "int" "blue",
+      final "int" "green",
+      final "int" "red",
+      final "double" "opacity",
+      final "Color" "shade50",
+      final "Color" "shade100",
+      final "Color" "shade200",
+      final "Color" "shade300",
+      final "Color" "shade400",
+      final "Color" "shade500",
+      final "Color" "shade600",
+      final "Color" "shade700",
+      final "Color" "shade800",
+      final "Color" "shade900"
+    ],
+    enum "MaterialState" [
+      "disabled",
+      "dragged",
+      "error",
+      "focused",
+      "hovered",
+      "pressed",
+      "selected"
+    ],
+    generic ["a"] $ class' "MaterialStateProperty" [
+      generic ["a"] $ static $
+        io ("MaterialStateProperty" :<> "a") "resolveWith" [
+          "resolver" :: "Dart.Core.Set" :<> "MaterialState" :-> "IO" :<> "a"
+        ]
     ],
     class' "Scaffold" [
       extends "Widget",
       new "" [
         "appBar" :? "Widget",
         "body" :? "Widget",
-        "floatingActionButton" :? "Widget"
+        "floatingActionButton" :? "Widget",
+        "backgroundColor" :? "Color"
       ]
     ],
     class' "Slider" [
@@ -125,6 +214,16 @@ import Dart.FFI.Elab
       static $ fun "ButtonStyle" "styleFrom" [
         "primary" :? "Color",
         "backgroundColor" :? "Color"
+      ]
+    ],
+    class' "TextFormField" [
+      extends "FormField",
+      extends "Widget",
+      new "" [
+        "key" :? "Key",
+        "controller" :? "TextEditingController",
+        "initialValue" :? "String",
+        "decoration" :? "InputDecoration"
       ]
     ],
     class' "TextTheme" [
@@ -159,6 +258,11 @@ import Dart.FFI.Elab
         "child" :? "Widget"
       ]
     ],
+    enum "AutovalidateMode" [
+      "always",
+      "disabled",
+      "onUserInteraction"
+    ],
     class' "BuildContext" [
     ],
     class' "Center" [
@@ -171,7 +275,8 @@ import Dart.FFI.Elab
       extends "Widget",
       new "" [
         "children" :? "Dart.Core.List" :<> "Widget",
-        "mainAxisAlignment" :? "MainAxisAlignment"
+        "mainAxisAlignment" :? "MainAxisAlignment",
+        "mainAxisSize" :? "MainAxisSize"
       ]
     ],
     class' "CustomPaint" [
@@ -203,6 +308,16 @@ import Dart.FFI.Elab
         "alignment" :? "AlignmentGeometry",
         "clipBehavior" :? "Clip"
       ]
+    ],
+    class' "Form" [
+      extends "Widget",
+      new "" [
+        "child" :? "Widget",
+        "onChanged" :? "IO" :<> "()",
+        "autovalidateMode" :? "AutovalidateMode"
+      ]
+    ],
+    class' "FormField" [
     ],
     class' "GestureDetector" [
       extends "Widget",
@@ -244,6 +359,23 @@ import Dart.FFI.Elab
         "mainAxisAlignment" :? "MainAxisAlignment"
       ]
     ],
+    class' "Padding" [
+      extends "Widget",
+      new "" [
+        "key" :? "Key",
+        "padding" :? "EdgeInsetsGeometry",
+        "child" :? "Widget"
+      ]
+    ],
+    class' "SizedBox" [
+      extends "Widget",
+      new "" [
+        "key" :? "Key",
+        "width" :? "double",
+        "height" :? "double",
+        "child" :? "Widget"
+      ]
+    ],
     class' "Text" [
       extends "Widget",
       new "" [
@@ -253,7 +385,14 @@ import Dart.FFI.Elab
         "textAlign" :? "TextAlign"
       ]
     ],
+    class' "TextEditingController" [
+      new "" [
+        "text" :? "String"
+      ]
+    ],
     class' "Widget" [
+    ],
+    class' "WidgetBuilder" [
     ]
   ],
   package "dart:ui" [
@@ -291,7 +430,7 @@ import Dart.FFI.Elab
       new "" [],
       io "void" "moveTo" ["x" :: "Double", "y" :: "Double"],
       io "void" "lineTo" ["x" :: "Double", "y" :: "Double"]
-    ],   
+    ],
     class' "Size" [
       final "Double" "width",
       final "Double" "height"
