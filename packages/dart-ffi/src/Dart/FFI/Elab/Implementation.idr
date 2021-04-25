@@ -372,7 +372,7 @@ elabClassMember ns qName typeParams thisTy d = case d of
     elabVar typeParams (Just thisTy) ty n ("." ++ n)
   Constructor n ps =>
     elabConstructorOf ns thisTy typeParams n ps (MkInvocation {hasIO = True, invoke = dartNew thisTy n})
-  ConstConstructor n ps =>
+  Const $ Constructor n ps =>
     elabConstructorOf ns thisTy typeParams n ps (MkInvocation {hasIO = False, invoke = dartNewConst thisTy n})
   _ => []
 

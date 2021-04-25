@@ -31,8 +31,8 @@ new : DartName -> List DartParameter -> DartDecl
 new = Constructor
 
 public export
-constNew : DartName -> List DartParameter -> DartDecl
-constNew = ConstConstructor
+const : DartDecl -> DartDecl
+const = Const
 
 public export
 final : DartType -> DartName -> DartDecl
