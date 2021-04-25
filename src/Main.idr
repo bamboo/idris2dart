@@ -150,6 +150,10 @@ debug = dartStringDoc . show
 comment : String -> Doc
 comment c = "/* " <+> text c <+> "*/"
 
+argList : List Doc -> Doc
+argList [] = text "()"
+argList args = paren (commaSep args <+> ",")
+
 assertionError : Doc -> Doc
 assertionError e = "throw $.AssertionError" <+> paren e <+> semi
 
@@ -679,7 +683,7 @@ mutual
     IEApp f args => do
       f' <- dartExp f
       args' <- traverse dartExp args
-      pure (f' <+> tupled args')
+      pure (f' <+> argList args')
     IEPrimFn f args =>
       pure (dartOp f !(traverseVect dartExp args))
     IEPrimFnExt n args =>
@@ -714,7 +718,7 @@ mutual
     posArgs <- traverse dartExp pos'
     namedArgs <- traverse dartNamedArg named'
     let ctorName' = if length ctorName > 0 then text ("." ++ ctorName) else empty
-    pure (fTy <+> ctorName' <+> tupled (posArgs ++ namedArgs))
+    pure (fTy <+> ctorName' <+> argList (posArgs ++ namedArgs))
 
   dartPrimInvoke : {auto ctx : Ref Dart DartT}
     -> String -> Expression -> Expression -> Expression -> Expression -> Core Doc
@@ -730,10 +734,10 @@ mutual
     case (dartNameKindOf fn, posArgs) of
       (MemberName, this :: args) => do -- Method call
         thisTy <- methodReceiverTypeFrom positionalTys
-        pure $ maybeCastTo thisTy this <+> text fn <+> typeArgs'' <+> tupled (args ++ namedArgs)
+        pure $ maybeCastTo thisTy this <+> text fn <+> typeArgs'' <+> argList (args ++ namedArgs)
       (TopLevelName, args) => do -- Static / Global function call
         fn' <- parseForeignName fn
-        pure $ fn' <+> typeArgs'' <+> tupled (args ++ namedArgs)
+        pure $ fn' <+> typeArgs'' <+> argList (args ++ namedArgs)
       (InfixOperator, [x, y]) => do
         xTy <- methodReceiverTypeFrom positionalTys
         pure $ binOp (text fn) (maybeCastTo xTy x) y
