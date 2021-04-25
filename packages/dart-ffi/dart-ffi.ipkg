@@ -4,6 +4,8 @@ version = 0.1.0
 
 modules
   = Dart.Core
+  , Dart.Core.Map
+  , Dart.Core.Set
   , Dart.FFI
   , Dart.FFI.Constructors
   , Dart.FFI.Elab

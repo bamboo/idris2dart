@@ -35,8 +35,13 @@ List element = GenericType "List,dart:core" [element]
 
 %inline
 public export
-DartMap : Type -> Type -> Type
-DartMap key val = GenericType "Map,dart:core" [key, val]
+Map : Type -> Type -> Type
+Map k v = GenericType "Map,dart:core" [k, v]
+
+%inline
+public export
+Set : Type -> Type
+Set e = GenericType "Set,dart:core" [e]
 
 namespace Object
 
@@ -136,18 +141,6 @@ namespace List
   into result es = do
     traverse_ (`add` result) (toList es)
     pure result
-
-namespace Map
-
-  %inline
-  export
-  new : HasIO io => {key : Type} -> {val : Type} -> io (DartMap key val)
-  new = primIO $ prim__dart_new (DartMap key val) "" [] none
-
-  %inline
-  export
-  put : HasIO io => {key : Type} -> key -> {val : Type} -> val -> DartMap key val -> io ()
-  put k v m = primIO $ prim__dart_invoke "[]" [] [m, k, v] none
 
 %inline
 public export
