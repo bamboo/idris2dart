@@ -23,6 +23,7 @@ data Dart : Type where
 record DartT where
   constructor MkDartT
   imports : StringMap Doc
+  nextImportId : Int
   includes : SortedSet String
   foreignTypeNames : StringMap Doc
   usesDelay : Bool
@@ -52,8 +53,8 @@ addImport lib = do
   s <- get Dart
   case lookup lib (imports s) of
     Nothing => do
-      let alias = text (dartIdent lib)
-      put Dart (record { imports $= insert lib alias } s)
+      let alias = text ("$" ++ show (nextImportId s))
+      put Dart (record { imports $= insert lib alias, nextImportId $= (+1) } s)
       pure alias
     Just alias =>
       pure alias
@@ -1020,7 +1021,7 @@ nubSort = SortedSet.toList . SortedSet.fromList
 compileToDart : Ref Ctxt Defs -> ClosedTerm -> Core Doc
 compileToDart defs term = do
   (impDefs, impMain) <- compileToImperative defs term
-  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]) empty empty False)
+  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]) 1 empty empty False)
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
   finalState <- get Dart
