@@ -14,7 +14,7 @@ class _Stateful extends material.StatefulWidget {
   final $.Object initialState;
   final material.Widget Function(_StatefulWidgetState, material.BuildContext) onBuild;
 
-  _Stateful({material.Key key, this.initialState, this.onBuild}) : super(key: key);
+  const _Stateful({material.Key key, this.initialState, this.onBuild}) : super(key: key);
 
   @$.override
   _StatefulState createState() => _StatefulState(initialState, onBuild);
@@ -96,8 +96,8 @@ namespace Stateful
 
   %inline
   public export
-  new : {stateType : Type} -> Stateful.New.NamedParameters {stateType = stateType} -> IO Stateful
-  new ps = primIO (prim__dart_new Stateful "" [] ps)
+  new : {stateType : Type} -> Stateful.New.NamedParameters {stateType = stateType} -> Stateful
+  new ps = prim__dart_new_const Stateful "" [] ps
 
   %inline
   public export

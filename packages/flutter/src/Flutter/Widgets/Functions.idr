@@ -10,11 +10,11 @@ export
 runApp : {widget : Type} -> IsAssignableFrom Widget widget => widget -> IO ()
 runApp w = primIO (prim__dart_invoke "runApp,package:flutter/widgets.dart" [] [w] none)
 
-||| A better alternative to `cast <$> widgetConstructor`.
+||| A simpler alternative to `pure (cast widget)`.
 %inline
 export
-widget : {a : Type} -> Cast a Widget => IO a -> IO Widget
-widget ctor = pure (cast !ctor)
+widget : {a : Type} -> Cast a Widget => a -> IO Widget
+widget w = pure (cast w)
 
 %inline
 export

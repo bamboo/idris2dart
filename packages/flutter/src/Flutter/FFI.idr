@@ -29,7 +29,7 @@ import Dart.FFI.Elab
     ],
     class' "EdgeInsets" [
       extends "EdgeInsetsGeometry",
-      new "all" [
+      const $ new "all" [
         "value" :: "double"
       ]
     ],
@@ -49,7 +49,7 @@ import Dart.FFI.Elab
       ]
     ],
     class' "ButtonStyle" [
-      new "" [
+      const $ new "" [
         "backgroundColor" :? "MaterialStateProperty" :<> "Color",
         "foregroundColor" :? "MaterialStateProperty" :<> "Color",
         "textStyle" :? "MaterialStateProperty" :<> "TextStyle",
@@ -59,7 +59,7 @@ import Dart.FFI.Elab
     ],
     class' "Card" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "key" :? "Key",
         "color" :? "Color",
         "shadowColor" :? "Color",
@@ -74,7 +74,7 @@ import Dart.FFI.Elab
     ],
     class' "CircularProgressIndicator" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "key" :? "Key"
       ]
     ],
@@ -93,7 +93,7 @@ import Dart.FFI.Elab
     ],
     class' "FloatingActionButton" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "onPressed" :? "IO" :<> "()",
         "tooltip" :? "String",
         "child" :? "Widget"
@@ -115,7 +115,7 @@ import Dart.FFI.Elab
     ],
     class' "IconButton" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "onPressed" :? "IO" :<> "()",
         "tooltip" :? "String",
         "icon" :? "Widget",
@@ -123,14 +123,14 @@ import Dart.FFI.Elab
       ]
     ],
     class' "InputDecoration" [
-      new "" [
+      const $ new "" [
         "labelText" :? "String",
         "hintText" :? "String"
       ]
     ],
     class' "LinearProgressIndicator" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "key" :? "Key",
         "value" :? "double",
         "backgroundColor" :? "Color",
@@ -142,7 +142,7 @@ import Dart.FFI.Elab
     ],
     class' "MaterialApp" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "title" :? "String",
         "home" :? "Widget",
         "theme" :? "ThemeData",
@@ -184,7 +184,7 @@ import Dart.FFI.Elab
     ],
     class' "Scaffold" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "appBar" :? "Widget",
         "body" :? "Widget",
         "floatingActionButton" :? "Widget",
@@ -193,7 +193,7 @@ import Dart.FFI.Elab
     ],
     class' "Slider" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "value" :? "Double",
         "onChanged" :? "Double" :-> "IO" :<> "()",
         "onChangeStart" :? "Double" :-> "IO" :<> "()",
@@ -206,7 +206,7 @@ import Dart.FFI.Elab
     ],
     class' "TextButton" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "onPressed" :? "IO" :<> "()",
         "style" :? "ButtonStyle",
         "child" :? "Widget"
@@ -250,7 +250,7 @@ import Dart.FFI.Elab
   ],
   package "package:flutter/widgets.dart" [
     class' "Align" [
-      new "" [
+      const $ new "" [
         "key" :? "Key",
         "alignment" :? "AlignmentGeometry",
         "widthFactor" :? "double",
@@ -267,7 +267,7 @@ import Dart.FFI.Elab
     ],
     class' "Center" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "child" :? "Widget"
       ]
     ],
@@ -281,7 +281,7 @@ import Dart.FFI.Elab
     ],
     class' "CustomPaint" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "key" :? "Key",
         "child" :? "Widget",
         "painter" :? "CustomPainter",
@@ -295,13 +295,13 @@ import Dart.FFI.Elab
     ],
     class' "Expanded" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "child" :? "Widget"
       ]
     ],
     class' "FittedBox" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "key" :? "Key",
         "child" :? "Widget",
         "fit" :? "BoxFit",
@@ -311,7 +311,7 @@ import Dart.FFI.Elab
     ],
     class' "Form" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "child" :? "Widget",
         "onChanged" :? "IO" :<> "()",
         "autovalidateMode" :? "AutovalidateMode"
@@ -342,7 +342,7 @@ import Dart.FFI.Elab
     ],
     class' "Icon" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "icon" :: "IconData",
         "key" :? "Key"
       ]
@@ -361,7 +361,7 @@ import Dart.FFI.Elab
     ],
     class' "Padding" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "key" :? "Key",
         "padding" :? "EdgeInsetsGeometry",
         "child" :? "Widget"
@@ -369,7 +369,7 @@ import Dart.FFI.Elab
     ],
     class' "SizedBox" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "key" :? "Key",
         "width" :? "double",
         "height" :? "double",
@@ -378,7 +378,7 @@ import Dart.FFI.Elab
     ],
     class' "Text" [
       extends "Widget",
-      new "" [
+      const $ new "" [
         "text" :: "String",
         "textScaleFactor" :? "Double",
         "style" :? "TextStyle",
@@ -414,7 +414,7 @@ import Dart.FFI.Elab
     class' "Color" [
     ],
     class' "Offset" [
-      new "" ["dx" :: "Double", "dy" :: "Double"],
+      const $ new "" ["dx" :: "Double", "dy" :: "Double"],
       final "Double" "dx",
       final "Double" "dy"
     ],

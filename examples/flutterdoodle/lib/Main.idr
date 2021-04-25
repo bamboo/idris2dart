@@ -46,37 +46,37 @@ onPaint s c _ = case s of
 appTitle : String
 appTitle = "Try taps and long presses"
 
-appHome : IO Stateful
+appHome : Stateful
 appHome = Stateful.new [initialState @= Idle [], onBuild @= build]
   where
     build : StatefulWidgetState State -> BuildContext -> IO Widget
-    build state context = cast <$> Scaffold.new [
+    build state context = widget $ Scaffold.new [
       appBar @=> !(AppBar.new [
-        title @=> !(Text.new appTitle [])
+        title @=> Text.new appTitle []
       ]),
-      body @=> !(Center.new [
-        child @=> !(CustomPaint.new [
+      body @=> Center.new [
+        child @=> CustomPaint.new [
           child @=> !(GestureDetector.new [
             onTapUp @= modify state . onTapUp,
             onLongPressStart @= modify state . onLongPressStart,
             onLongPressMoveUpdate @= modify state . onLongPressMoveUpdate,
             onLongPressEnd @= modify state . onLongPressEnd
           ]),
-          painter @=> !(Painter.new [
+          painter @=> Painter.new [
             onPaint @= onPaint (get state)
-          ])
-        ])
-      ])
+          ]
+        ]
+      ]
     ]
 
 app : IO MaterialApp
-app = MaterialApp.new [
+app = pure $ MaterialApp.new [
   title @= appTitle,
   theme @= !(ThemeData.new [
     primarySwatch @= Colors.blue,
     visualDensity @= VisualDensity.adaptivePlatformDensity
   ]),
-  home @=> !appHome
+  home @=> appHome
 ]
 
 main : IO ()

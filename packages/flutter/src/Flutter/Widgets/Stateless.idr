@@ -14,7 +14,7 @@ import 'package:flutter/material.dart' as material;
 
 class _Stateless extends material.StatelessWidget {
   final material.Widget Function(material.BuildContext) onBuild;
-  _Stateless({material.Key key, this.onBuild}) : super(key: key);
+  const _Stateless({material.Key key, this.onBuild}) : super(key: key);
   @$.override
   material.Widget build(material.BuildContext context) {
     return onBuild(context);
@@ -27,7 +27,7 @@ class _Stateless extends material.StatelessWidget {
     partial' $
       class' "Stateless" [
         extends "Widget",
-        new "" [
+        const $ new "" [
           "key" :? "Key",
           "onBuild" :? "BuildContext" :-> "IO" :<> "Widget"
         ]

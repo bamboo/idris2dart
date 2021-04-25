@@ -5,39 +5,39 @@ import Flutter
 appTitle : String
 appTitle = "Idris Demo Home Page"
 
-appHome : IO Stateful
+appHome : Stateful
 appHome = Stateful.new [initialState @= 0, onBuild @= build]
   where
     build : StatefulWidgetState Int -> BuildContext -> IO Widget
-    build state context = cast <$> Scaffold.new [
+    build state context = widget $ Scaffold.new [
       appBar @=> !(AppBar.new [
-        title @=> !(Text.new appTitle [])
+        title @=> Text.new appTitle []
       ]),
-      body @=> !(Center.new [
+      body @=> Center.new [
         child @=> !(Column.new [
           mainAxisAlignment @= MainAxisAlignment.center,
           children @= widgets [
-            !(Text.new "You have pushed the button this many times:" []),
-            !(Text.new (show (get state)) [
-              style @= headline4 (textTheme !(Theme.of context))
-            ])
+            Text.new "You have pushed the button this many times:" [],
+            Text.new (show (get state)) [
+              style @= !(Theme.of context) @. textTheme @. headline4
+            ]
           ]
         ])
-      ]),
-      floatingActionButton @=> !(FloatingActionButton.new [
+      ],
+      floatingActionButton @=> FloatingActionButton.new [
         tooltip @= "Increment",
-        child @=> !(Icon.new Icons.add []),
+        child @=> Icon.new Icons.add [],
         onPressed @= modify state (+ 1)
-      ])
+      ]
     ]
 
-app : IO Stateless
+app : Stateless
 app = Stateless.new [onBuild @= build]
   where
     build : BuildContext -> IO Widget
-    build _ = cast <$> MaterialApp.new [
+    build _ = widget $ MaterialApp.new [
       title @= appTitle,
-      home @=> !appHome,
+      home @=> appHome,
       theme @= !(ThemeData.new [
 -- This is the theme of your application.
 --
@@ -53,4 +53,4 @@ app = Stateless.new [onBuild @= build]
     ]
 
 main : IO ()
-main = runApp !app
+main = runApp app

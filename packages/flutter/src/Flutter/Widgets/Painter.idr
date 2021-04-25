@@ -17,7 +17,7 @@ class _Painter extends material.CustomPainter {
 
   final void Function(material.Canvas, material.Size) onPaint;
 
-  _Painter({this.onPaint});
+  const _Painter({@material.required this.onPaint});
 
   @$.override
   void paint(material.Canvas canvas, material.Size size) {
@@ -36,7 +36,7 @@ class _Painter extends material.CustomPainter {
     partial' $
       class' "Painter" [
         extends "CustomPainter",
-        new "" [
+        const $ new "" [
           "onPaint" :? "Canvas" :-> "Size" :-> "IO" :<> "()"
         ]
       ]
