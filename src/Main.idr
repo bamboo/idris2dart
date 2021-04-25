@@ -817,7 +817,6 @@ mutual
       , positional
       , named
     ] = dartPrimInvoke fn typeArguments positionalTys positional named
-
   dartPrimFnExt
     (NS _ (UN "prim__dart_new_const"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
@@ -826,7 +825,6 @@ mutual
       , positional
       , named
     ] = dartPrimNew ty ctorName positional named
-
   dartPrimFnExt
     (NS _ (UN "prim__dart_new"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
@@ -834,9 +832,8 @@ mutual
       , IEConstant (Str ctorName)
       , positional
       , named
-      , rest
+      , _
     ] = dartPrimNew ty ctorName positional named
-
   dartPrimFnExt
     (NS _ (UN "prim__dart_List_new"))
     [ elementTy
