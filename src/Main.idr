@@ -150,6 +150,18 @@ debug = dartStringDoc . show
 comment : String -> Doc
 comment c = "/* " <+> text c <+> "*/"
 
+surroundWith : Doc -> Doc -> Doc
+surroundWith s d = s <+> d <+> s
+
+mdCode : Doc -> Doc
+mdCode = surroundWith "`"
+
+mdItalic : Doc -> Doc
+mdItalic = surroundWith "_"
+
+docCommentFor : FC -> Name -> Doc
+docCommentFor fc n = "/// " <+> mdCode (shown n) <+> " from " <+> mdItalic (shown fc) <+> "." <+> line
+
 argList : List Doc -> Doc
 argList [] = text "()"
 argList args = paren (commaSep args <+> ",")
@@ -939,7 +951,7 @@ mutual
     -> Core Doc
   dartStatement s = case s of
     FunDecl fc n ps body =>
-      pure (line <+> dartName n <+> !(dartLambda ps body))
+      pure (line <+> docCommentFor fc n <+> dartName n <+> !(dartLambda ps body))
     ForeignDecl fc n ss args ret =>
       pure (line <+> !(foreignDecl n ss args ret))
     SwitchStatement e cases@((IEConstant (BI _), _) :: _) maybeDefault =>
