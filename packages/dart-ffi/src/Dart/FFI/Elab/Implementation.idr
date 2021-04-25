@@ -84,6 +84,10 @@ dartNew : TTImp -> String -> TTImp -> TTImp -> TTImp
 dartNew ty ctorName positional named =
   `(prim__dart_new ~ty ~(primVal (Str ctorName)) ~positional ~named)
 
+dartNewConst : TTImp -> String -> TTImp -> TTImp -> TTImp
+dartNewConst ty ctorName positional named =
+  `(prim__dart_new_const ~ty ~(primVal (Str ctorName)) ~positional ~named)
+
 listWithVars : List String ->  TTImp
 listWithVars vars = foldr (\v, acc => `(~(var (UN v)) :: ~acc)) `(Nil) vars
 
@@ -284,11 +288,11 @@ elabFunction hasIO ty n ps =
     invocation = if hasIO then ioInvocationOf fn [] else pureInvocationOf fn []
   in elabFunction' [] invocation [] Nothing (elabType ty) n ps
 
-elabConstructorOf : List String -> TTImp -> TypeParameters -> String -> List DartParameter -> List Decl
-elabConstructorOf ns ty typeParams n ps =
+elabConstructorOf : List String -> TTImp -> TypeParameters -> String -> List DartParameter -> Invocation -> List Decl
+elabConstructorOf ns ty typeParams n ps invocation =
   elabFunction'
     ns
-    (MkInvocation {hasIO = True, invoke = dartNew ty n})
+    invocation
     typeParams
     Nothing
     ty
@@ -367,7 +371,9 @@ elabClassMember ns qName typeParams thisTy d = case d of
   Var ty n =>
     elabVar typeParams (Just thisTy) ty n ("." ++ n)
   Constructor n ps =>
-    elabConstructorOf ns thisTy typeParams n ps
+    elabConstructorOf ns thisTy typeParams n ps (MkInvocation {hasIO = True, invoke = dartNew thisTy n})
+  ConstConstructor n ps =>
+    elabConstructorOf ns thisTy typeParams n ps (MkInvocation {hasIO = False, invoke = dartNewConst thisTy n})
   _ => []
 
 elabEnumMember : {auto p : DartPackage} -> TTImp -> String -> String -> List (Decl)

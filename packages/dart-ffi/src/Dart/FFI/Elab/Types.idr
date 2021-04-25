@@ -62,6 +62,7 @@ data DartDecl
   | Class DartName (List DartDecl)
   | Enum DartName (List DartName)
   | Constructor DartName (List DartParameter)
+  | ConstConstructor DartName (List DartParameter)
   | Extends DartType
   | Generic (List DartName) DartDecl
   | Partial DartDecl
@@ -70,6 +71,7 @@ public export
 Show DartDecl where
   show (Function _ n _) = "fun " ++ n
   show (Constructor n _) = "new " ++ show n
+  show (ConstConstructor n _) = "const " ++ show n
   show (Val _ n) = "final " ++ n
   show (Var _ n) = "var " ++ n
   show (Effectful d) = "io $ " ++ show d

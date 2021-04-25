@@ -31,6 +31,10 @@ new : DartName -> List DartParameter -> DartDecl
 new = Constructor
 
 public export
+constNew : DartName -> List DartParameter -> DartDecl
+constNew = ConstConstructor
+
+public export
 final : DartType -> DartName -> DartDecl
 final = Val
 

@@ -64,6 +64,14 @@ public export
  -> IORes ty
 
 public export
+%extern prim__dart_new_const
+  : (ty : Type)
+ -> (constructorName : String)
+ -> (positionalArguments : HVect positionalArgumentTys)
+ -> (namedArguments : Parameters schema)
+ -> ty
+
+public export
 %extern prim__dart_get_pure
   : {0 res : Type}
  -> {thisTy : Type}

@@ -705,6 +705,17 @@ mutual
   maybeCastTo : Maybe Doc -> Doc -> Doc
   maybeCastTo ty e = maybe e (flip castTo e) ty
 
+  dartPrimNew : {auto ctx : Ref Dart DartT}
+   -> Expression -> String -> Expression -> Expression -> Core Doc
+  dartPrimNew ty ctorName positional named = do
+    let pos' = collectPositional positional
+    let named' = collectNamed named
+    fTy <- dartTypeFromExpression ty
+    posArgs <- traverse dartExp pos'
+    namedArgs <- traverse dartNamedArg named'
+    let ctorName' = if length ctorName > 0 then text ("." ++ ctorName) else empty
+    pure (fTy <+> ctorName' <+> tupled (posArgs ++ namedArgs))
+
   dartPrimInvoke : {auto ctx : Ref Dart DartT}
     -> String -> Expression -> Expression -> Expression -> Expression -> Core Doc
   dartPrimInvoke fn typeArgs positionalTys positional named = do
@@ -792,6 +803,15 @@ mutual
     ] = dartPrimInvoke fn typeArguments positionalTys positional named
 
   dartPrimFnExt
+    (NS _ (UN "prim__dart_new_const"))
+    [ IENull, IENull, IENull, IENull -- erased type arguments
+      , ty
+      , IEConstant (Str ctorName)
+      , positional
+      , named
+    ] = dartPrimNew ty ctorName positional named
+
+  dartPrimFnExt
     (NS _ (UN "prim__dart_new"))
     [ IENull, IENull, IENull, IENull -- erased type arguments
       , ty
@@ -799,14 +819,8 @@ mutual
       , positional
       , named
       , rest
-    ] = do
-      let pos' = collectPositional positional
-      let named' = collectNamed named
-      fTy <- dartTypeFromExpression ty
-      posArgs <- traverse dartExp pos'
-      namedArgs <- traverse dartNamedArg named'
-      let ctorName' = if length ctorName > 0 then text ("." ++ ctorName) else empty
-      pure (fTy <+> ctorName' <+> tupled (posArgs ++ namedArgs))
+    ] = dartPrimNew ty ctorName positional named
+
   dartPrimFnExt
     (NS _ (UN "prim__dart_List_new"))
     [ elementTy
