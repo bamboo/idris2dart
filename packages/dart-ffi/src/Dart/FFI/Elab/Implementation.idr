@@ -483,6 +483,6 @@ export
 importDart : List DartPackage -> Elab ()
 importDart packages = do
   -- Declare all foreign types first
-  for_ packages $ \p =>
+  for_ packages \p =>
     for_ p.declarations (declare . elabTypeDecl)
   for_ packages elabPackage
