@@ -21,7 +21,7 @@ dartTests
   = [ "dart001", "dart002", "dart003"
     , "dart015", "dart021", "dart022", "dart027"
     , "ffi001", "ffi002", "ffi003", "ffi004"
-    , "ffi005", "ffi006", "ffi007"
+    , "ffi005", "ffi006", "ffi007", "ffi008"
     , "generics001", "generics002"
     , "idiom001", "lazy001", "tailrec001"
     , "reg001"

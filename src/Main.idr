@@ -760,6 +760,9 @@ mutual
   dartPrimFnExt : {auto ctx : Ref Dart DartT}
     -> Name -> List Expression -> Core Doc
   dartPrimFnExt
+    (NS _ (UN "prim__dart_unsafe_null"))
+    _ = pure null'
+  dartPrimFnExt
     (NS _ (UN "prim__setField"))
     (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _ :: rhs :: _) = do
       fTy <- foreignTypeName ty
@@ -877,6 +880,8 @@ mutual
       go _   _     _         _ = Nothing
 
   dartForeignArg : {auto ctx : Ref Dart DartT} -> Expression -> Expression -> Core Doc
+  dartForeignArg _ (IEPrimFnExt (NS _ (UN "prim__dart_unsafe_null")) _) =
+    pure null'
   dartForeignArg ty value =
     case parseFunctionType ty of
       -- Optimize curried IO callbacks

@@ -157,12 +157,19 @@ namespace Iterable
   forEach : HasIO io => {element : Type} -> {iterable : Type} -> IsAssignableFrom (Iterable element) iterable => (element -> IO ()) -> iterable -> io ()
   forEach action iterable = primIO $ prim__dart_invoke ".forEach" [] [iterable, action] Parameters.none
 
+%extern prim__dart_unsafe_null : a
+
 namespace Nullable
 
   %inline
   export
   null : Nullable a
-  null = prim__dart_get_pure "null" Void
+  null = prim__dart_unsafe_null
+
+  %inline
+  export
+  unsafeNull : a
+  unsafeNull = prim__dart_unsafe_null
 
   %inline
   export
@@ -170,7 +177,7 @@ namespace Nullable
   isNull a = toBool $
     prim__dart_invoke_pure "==" [] [
       the AnyPtr (believe_me a),
-      the AnyPtr (believe_me (Nullable.null {a = Void}))
+      the AnyPtr prim__dart_unsafe_null
     ] none
 
   %inline
