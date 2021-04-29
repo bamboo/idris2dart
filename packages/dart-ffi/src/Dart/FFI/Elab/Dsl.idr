@@ -39,6 +39,10 @@ final : DartType -> DartName -> DartDecl
 final = Val
 
 public export
+getter : DartType -> DartName -> DartDecl
+getter type name = Effectful (Val type name)
+
+public export
 var : DartType -> DartName -> DartDecl
 var = Var
 

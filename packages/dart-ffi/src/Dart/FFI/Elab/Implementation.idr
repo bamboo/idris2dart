@@ -299,16 +299,32 @@ elabConstructorOf ns ty typeParams n ps invocation =
     (if length n == 0 then "new" else n)
     ps
 
-elabVal' : TypeParameters -> Maybe TTImp -> DartType -> DartName -> String -> List Decl
-elabVal' typeParams (Just thisTy) ty n fn =
+elabGetter : (hasIO : Bool)
+  -> TypeParameters
+  -> Maybe TTImp
+  -> DartType
+  -> DartName
+  -> String
+  -> List Decl
+elabGetter False typeParams (Just thisTy) ty n fn =
   defExport (UN n) ["this"] (functionType' (elabType ty) typeParams [("thisTy", thisTy)])
     `(prim__dart_get_pure ~(primVal (Str fn)) ~(var (UN "this")))
-elabVal' typeParams Nothing ty n fn =
+elabGetter False typeParams Nothing ty n fn =
   defExport (UN n) [] (elabType ty)
     `(prim__dart_get_pure ~(primVal (Str fn)) Void)
+elabGetter True typeParams (Just thisTy) ty n fn =
+  let io = bindVar "io"
+  in defExport (UN n) ["this"]
+    `(HasIO ~io => ~(functionType' `(~io ~(elabType ty)) typeParams [("this", thisTy)]))
+    `(primIO $ prim__dart_get ~(primVal (Str fn)) ~(var (UN "this")))
+elabGetter True typeParams Nothing ty n fn =
+  let io = bindVar "io"
+  in defExport (UN n) []
+    `(HasIO ~io => ~io ~(elabType ty))
+    `(primIO $ prim__dart_get ~(primVal (Str fn)) Void)
 
 elabVal : DartType -> DartName -> String -> List Decl
-elabVal = elabVal' [] Nothing
+elabVal = elabGetter False [] Nothing
 
 elabVar : TypeParameters -> Maybe TTImp ->  DartType -> DartName -> String -> List Decl
 elabVar typeParams thisTy ty n fn =
@@ -365,7 +381,11 @@ elabClassMember ns qName typeParams thisTy d = case d of
   Static (Val ty n) =>
     elabVal ty n (withMemberName qName n)
   Val ty n =>
-    elabVal' typeParams (Just thisTy) ty n ("." ++ n)
+    elabGetter False typeParams (Just thisTy) ty n ("." ++ n)
+  Static (Effectful (Val ty n)) =>
+    elabGetter True [] Nothing ty n (withMemberName qName n)
+  Effectful (Val ty n) =>
+    elabGetter True typeParams (Just thisTy) ty n ("." ++ n)
   Static (Var ty n) =>
     elabVar [] Nothing ty n (withMemberName qName n)
   Var ty n =>
