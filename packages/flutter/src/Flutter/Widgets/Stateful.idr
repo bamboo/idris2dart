@@ -72,17 +72,17 @@ namespace Stateful
 
     %inline
     public export
-    key : {stateType : Type} -> Parameter (Tag stateType)
+    key : {stateType : Type} -> Parameter (Stateful.New.Tag stateType)
     key = mkParameter "key" Key
 
     %inline
     public export
-    initialState : {stateType : Type} -> Parameter (Tag stateType)
+    initialState : {stateType : Type} -> Parameter (Stateful.New.Tag stateType)
     initialState = mkParameter "initialState" stateType
 
     %inline
     public export
-    onBuild : {stateType : Type} -> Parameter (Tag stateType)
+    onBuild : {stateType : Type} -> Parameter (Stateful.New.Tag stateType)
     onBuild = mkParameter "onBuild" (StatefulWidgetState stateType -> BuildContext -> IO Widget)
 
     %inline

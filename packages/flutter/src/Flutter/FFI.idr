@@ -8,6 +8,8 @@ import Dart.FFI.Elab
 %runElab importDart [
   package "package:flutter/foundation.dart" [
     class' "Key" [
+    ],
+    class' "Listenable" [
     ]
   ],
   package "package:flutter/rendering.dart" [
@@ -85,6 +87,7 @@ import Dart.FFI.Elab
       static $ final "MaterialColor" "cyan",
       static $ final "MaterialColor" "green",
       static $ final "MaterialColor" "grey",
+      static $ final "MaterialColor" "orange",
       static $ final "MaterialColor" "purple",
       static $ final "MaterialColor" "red",
       static $ final "MaterialColor" "transparent",
@@ -136,8 +139,8 @@ import Dart.FFI.Elab
         "backgroundColor" :? "Color",
         "minHeight" :? "double",
         "semanticsLabel" :? "String",
-        "semanticsValue" :? "String"
-        -- Animation<Color?>? valueColor,
+        "semanticsValue" :? "String",
+        "valueColor" :? "Animation" :<> "Color"
       ]
     ],
     class' "MaterialApp" [
@@ -180,6 +183,10 @@ import Dart.FFI.Elab
       generic ["a"] $ static $
         io ("MaterialStateProperty" :<> "a") "resolveWith" [
           "resolver" :: "Dart.Core.Set" :<> "MaterialState" :-> "IO" :<> "a"
+        ],
+      generic ["a"] $ static $
+        fun ("MaterialStateProperty" :<> "a") "all" [
+          "value" :: "a"
         ]
     ],
     class' "Scaffold" [
@@ -255,6 +262,15 @@ import Dart.FFI.Elab
         "alignment" :? "AlignmentGeometry",
         "widthFactor" :? "double",
         "heightFactor" :? "double",
+        "child" :? "Widget"
+      ]
+    ],
+    class' "AnimatedBuilder" [
+      extends "Widget",
+      const $ new "" [
+        "key" :? "Key",
+        "animation" :? "Listenable",
+        "builder" :? "BuildContext" :-> "Nullable" :<> "Widget" :-> "IO" :<> "Widget",
         "child" :? "Widget"
       ]
     ],
@@ -352,6 +368,18 @@ import Dart.FFI.Elab
     enum "MainAxisAlignment" [
       "start", "end", "center", "spaceBetween", "spaceAround", "spaceEvenly"
     ],
+    class' "Navigator" [
+      static $ io "NavigatorState" "of" [
+        "context" :: "BuildContext",
+        "rootNavigator" :? "bool"
+      ]
+    ],
+    class' "NavigatorState" [
+      io "void" "pushNamed" [
+        "routeName" :: "String",
+        "arguments" :? "Object"
+      ]
+    ],
     class' "Row" [
       extends "Widget",
       new "" [
@@ -388,11 +416,14 @@ import Dart.FFI.Elab
     class' "TextEditingController" [
       new "" [
         "text" :? "String"
-      ]
+      ],
+      var "TextEditingValue" "value"
     ],
     class' "Widget" [
     ],
     class' "WidgetBuilder" [
+    ],
+    class' "TransitionBuilder" [
     ]
   ],
   package "dart:ui" [
@@ -412,6 +443,9 @@ import Dart.FFI.Elab
       "antiAlias", "antiAliasWithSaveLayer", "hardEdge", "none"
     ],
     class' "Color" [
+      fun "Color" "withOpacity" [
+        "opacity" :: "double"
+      ]
     ],
     class' "Offset" [
       const $ new "" ["dx" :: "Double", "dy" :: "Double"],
@@ -468,5 +502,127 @@ import Dart.FFI.Elab
       final "Offset" "globalPosition",
       final "Offset" "localPosition"
     ]
+  ],
+  package "package:flutter/services.dart" [
+    class' "TextEditingValue" [
+      final "String" "text"
+    ]
+  ],
+  package "package:flutter/scheduler.dart" [
+    class' "TickerProvider" [
+    ]
+  ],
+  package "package:flutter/animation.dart" [
+    enum "AnimationBehavior" [
+      "normal",
+      "preserve"
+    ],
+    class' "AnimationController" [
+      extends ("Animation" :<> "double"),
+      extends "Listenable",
+      new "" [
+        "value" :? "double",
+        "duration" :? "Duration",
+        "reverseDuration" :? "Duration",
+        "debugLabel" :? "String",
+        "lowerBound" :? "double",
+        "upperBound" :? "double",
+        "animationBehavior" :? "AnimationBehavior",
+        "vsync" :? "TickerProvider"
+      ],
+      io "void" "animateTo" ["value" :: "double"],
+      generic ["u"] $
+        io ("Animation" :<> "u") "drive" [
+          "animatable" :: "Animatable" :<> "u"
+        ],
+      io "void" "dispose" []
+    ],
+    generic ["a"] $
+      class' "Animatable" [
+      ],
+    generic ["a"] $
+      class' "Animation" [
+        getter "a" "value"
+      ],
+    class' "ColorTween" [
+      extends ("Animatable" :<> "Color"),
+      extends "Listenable",
+      new "" [
+        "begin" :? "Color",
+        "end" :? "Color"
+      ]
+    ],
+    class' "Curve" [
+    ],
+    class' "Curves" [
+      static $ final "Curve" "bounceIn",
+      static $ final "Curve" "bounceInOut",
+      static $ final "Curve" "bounceOut",
+      static $ final "Curve" "decelerate",
+      static $ final "Curve" "ease",
+      static $ final "Curve" "easeIn",
+      static $ final "Curve" "easeInBack",
+      static $ final "Curve" "easeInCirc",
+      static $ final "Curve" "easeInCubic",
+      static $ final "Curve" "easeInExpo",
+      static $ final "Curve" "easeInOut",
+      static $ final "Curve" "easeInOutBack",
+      static $ final "Curve" "easeInOutCirc",
+      static $ final "Curve" "easeInOutCubic",
+      static $ final "Curve" "easeInOutCubicEmphasized",
+      static $ final "Curve" "easeInOutExpo",
+      static $ final "Curve" "easeInOutQuad",
+      static $ final "Curve" "easeInOutQuart",
+      static $ final "Curve" "easeInOutQuint",
+      static $ final "Curve" "easeInOutSine",
+      static $ final "Curve" "easeInQuad",
+      static $ final "Curve" "easeInQuart",
+      static $ final "Curve" "easeInQuint",
+      static $ final "Curve" "easeInSine",
+      static $ final "Curve" "easeInToLinear",
+      static $ final "Curve" "easeOut",
+      static $ final "Curve" "easeOutBack",
+      static $ final "Curve" "easeOutCirc",
+      static $ final "Curve" "easeOutCubic",
+      static $ final "Curve" "easeOutExpo",
+      static $ final "Curve" "easeOutQuad",
+      static $ final "Curve" "easeOutQuart",
+      static $ final "Curve" "easeOutQuint",
+      static $ final "Curve" "easeOutSine",
+      static $ final "Curve" "elasticIn",
+      static $ final "Curve" "elasticInOut",
+      static $ final "Curve" "elasticOut",
+      static $ final "Curve" "fastLinearToSlowEaseIn",
+      static $ final "Curve" "fastOutSlowIn",
+      static $ final "Curve" "linear",
+      static $ final "Curve" "linearToEaseOut",
+      static $ final "Curve" "slowMiddle"
+    ],
+    class' "CurveTween" [
+      extends ("Animatable" :<> "double"),
+      extends "Listenable",
+      new "" [
+        "curve" :? "Curve"
+      ]
+    ],
+    generic ["a"] $
+      class' "TweenSequence" [
+        -- extends ("Animatable" :<> "a"),
+        extends "Listenable",
+        new "" [
+          "items" :: "Dart.Core.List" :<> ("TweenSequenceItem" :<> "a")
+        ]
+      ],
+    generic ["a"] $
+      class' "TweenSequenceItem" [
+        const $ new "" [
+          "tween" :? "Animatable" :<> "a",
+          "weight" :? "double"
+        ]
+      ]
   ]
 ]
+
+-- TODO: fix `extends` for generic types
+public export
+IsAssignableFrom (Animatable a) (TweenSequence a) where
