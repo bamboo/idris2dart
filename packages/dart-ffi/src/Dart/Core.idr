@@ -25,6 +25,11 @@ Symbol = Struct "Symbol,dart:core" [("hashCode", Int)]
 
 %inline
 public export
+Duration : Type
+Duration = Struct "Duration,dart:core" []
+
+%inline
+public export
 Iterable : Type -> Type
 Iterable element = GenericType "Iterable,dart:core" [element]
 
@@ -141,58 +146,6 @@ namespace List
   into result es = do
     traverse_ (`add` result) (toList es)
     pure result
-
-%inline
-public export
-Duration : Type
-Duration = Struct "Duration,dart:core" [
-  ("inMilliseconds", Int),
-  ("inMicroseconds", Int),
-  ("inSeconds", Int)
-]
-
-namespace Duration
-
-  public export
-  %foreign "Dart:const Duration.zero,dart:core"
-  zero : Duration
-
-  %foreign "Dart:const Duration.microsecondsPerMinute,dart:core"
-  public export
-  microsecondsPerMinute : Int
-
-  %foreign "Dart:const Duration.microsecondsPerSecond,dart:core"
-  public export
-  microsecondsPerSecond : Int
-
-  %foreign "Dart:const Duration.microsecondsPerMillisecond,dart:core"
-  public export
-  microsecondsPerMillisecond : Int
-
-  %inline
-  public export
-  inSeconds : Duration -> Int
-  inSeconds = (`getField` "inSeconds")
-
-  %inline
-  public export
-  inMilliseconds : Duration -> Int
-  inMilliseconds = (`getField` "inMilliseconds")
-
-  %inline
-  public export
-  inMicroseconds : Duration -> Int
-  inMicroseconds = (`getField` "inMicroseconds")
-
-  %inline
-  public export
-  (-) : Duration -> Duration -> Duration
-  (-) x y = prim__dart_invoke_pure "-" [] [x, y] Parameters.none
-
-  %inline
-  public export
-  (+) : Duration -> Duration -> Duration
-  (+) x y = prim__dart_invoke_pure "+" [] [x, y] Parameters.none
 
 public export
 IsAssignableFrom (Iterable element) (Dart.Core.List element) where

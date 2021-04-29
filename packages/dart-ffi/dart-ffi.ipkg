@@ -4,6 +4,7 @@ version = 0.1.0
 
 modules
   = Dart.Core
+  , Dart.Core.Duration
   , Dart.Core.Map
   , Dart.Core.Set
   , Dart.FFI
