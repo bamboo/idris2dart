@@ -7,6 +7,7 @@ modules
   , Dart.Core.Duration
   , Dart.Core.Map
   , Dart.Core.Set
+  , Dart.Core.String
   , Dart.FFI
   , Dart.FFI.Constructors
   , Dart.FFI.Elab
@@ -16,7 +17,6 @@ modules
   , Dart.FFI.Enums
   , Dart.FFI.Types
   , Dart.FFI.Upcast
-  , Dart.String
 
 sourcedir = "src"
 
