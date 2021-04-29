@@ -107,20 +107,25 @@ varOf n = var $
 TypeParameters : Type
 TypeParameters = List (String, TTImp)
 
+parsePrimitiveType : DartName -> Maybe TTImp
+parsePrimitiveType = \case
+  "int" => Just `(Int)
+  "Int" => Just `(Int)
+  "String" => Just `(String)
+  "bool" => Just `(DartBool)
+  "Bool" => Just `(DartBool)
+  "double" => Just `(Double)
+  "Double" => Just `(Double)
+  "void" => Just `(())
+  "()" => Just `(())
+  _ => Nothing
+
 elabType' : TypeParameters -> DartType -> TTImp
 elabType' ts = \case
   FType ps ret => foldr (\p, acc => `(~p -> ~acc)) (elabType' ts ret) (elabType' ts <$> ps)
   GType t args => foldl app (elabType' ts t) (elabType' ts <$> args)
-  NType n => case n of
-    "int" => `(Int)
-    "Int" => `(Int)
-    "String" => `(String)
-    "void" => `(())
-    "()" => `(())
-    "bool" => `(DartBool)
-    "Bool" => `(DartBool)
-    "double" => `(Double)
-    "Double" => `(Double)
+  NType n => case parsePrimitiveType n of
+    Just ty => ty
     _ => case lookup n ts of
       Nothing => varOf n
       Just _ => bindVar n
@@ -401,6 +406,18 @@ elabEnumMember enumTy dartType n =
   defExport (UN n) [] enumTy
     `(prim__dart_get_pure ~(primVal (Str (packageQualifiedName (dartType ++ "." ++ n)))) Void)
 
+elabPrimitive : {auto p : DartPackage} -> DartName -> List DartDecl -> Elab ()
+elabPrimitive n members =
+  case parsePrimitiveType n of
+    Just thisTy => do
+      let qName = packageQualifiedName n
+      when (not (null members)) $
+        declare [
+          inNamespace (MkNS [n]) $
+            concatMap (elabClassMember [n] qName [] thisTy) members
+        ]
+    Nothing => fail $ "Unsupported primitive type " ++ n
+
 elabClass : {auto p : DartPackage} -> DartName -> List String -> List DartDecl -> Elab ()
 elabClass n ps members = do
   let qName = packageQualifiedName n
@@ -429,6 +446,8 @@ elabPackageDecl = \case
     elabClass n ps members
   Class n members =>
     elabClass n [] members
+  Primitive $ Class n members =>
+    elabPrimitive n members
   Enum n members =>
     when (not (null members)) $
       declare [

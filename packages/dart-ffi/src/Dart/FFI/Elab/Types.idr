@@ -66,6 +66,7 @@ data DartDecl
   | Generic (List DartName) DartDecl
   | Partial DartDecl
   | Const DartDecl
+  | Primitive DartDecl
 
 public export
 Show DartDecl where
@@ -81,6 +82,7 @@ Show DartDecl where
   show (Extends t) = "extends " ++ show t
   show (Generic _ d) = "generic " ++ show d
   show (Partial d) = "partial " ++ show d
+  show (Primitive d) = "primitive " ++ show d
 
 public export
 record DartPackage where

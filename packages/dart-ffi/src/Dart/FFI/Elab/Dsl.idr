@@ -57,3 +57,7 @@ io ty name ps = Effectful (fun ty name ps)
 public export
 partial' : DartDecl -> DartDecl
 partial' = Partial
+
+public export
+primitive : DartDecl -> DartDecl
+primitive = Primitive
