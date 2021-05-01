@@ -454,9 +454,6 @@ dartStdout = foreignName "dart:io" "stdout"
 dartStdin : {auto ctx : Ref Dart DartT} -> Core Doc
 dartStdin = foreignName "dart:io" "stdin"
 
-dataStringNS : Namespace
-dataStringNS = mkNamespace "Data.String"
-
 unknownForeignDecl : {auto ctx : Ref Dart DartT}
   -> Name -> List String
   -> Core Doc
@@ -485,8 +482,14 @@ foreignDecl n ss args ret = case n of
     pure (dartName n <+> "(c, w)" <+> block (!dartStdout <+> ".writeCharCode(c);" <+> line <+> "return w;"))
   NS _ (UN "prim__getStr") =>
     pure (dartName n <+> "(w)" <+> block ("return " <+> !dartStdin <+> ".readLineSync() ?? \"\";"))
-  NS ns (UN "fastConcat") => if ns == dataStringNS
+  NS ns (UN "fastConcat") => if ns == typesNS
     then pure (text primDartFastConcat)
+    else maybeForeignDartDecl n ss args ret
+  NS ns (UN "fastUnpack") => if ns == typesNS
+    then pure (text primDartFastUnpack)
+    else maybeForeignDartDecl n ss args ret
+  NS ns (UN "fastPack") => if ns == typesNS
+    then pure (text primDartFastPack)
     else maybeForeignDartDecl n ss args ret
   _ => maybeForeignDartDecl n ss args ret
 

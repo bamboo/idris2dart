@@ -1,13 +1,37 @@
 module Primitives
 
 export
+primDartFastUnpack : String
+primDartFastUnpack = """
+$.List Prelude_Types_fastUnpack($.String s) {
+  return s.codeUnits.reversed.fold(
+    const [0],
+    (acc, charCode) => [1, charCode, acc],
+  );
+}
+"""
+
+export
+primDartFastPack : String
+primDartFastPack = """
+$.String Prelude_Types_fastPack($.List list) {
+  final buffer = $.StringBuffer();
+  while (list[0] == 1) {
+    buffer.writeCharCode(list[1]);
+    list = list[2];
+  }
+  return buffer.toString();
+}
+"""
+
+export
 primDartFastConcat : String
 primDartFastConcat = """
-$.String Data_String_fastConcat($.List ss) {
+$.String Prelude_Types_fastConcat($.List list) {
   final buffer = $.StringBuffer();
-  while (ss[0] == 1) {
-    buffer.write(ss[1]);
-    ss = ss[2];
+  while (list[0] == 1) {
+    buffer.write(list[1]);
+    list = list[2];
   }
   return buffer.toString();
 }
