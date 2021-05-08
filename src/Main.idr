@@ -671,12 +671,18 @@ mutual
   dartLambda : {auto ctx : Ref Dart DartT} -> List Name -> Statement -> Core Doc
   dartLambda ps s = (paramList ps <+>) <$> dartBlock s
 
-  commaSepExps :  {auto ctx : Ref Dart DartT}
+  commaSepExps : {auto ctx : Ref Dart DartT}
     -> List Expression
     -> Core Doc
   commaSepExps es = do
     es' <- traverse dartExp es
     pure (commaSep es')
+
+  dartApp : {auto ctx : Ref Dart DartT} -> Expression -> List Expression -> Core Doc
+  dartApp f args = do
+    f' <- dartExp f
+    args' <- traverse dartExp args
+    pure (f' <+> argList args')
 
   dartConstructor : {auto ctx : Ref Dart DartT}
     -> Doc
@@ -694,12 +700,12 @@ mutual
     IEConstant c => pure (dartConstant c)
     IEVar v => pure (dartName v)
     IELambda ps s => dartLambda ps s
-    IEApp (IEVar (NS ns (UN "believe_me"))) [_, _, arg] =>
-      dartExp arg
-    IEApp f args => do
-      f' <- dartExp f
-      args' <- traverse dartExp args
-      pure (f' <+> argList args')
+    IEApp f@(IEVar (NS ns (UN "believe_me"))) args@[arg] =>
+      if ns == builtinNS
+        then dartExp arg
+        else dartApp f args
+    IEApp f args =>
+      dartApp f args
     IEPrimFn f args =>
       pure (dartOp f !(traverseVect dartExp args))
     IEPrimFnExt n args =>
