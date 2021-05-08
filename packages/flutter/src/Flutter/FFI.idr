@@ -372,12 +372,25 @@ import Dart.FFI.Elab
       static $ io "NavigatorState" "of" [
         "context" :: "BuildContext",
         "rootNavigator" :? "bool"
+      ],
+      static $ io "void" "popUntil" [
+        "context" :: "BuildContext",
+        "predicate" :: "RoutePredicate"
       ]
     ],
     class' "NavigatorState" [
       io "void" "pushNamed" [
         "routeName" :: "String",
         "arguments" :? "Object"
+      ]
+    ],
+    class' "Route" [
+    ],
+    class' "RoutePredicate" [
+    ],
+    class' "ModalRoute" [
+      static $ fun "RoutePredicate" "withName" [
+        "name" :: "String"
       ]
     ],
     class' "Row" [
