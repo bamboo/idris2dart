@@ -40,7 +40,23 @@ import Dart.FFI.Elab
     class' "ShapeBorder" [
     ],
     class' "TextStyle" [
-      final "TextAlign" "textAlign"
+      final "TextAlign" "textAlign",
+      new "" [
+        "color" :? "Color",
+        -- "decoration" :? "TextDecoration",
+        "decorationColor" :? "Color",
+        -- "decorationStyle" :? "TextDecorationStyle",
+        "decorationThickness" :? "double",
+        -- "fontWeight" :? "FontWeight",
+        -- "fontStyle" :? "FontStyle",
+        -- "textBaseline" :? "TextBaseline",
+        "fontFamily" :? "String",
+        "fontFamilyFallback" :? "Dart.Core.List" :<> "String",
+        "fontSize" :? "double",
+        "letterSpacing" :? "double",
+        "wordSpacing" :? "double",
+        "height" :? "double"
+      ]
     ]
   ],
   package "package:flutter/material.dart" [
@@ -125,10 +141,15 @@ import Dart.FFI.Elab
         "alignment" :? "AlignmentGeometry"
       ]
     ],
+    class' "InputBorder" [
+      static $ final "InputBorder" "none"
+    ],
     class' "InputDecoration" [
       const $ new "" [
         "labelText" :? "String",
-        "hintText" :? "String"
+        "hintText" :? "String",
+        "hintStyle" :? "TextStyle",
+        "border" :? "InputBorder"
       ]
     ],
     class' "LinearProgressIndicator" [
@@ -221,6 +242,18 @@ import Dart.FFI.Elab
       static $ fun "ButtonStyle" "styleFrom" [
         "primary" :? "Color",
         "backgroundColor" :? "Color"
+      ]
+    ],
+    class' "TextField" [
+      extends "Widget",
+      new "" [
+        "key" :? "Key",
+        "controller" :? "TextEditingController",
+        "decoration" :? "InputDecoration",
+        "keyboardType" :? "TextInputType",
+        "inputFormatters" :? "Dart.Core.List" :<> "TextInputFormatter",
+        "textAlign" :? "TextAlign",
+        "style" :? "TextStyle"
       ]
     ],
     class' "TextFormField" [
@@ -456,6 +489,9 @@ import Dart.FFI.Elab
       "antiAlias", "antiAliasWithSaveLayer", "hardEdge", "none"
     ],
     class' "Color" [
+      const $ new "" [
+        "value" :: "int"
+      ],
       fun "Color" "withOpacity" [
         "opacity" :: "double"
       ]
@@ -517,8 +553,25 @@ import Dart.FFI.Elab
     ]
   ],
   package "package:flutter/services.dart" [
+    class' "FilteringTextInputFormatter" [
+      static $ final "TextInputFormatter" "digitsOnly"
+    ],
     class' "TextEditingValue" [
       final "String" "text"
+    ],
+    class' "TextInputFormatter" [
+    ],
+    class' "TextInputType" [
+      static $ final "TextInputType" "datetime",
+      static $ final "TextInputType" "emailAddress",
+      static $ final "TextInputType" "multiline",
+      static $ final "TextInputType" "name",
+      static $ final "TextInputType" "number",
+      static $ final "TextInputType" "phone",
+      static $ final "TextInputType" "streetAddress",
+      static $ final "TextInputType" "text",
+      static $ final "TextInputType" "url",
+      static $ final "TextInputType" "visiblePassword"
     ]
   ],
   package "package:flutter/scheduler.dart" [
