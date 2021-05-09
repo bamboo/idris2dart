@@ -57,6 +57,7 @@ public export
 public export
 %extern prim__dart_new
   : (ty : Type)
+ -> {positionalArgumentTys : Vect k Type}
  -> (constructorName : String)
  -> (positionalArguments : HVect positionalArgumentTys)
  -> (namedArguments : Parameters schema)
@@ -66,6 +67,7 @@ public export
 public export
 %extern prim__dart_new_const
   : (ty : Type)
+ -> {positionalArgumentTys : Vect k Type}
  -> (constructorName : String)
  -> (positionalArguments : HVect positionalArgumentTys)
  -> (namedArguments : Parameters schema)

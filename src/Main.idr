@@ -732,13 +732,15 @@ mutual
   maybeCastTo ty e = maybe e (flip castTo e) ty
 
   dartPrimNew : {auto ctx : Ref Dart DartT}
-   -> Expression -> String -> Expression -> Expression -> Core Doc
-  dartPrimNew ty ctorName positional named = do
+   -> Expression -> Expression -> String -> Expression -> Expression -> Core Doc
+  dartPrimNew ty positionalTys ctorName positional named = do
+    let posTys = collectPositional positionalTys
     let pos' = collectPositional positional
     let named' = collectNamed named
-    fTy <- dartTypeFromExpression ty
-    posArgs <- traverse dartExp pos'
+    let typedPos = zip posTys pos'
+    posArgs <- traverse (uncurry dartForeignArg) typedPos
     namedArgs <- traverse dartNamedArg named'
+    fTy <- dartTypeFromExpression ty
     let ctorName' = if length ctorName > 0 then text ("." ++ ctorName) else empty
     pure (fTy <+> ctorName' <+> argList (posArgs ++ namedArgs))
 
@@ -832,21 +834,23 @@ mutual
     ] = dartPrimInvoke fn typeArguments positionalTys positional named
   dartPrimFnExt
     (NS _ (UN "prim__dart_new_const"))
-    [ IENull, IENull, IENull, IENull -- erased type arguments
+    [ IENull, IENull, IENull -- erased type arguments
       , ty
+      , positionalTys
       , IEConstant (Str ctorName)
       , positional
       , named
-    ] = dartPrimNew ty ctorName positional named
+    ] = dartPrimNew ty positionalTys ctorName positional named
   dartPrimFnExt
     (NS _ (UN "prim__dart_new"))
-    [ IENull, IENull, IENull, IENull -- erased type arguments
+    [ IENull, IENull, IENull -- erased type arguments
       , ty
+      , positionalTys
       , IEConstant (Str ctorName)
       , positional
       , named
       , _
-    ] = dartPrimNew ty ctorName positional named
+    ] = dartPrimNew ty positionalTys ctorName positional named
   dartPrimFnExt
     (NS _ (UN "prim__dart_List_new"))
     [ elementTy
@@ -876,7 +880,7 @@ mutual
             )
   dartPrimFnExt (NS _ (UN "prim__dart_if")) [ IENull, condition, thenValue, elseValue ] =
     pure (!(dartExp condition) <+> " ? " <+> !(dartExp thenValue) <+> " : " <+> !(dartExp elseValue))
-  dartPrimFnExt n args = pure (debug (n, args))
+  dartPrimFnExt n args = pure (unsupported (n, args))
 
   uncurryCallback : (hasIO : Bool) -> (args : List CFType) -> Expression -> Maybe (List Name, Statement)
   uncurryCallback = go []
