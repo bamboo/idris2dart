@@ -212,6 +212,9 @@ stringTy = text "$.String"
 doubleTy : Doc
 doubleTy = text "$.double"
 
+refTy : Doc
+refTy = text "Ref"
+
 maxDartInt : Integer
 maxDartInt = 9223372036854775807
 
@@ -771,8 +774,14 @@ mutual
   dartPrimFnExt : {auto ctx : Ref Dart DartT}
     -> Name -> List Expression -> Core Doc
   dartPrimFnExt
-    (NS _ (UN "prim__dart_unsafe_null"))
-    _ = pure null'
+    (NS _ (UN "prim__newIORef"))
+    [IENull, e, _] = include refTyDef *> pure ("Ref" <+> paren !(dartExp e))
+  dartPrimFnExt
+    (NS _ (UN "prim__writeIORef"))
+    [IENull, ref, e, _] = pure $ castTo refTy !(dartExp ref) <+> ".v = " <+> !(dartExp e)
+  dartPrimFnExt
+    (NS _ (UN "prim__readIORef"))
+    [IENull, ref, _] = pure $ castTo refTy !(dartExp ref) <+> ".v"
   dartPrimFnExt
     (NS _ (UN "prim__setField"))
     (IEConstant (Str ty) :: _ :: _ :: e :: IEConstant (Str f) :: _ :: rhs :: _) = do
@@ -878,8 +887,13 @@ mutual
             text "$.List<" <+> elementTy' <+> ">.unmodifiable" <+> paren (
               "Dart_Iterable_fromList" <+> paren !(dartExp elements)
             )
-  dartPrimFnExt (NS _ (UN "prim__dart_if")) [ IENull, condition, thenValue, elseValue ] =
+  dartPrimFnExt
+    (NS _ (UN "prim__dart_if"))
+    [ IENull, condition, thenValue, elseValue ] =
     pure (!(dartExp condition) <+> " ? " <+> !(dartExp thenValue) <+> " : " <+> !(dartExp elseValue))
+  dartPrimFnExt
+    (NS _ (UN "prim__dart_unsafe_null"))
+    _ = pure null'
   dartPrimFnExt n args = pure (unsupported (n, args))
 
   uncurryCallback : (hasIO : Bool) -> (args : List CFType) -> Expression -> Maybe (List Name, Statement)

@@ -47,3 +47,12 @@ $.Iterable<$.dynamic> Dart_Iterable_fromList($.List es) sync* {
   }
 }
 """
+
+export
+refTyDef : String
+refTyDef = """
+class Ref {
+  $.dynamic v;
+  Ref(this.v);
+}
+"""

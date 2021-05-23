@@ -23,7 +23,8 @@ dartTests
     , "ffi001", "ffi002", "ffi003", "ffi004"
     , "ffi005", "ffi006", "ffi007", "ffi008"
     , "generics001", "generics002"
-    , "idiom001", "lazy001", "tailrec001"
+    , "idiom001", "ioref001"
+    , "lazy001", "tailrec001"
     , "reg001"
     , "perf006"
     ]
