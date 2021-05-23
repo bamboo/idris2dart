@@ -10,6 +10,14 @@ import Dart.FFI.Elab
     class' "Key" [
     ],
     class' "Listenable" [
+    ],
+    enum "TargetPlatform" [
+      "android",
+      "fuchsia",
+      "iOS",
+      "linux",
+      "macOS",
+      "windows"
     ]
   ],
   package "package:flutter/rendering.dart" [
@@ -170,7 +178,8 @@ import Dart.FFI.Elab
         "title" :? "String",
         "home" :? "Widget",
         "theme" :? "ThemeData",
-        "routes" :? "Dart.Core.Map" :<> "String" :<> "WidgetBuilder"
+        "routes" :? "Dart.Core.Map" :<> "String" :<> "WidgetBuilder",
+        "navigatorObservers" :? "Dart.Core.List" :<> "NavigatorObserver"
       ]
     ],
     class' "MaterialColor" [
@@ -209,6 +218,17 @@ import Dart.FFI.Elab
         fun ("MaterialStateProperty" :<> "a") "all" [
           "value" :: "a"
         ]
+    ],
+    class' "CupertinoPageTransitionsBuilder" [
+      extends "PageTransitionsBuilder",
+      const $ new "" []
+    ],
+    class' "PageTransitionsBuilder" [
+    ],
+    class' "PageTransitionsTheme" [
+      const $ new "" [
+        "builders" :? "Dart.Core.Map" :<> "TargetPlatform" :<> "PageTransitionsBuilder"
+      ]
     ],
     class' "Scaffold" [
       extends "Widget",
@@ -280,7 +300,8 @@ import Dart.FFI.Elab
     class' "ThemeData" [
       new "" [
         "primarySwatch" :? "MaterialColor",
-        "visualDensity" :? "VisualDensity"
+        "visualDensity" :? "VisualDensity",
+        "pageTransitionsTheme" :? "PageTransitionsTheme"
       ],
       final "TextTheme" "textTheme"
     ],
@@ -410,6 +431,8 @@ import Dart.FFI.Elab
         "context" :: "BuildContext",
         "predicate" :: "RoutePredicate"
       ]
+    ],
+    class' "NavigatorObserver" [
     ],
     class' "NavigatorState" [
       io "void" "pushNamed" [
