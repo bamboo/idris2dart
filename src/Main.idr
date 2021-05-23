@@ -775,7 +775,7 @@ mutual
     -> Name -> List Expression -> Core Doc
   dartPrimFnExt
     (NS _ (UN "prim__newIORef"))
-    [IENull, e, _] = include refTyDef *> pure ("Ref" <+> paren !(dartExp e))
+    [IENull, e, _] = include refTyDef *> pure (refTy <+> paren !(dartExp e))
   dartPrimFnExt
     (NS _ (UN "prim__writeIORef"))
     [IENull, ref, e, _] = pure $ castTo refTy !(dartExp ref) <+> ".v = " <+> !(dartExp e)
