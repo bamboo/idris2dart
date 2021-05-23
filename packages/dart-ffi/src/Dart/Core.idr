@@ -144,7 +144,7 @@ namespace List
   export
   into : HasIO io => {element : Type} -> Dart.Core.List element -> UpcastList element -> io (Dart.Core.List element)
   into result es = do
-    traverse_ (`add` result) (toList es)
+    traverse_ (`add` result) (UpcastList.toList es)
     pure result
 
 public export
