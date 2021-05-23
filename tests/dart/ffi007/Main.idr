@@ -22,7 +22,8 @@ import Dart.FFI.Elab
     class' "Point" [
       final "Int" "x",
       final "Int" "y",
-      new "" ["x" :: "Int", "y" :: "Int"],
+      new "" [],
+      new "at" ["x" :: "Int", "y" :: "Int"],
       io "void" "moveTo" ["x" :: "Int", "y" :: "Int"],
       static $ io "Point" "origin" []
     ]
@@ -51,10 +52,13 @@ main = do
   applyFn "Tree" 1 pluraliseIO >>= putStrLn
 
   -- Classes
-  pt <- Point.new 0 1
+  pt <- Point.at 0 1
   printLn pt
   pt @. moveTo 4 5
   printLn pt
 
   -- Static functions
   printLn !Point.origin
+
+  -- Constructor with no arguments
+  printLn !Point.new

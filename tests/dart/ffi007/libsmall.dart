@@ -17,12 +17,15 @@ String applyFn(String x, int y, StringFn f) {
 class Point {
   int x;
   int y;
-  Point(this.x, this.y);
+  Point.at(this.x, this.y);
+  Point()
+      : x = 0,
+        y = 0;
 
   void moveTo(int x, int y) {
     this.x = x;
     this.y = y;
   }
 
-  static Point origin() => Point(0, 0);
+  static Point origin() => Point();
 }
