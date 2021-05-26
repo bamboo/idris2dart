@@ -28,6 +28,15 @@ record DartT where
   foreignTypeNames : StringMap Doc
   usesDelay : Bool
 
+modify : {auto ctx : Ref Dart DartT} -> (DartT -> DartT) -> Core ()
+modify = Core.update Dart
+
+useDelay : {auto ctx : Ref Dart DartT} -> Core ()
+useDelay = modify { usesDelay := True }
+
+include : {auto ctx : Ref Dart DartT} -> String -> Core ()
+include code = modify { includes $= insert code }
+
 Statement : Type
 Statement = ImperativeStatement
 
@@ -58,11 +67,6 @@ addImport lib = do
       pure alias
     Just alias =>
       pure alias
-
-include : {auto ctx : Ref Dart DartT} -> String -> Core ()
-include code = do
-  s <- get Dart
-  put Dart (record { includes $= insert code } s)
 
 keywordSafe : String -> String
 keywordSafe s = case s of
@@ -377,18 +381,13 @@ parseForeignName ty =
   let (tyN, lib) = splitAtFirst ',' ty
   in foreignName lib tyN
 
-lookupForeignType : {auto ctx : Ref Dart DartT}
-  -> String -> Core (Maybe Doc)
-lookupForeignType ty =
-  lookup ty . foreignTypeNames <$> get Dart
+lookupForeignType : {auto ctx : Ref Dart DartT} -> String -> Core (Maybe Doc)
+lookupForeignType ty = lookup ty . foreignTypeNames <$> get Dart
 
-putForeignType : {auto ctx : Ref Dart DartT}
-  -> String -> Doc -> Core ()
-putForeignType ty doc =
-  put Dart (record { foreignTypeNames $= insert ty doc } !(get Dart))
+putForeignType : {auto ctx : Ref Dart DartT} -> String -> Doc -> Core ()
+putForeignType ty doc = modify { foreignTypeNames $= insert ty doc }
 
-foreignTypeName : {auto ctx : Ref Dart DartT}
-  -> String -> Core Doc
+foreignTypeName : {auto ctx : Ref Dart DartT} -> String -> Core Doc
 foreignTypeName ty = do
   case !(lookupForeignType ty) of
     Just doc => pure doc
@@ -550,8 +549,8 @@ runtimeCastOf : Constant -> Doc -> Doc
 runtimeCastOf ty e = castTo (runtimeTypeOf ty) e
 
 dartOp : {auto ctx : Ref Dart DartT}
-  -> PrimFn arity
-  -> Vect arity Doc
+  -> PrimFn args
+  -> Vect args Doc
   -> Doc
 dartOp (LT StringType) [x, y] = stringCompare " < 0" x y
 dartOp (LTE StringType) [x, y] = stringCompare " <= 0" x y
@@ -644,11 +643,6 @@ dartOp DoubleCeiling [x] = doubleOp x "ceilToDouble()"
 dartOp BelieveMe [_, _, x] = x
 dartOp Crash [_, m] = assertionError m
 dartOp e args = unsupported ("dartOp", e, args)
-
-useDelay : {auto ctx : Ref Dart DartT} -> Core ()
-useDelay = do
-  s <- get Dart
-  put Dart (record { usesDelay = True } s)
 
 dartTypeFromExpression : {auto ctx : Ref Dart DartT} -> Expression -> Core Doc
 dartTypeFromExpression ty = case ty of
