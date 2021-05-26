@@ -1089,7 +1089,7 @@ compile : Ref Ctxt Defs
   -> (outfile : String)
   -> Core (Maybe String)
 compile defs tmpDir outputDir term file = do
-  compileToDartFile file defs term
+  compileToDartFile (outputDir ++ "/" ++ file) defs term
   pure Nothing
 
 execute : Ref Ctxt Defs -> (tmpDir : String) -> ClosedTerm -> Core ()

@@ -1,6 +1,5 @@
 $1 --no-color --console-width 0 --cg dart --no-banner -p dart-ffi -p contrib Main.idr -o main.dart
 
-dart ./main.dart
+dart ./build/exec/main.dart
 
-rm main.dart
 rm -rf build

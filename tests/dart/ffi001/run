@@ -1,6 +1,6 @@
 $1 --no-color --console-width 0 --cg dart --no-banner Main.idr -o main.dart
 
-dart ./main.dart
+cp ./libsmall.dart ./build/exec
+dart ./build/exec/main.dart
 
-rm main.dart
 rm -rf build
