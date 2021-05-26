@@ -18,7 +18,8 @@ import System.Path
 
 dartTests : List String
 dartTests
-  = [ "dart001", "dart002", "dart003"
+  = [ "args"
+    , "dart001", "dart002", "dart003"
     , "dart015", "dart021", "dart022", "dart027"
     , "ffi001", "ffi002", "ffi003", "ffi004"
     , "ffi005", "ffi006", "ffi007", "ffi008"

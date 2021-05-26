@@ -27,12 +27,16 @@ record DartT where
   includes : SortedSet String
   foreignTypeNames : StringMap Doc
   usesDelay : Bool
+  usesArgs : Bool
 
 modify : {auto ctx : Ref Dart DartT} -> (DartT -> DartT) -> Core ()
 modify = Core.update Dart
 
 useDelay : {auto ctx : Ref Dart DartT} -> Core ()
 useDelay = modify { usesDelay := True }
+
+useArgs : {auto ctx : Ref Dart DartT} -> Core ()
+useArgs = modify { usesArgs := True }
 
 include : {auto ctx : Ref Dart DartT} -> String -> Core ()
 include code = modify { includes $= insert code }
@@ -484,6 +488,10 @@ foreignDecl n ss args ret = case n of
     pure (dartName n <+> "(c, w)" <+> block (!dartStdout <+> ".writeCharCode(c);" <+> line <+> "return w;"))
   NS _ (UN "prim__getStr") =>
     pure (dartName n <+> "(w)" <+> block ("return " <+> !dartStdin <+> ".readLineSync() ?? \"\";"))
+  NS _ (UN "prim__getArgCount") =>
+    useArgs *> pure (dartName n <+> "(w) => $args.length;")
+  NS _ (UN "prim__getArg") =>
+    useArgs *> pure (dartName n <+> "(i, w) => $args[i];")
   NS ns (UN "fastConcat") => if ns == typesNS
     then pure (text primDartFastConcat)
     else maybeForeignDartDecl n ss args ret
@@ -1044,10 +1052,19 @@ class $Delayed {
 nubSort : Ord a => List a -> List a
 nubSort = SortedSet.toList . SortedSet.fromList
 
+mainFunctionFor : Doc -> (usesArgs : Bool) -> Doc
+mainFunctionFor mainBody = \case
+  False => "void main()" <+> block mainBody
+  True => vcat [
+    "$.List<$.String> $args;",
+    emptyLine,
+    "void main($.List<$.String> $$args)" <+> block (vcat ["$args = $$args;", mainBody])
+  ]
+
 compileToDart : Ref Ctxt Defs -> ClosedTerm -> Core Doc
 compileToDart defs term = do
   (impDefs, impMain) <- compileToImperative defs term
-  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]) 1 empty empty False)
+  ctx <- newRef Dart (MkDartT (fromList [("dart:core", "$")]) 1 empty empty False False)
   dartDefs <- dartStatement impDefs
   dartMain <- dartStatement impMain
   finalState <- get Dart
@@ -1057,7 +1074,7 @@ compileToDart defs term = do
   let includes' = text (unlines nonImportLines)
   let imports' = dartImport <$> toList finalState.imports
   let header' = vcat (header ++ imports' ++ includeImports')
-  let mainDecl = "void main()" <+> block dartMain
+  let mainDecl = mainFunctionFor dartMain finalState.usesArgs
   let footer = if finalState.usesDelay then delayClass else empty
   pure $
     header'

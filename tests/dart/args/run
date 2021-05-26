@@ -1,0 +1,5 @@
+$1 --no-banner --no-color --console-width 0 --cg dart -o args TestArgs.idr > /dev/null
+dart ./build/exec/args a b
+dart ./build/exec/args c
+
+rm -rf build
