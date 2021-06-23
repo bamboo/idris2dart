@@ -1,7 +1,7 @@
 ||| A simplified Wadler style pretty printing library without the pretty part.
 module Printer
 
-import Data.String.Extra
+import Data.String
 import System.File
 
 export
