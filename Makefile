@@ -21,11 +21,11 @@ flutter-sources = $(shell find $(flutter-dir) -type f -iname "*.idr")
 flutter: $(flutter-install-cookie)
 
 $(flutter-install-cookie): $(flutter-sources) $(dart-ffi-install-cookie)
-	cd $(flutter-dir) && idris2 --install ./flutter.ipkg
+	cd $(flutter-dir) && idris2 --install-with-src ./flutter.ipkg
 	touch $(flutter-install-cookie)
 
 $(dart-ffi-install-cookie): $(dart-ffi-sources)
-	cd $(dart-ffi-dir) && idris2 --install ./dart-ffi.ipkg
+	cd $(dart-ffi-dir) && idris2 --install-with-src ./dart-ffi.ipkg
 	touch $(dart-ffi-install-cookie)
 
 runtests = ./tests/build/exec/runtests
