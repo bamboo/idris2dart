@@ -11,3 +11,5 @@ depends = idris2, network, contrib
 executable = idris2dart
 
 sourcedir = "src"
+
+opts = "-Werror"

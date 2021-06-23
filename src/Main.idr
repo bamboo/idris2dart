@@ -557,8 +557,8 @@ runtimeCastOf : Constant -> Doc -> Doc
 runtimeCastOf ty e = castTo (runtimeTypeOf ty) e
 
 dartOp : {auto ctx : Ref Dart DartT}
-  -> PrimFn args
-  -> Vect args Doc
+  -> PrimFn argCount
+  -> Vect argCount Doc
   -> Doc
 dartOp (LT StringType) [x, y] = stringCompare " < 0" x y
 dartOp (LTE StringType) [x, y] = stringCompare " <= 0" x y
