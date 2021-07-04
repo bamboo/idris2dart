@@ -8,8 +8,8 @@ import Core.Name.Namespace
 import Data.List
 import Data.List1
 import Data.SortedSet as SortedSet
+import Data.String
 import Data.String.Extra
-import Data.Strings
 import Idris.Driver
 import Libraries.Data.StringMap
 import Libraries.Utils.Hex
@@ -1111,7 +1111,7 @@ execute defs tmpDir term = do
   pure ()
 
 dartCodegen : Codegen
-dartCodegen = MkCG compile execute
+dartCodegen = MkCG compile execute Nothing Nothing
 
 main : IO ()
 main = mainWithCodegens [("dart", dartCodegen)]

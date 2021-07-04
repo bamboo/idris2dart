@@ -3,7 +3,7 @@ module Main
 import Data.Maybe
 import Data.List
 import Data.List1
-import Data.Strings
+import Data.String
 
 import System
 import System.Directory
